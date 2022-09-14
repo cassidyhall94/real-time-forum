@@ -15,15 +15,15 @@ AUDIT: https://learn.01founders.co/git/root/public/src/branch/master/subjects/re
 
 - one HTML file only: https://en.wikipedia.org/wiki/Single-page_application
 
-Registration and login
+- Registration and login
     - form data must include: nickname, age, gender, first and last name, email, password
     - login using either nickname or email with password
     - logout from any page
 
-Creation of posts and comments
+- Creation of posts and comments
     - posts will have categories
 
-Private messaging
+- Private messaging
     - online/offline section
         - organised by last message sent
             - if user is new, then contacts are ordered alphabetical
