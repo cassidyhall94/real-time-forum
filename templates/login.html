@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href ="stylesheet" type ="text/css">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+</head>
+<body>
+    <title>Login</title>
+    <div class="imageCat">  <img src ="cat" width = "50%">
+        <br> <br>
+</div>
+    
+    <div class="grid">
+
+        <form action ="login" method = "POST" > 
+            
+            <div class="container">
+            <label for ="username"><b>Username:</b></label>
+            <input type="text" placeholder="enter here" name="username" required> <br><br>
+
+            <label for = "password"><b>Password:</b></label>
+            <input type ="password" placeholder="enter password" name="password" required> <br><br>
+            <input type ="checkbox" id ="li" name ="remember"> Remember me <br><br>
+            <button type ="submit">Login</button> <br><br>
+            <label>
+            </label>
+            </div>
+        </form> 
+        
+        <form action = "reset">
+            <input type="submit" value=" Forgot password?"/>
+        </form> <br>
+        <form action = "signup">
+            <input type="submit" value="Register"/>
+        </form> <br>
+        <form action = "home">
+            <input type="submit"  id="guest" value=" Continue as guest"/>
+        </form> <br>
+    </div>
+
+</body>
+
+
+</html>
+
