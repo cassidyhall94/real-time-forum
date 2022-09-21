@@ -65,9 +65,9 @@
                         <option value="Fitness">Fitness</option>
                         <option value="Technology">Technology</option>
                         <option value="Travel">Travel</option>
-                    </select> 
+                    </select>
                     <select id="category2" name="category2">
-                        <option value =""></option>
+                        <option value=""></option>
                         <option value="Health">Health</option>
                         <option value="Finance">Finance</option>
                         <option value="Animals">Animals</option>
@@ -146,41 +146,26 @@
             <br>
             <br>
         </div>
-</body>
-<script>
-    // get the url of the webserver
-    const appURL = location.protocol + '//' + location.host;
-    const likePost = async (elementID) => {
-        console.log("clicked like-" + elementID);
-        // get the likes element <a> tag
-        const likesElement = document.getElementById("likes-" + elementID);
-        const dislikesElement = document.getElementById("dislikes-" + elementID);
-        // run a POST request to the webserver, this sends the postID and matches MethodPost
-        const response = await fetch(appURL + '/likePost?id=' + likesElement.getAttribute("data-post-id"), {
-            method: 'POST',
-        });
-        // transform the webserver's response into json
-        const postResult = await response.json();
-        // if the post successful
-        if (postResult.success == true) {
-            // update the number of likes that the user can see
-            likesElement.innerHTML = postResult.likes + " Likes";
-            dislikesElement.innerHTML = postResult.dislikes + " Dislikes";
-        }
-    }
 
-    const dislikePost = async (elementID) => {
-        const likesElement = document.getElementById("likes-" + elementID);
-        const dislikesElement = document.getElementById("dislikes-" + elementID);
-        const response = await fetch(appURL + '/dislikePost?id=' + dislikesElement.getAttribute("data-post-id"), {
-            method: 'POST',
-        });
-        const postResult = await response.json();
-        if (postResult.success == true) {
-            likesElement.innerHTML = postResult.likes + " Likes";
-            dislikesElement.innerHTML = postResult.dislikes + " Dislikes";
-        }
-    }
-</script>
+        <script>
+            let socket = new WebSocket("ws://localhost:8080/ws");
+            console.log("Attempting Connection...");
+        
+            socket.onopen = () => {
+                console.log("Successfully Connected");
+                socket.send("Hi From the Client!")
+            };
+        
+            socket.onclose = event => {
+                console.log("Socket Closed Connection: ", event);
+                socket.send("Client Closed!")
+            };
+        
+            socket.onerror = error => {
+                console.log("Socket Error: ", error);
+            };
+        </script>
+</body>
+
 
 </html>

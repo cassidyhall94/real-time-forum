@@ -16,38 +16,11 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var upgrader = websocket.Upgrader{} // use default options
-
-func socketHandler(w http.ResponseWriter, r *http.Request) {
-	// Upgrade our raw HTTP connection to a websocket based one
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Print("Error during connection upgradation:", err)
-		return
-	}
-	defer conn.Close()
-	// The event loop
-	for {
-		messageType, message, err := conn.ReadMessage()
-		if err != nil {
-			log.Println("Error during message reading:", err)
-			break
-		}
-		log.Printf("Received: %s", message)
-		err = conn.WriteMessage(messageType, message)
-		if err != nil {
-			log.Println("Error during message writing:", err)
-			break
-		}
-	}
-}
-
 func cssHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "./templates/stylesheet.css")
 }
 
 func main() {
-
 	// key:= "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http://127.0.0.1:3000"
 	db, err := sql.Open("sqlite3", "./database/userdata.db")
 	if err != nil {
@@ -73,7 +46,10 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/socket", socketHandler)
+
+	// websocket handlers
+	mux.HandleFunc("/ws", wsEndpoint)
+
 	mux.HandleFunc("/", data.Handler)
 	mux.HandleFunc("/category/", data.CategoryDump)
 	mux.HandleFunc("/categoryg/", data.CategoryDump)
@@ -91,4 +67,52 @@ func main() {
 		fmt.Printf("main ListenAndServe error: %+v\n", err)
 	}
 
+}
+
+// We'll need to define an Upgrader
+// this will require a Read and Write buffer size
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+	CheckOrigin:     func(r *http.Request) bool { return true },
+}
+
+// define a reader which will listen for
+// new messages being sent to our WebSocket
+// endpoint
+func reader(conn *websocket.Conn) {
+	for {
+		// read in a message
+		messageType, p, err := conn.ReadMessage()
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		// print out that message for clarity
+		log.Println(string(p))
+
+		if err := conn.WriteMessage(messageType, p); err != nil {
+			log.Println(err)
+			return
+		}
+
+	}
+}
+
+func wsEndpoint(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Println("Client Connected")
+	// upgrade this connection to a WebSocket
+	// connection
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+	err = ws.WriteMessage(1, []byte("Apple!"))
+	if err != nil {
+		fmt.Println(err)
+	}
+	// listen indefinitely for new messages coming
+	// through on our WebSocket connection
+	reader(ws)
 }
