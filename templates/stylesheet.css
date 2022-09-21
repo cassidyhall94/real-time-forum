@@ -51,8 +51,7 @@ a {
 a:hover {
   transform: scale(1.2);
 }
-
-h2 {
+h2{
   display: flex;
   justify-content: center;
 }
@@ -138,10 +137,10 @@ li {
 }
 
 
-.head>h4 {
+.head > h4{
   border: var(--border-color);
   color: var(--text-color);
-  flex-shrink: 2;
+    flex-shrink: 2;
   flex-basis: auto;
 }
 
@@ -221,7 +220,7 @@ button:hover {
   margin: 0;
   padding: 0;
   max-height: 800px;
-  overflow: scroll
+  overflow:scroll
 }
 
 .content {
@@ -267,8 +266,7 @@ h4 {
   margin: 0;
   color: var(--heading-color);
 }
-
-select#category {
+select#category{
   width: 200px;
 }
 
@@ -514,22 +512,9 @@ h6 {
   /* overflow: scroll; */
 }
 
+
 li.row {
   /* display: flex; */
   margin: 10px;
   flex-direction: column;
-}
-
-#display-image {
-  width: 400px;
-  height: 225px;
-  border: 1px solid black;
-  background-position: center;
-  background-size: cover;
-}
-
-.uploaded-image {
-  width: 200px;
-  height: 300px;
-  object-fit: contain;
 }

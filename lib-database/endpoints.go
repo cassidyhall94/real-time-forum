@@ -1,14 +1,11 @@
-package main
+package database
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"html/template"
-	"image/gif"
-	"image/jpeg"
-	"image/png"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -17,6 +14,14 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 )
+
+func (p PostFeed) MarshallJSON() ([]byte, error) {
+	return json.Marshal(p)
+}
+
+func (c Comment) MarshallJSON() ([]byte, error) {
+	return json.Marshal(c)
+}
 
 // @TODO: error handling.
 // login page.
@@ -76,8 +81,12 @@ func (data *Forum) LoginWeb(w http.ResponseWriter, r *http.Request) {
 			Name:    "session_token",
 			Value:   sessionToken.String(),
 			Expires: expiresAt,
+			// MaxAge:  2 * int(time.Hour),
 		})
+		// fmt.Println(data.GetSessions())
+		// w.WriteHeader(200)
 		http.Redirect(w, r, "/home", http.StatusFound)
+		// data.HomePage(w, r)
 	} else {
 		fmt.Println("invalid credentials")
 		err := tpl.ExecuteTemplate(w, "login.html", "check username and password")
@@ -96,6 +105,13 @@ func (data *Forum) GetSignupPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/*  1. check e-mail criteria
+    2. check u.username criteria
+	 3. check password criteria
+	 4. check if u.username is already exists in database
+	 5. create bcrypt hash from password
+	 6. insert u.username and password hash in database
+*/
 func (data *Forum) SignUpUser(w http.ResponseWriter, r *http.Request) {
 	tpl := template.Must(template.ParseGlob("templates/*"))
 	err := r.ParseForm() // parses sign up form to fetch needed information
@@ -235,6 +251,7 @@ func (data *Forum) GetUsernameFromSessionID(writer http.ResponseWriter, request 
 	}
 
 	for _, sess := range a {
+		// fmt.Println(sessionToken, " : ", sess.SessionID)
 		if sessionToken == sess.SessionID {
 			return sess.Username
 		}
@@ -313,18 +330,10 @@ func (data *Forum) HomePage(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "text/html")
 	tpl := template.Must(template.ParseGlob("templates/*"))
 
-	if strings.HasPrefix(request.Header.Get("Content-type"), "multipart/form-data") {
-		if err := request.ParseMultipartForm(32<<20 + 512); err != nil { // checks for errors parsing form
-			http.Error(writer, "500 Internal Server Error", http.StatusInternalServerError)
-			fmt.Printf("HomePage (ParseForm) error:  %+v\n", err)
-			return
-		}
-	} else {
-		if err := request.ParseForm(); err != nil { // checks for errors parsing form
-			http.Error(writer, "500 Internal Server Error", http.StatusInternalServerError)
-			fmt.Printf("HomePage (ParseForm) error:  %+v\n", err)
-			return
-		}
+	if err := request.ParseForm(); err != nil { // checks for errors parsing form
+		http.Error(writer, "500 Internal Server Error", http.StatusInternalServerError)
+		fmt.Printf("HomePage (ParseForm) error:  %+v\n", err)
+		return
 	}
 	loggedIn := data.CheckCookie(writer, request)
 	// 🐈
@@ -349,102 +358,20 @@ func (data *Forum) HomePage(writer http.ResponseWriter, request *http.Request) {
 		}
 
 		postCategory := request.FormValue("category")
+		postCategory2 := request.FormValue("category2")
+		// fmt.Println( postCategory2)
+
+		if postCategory2 != "" {
+			postCategory += " "
+			postCategory += postCategory2
+		}
+		// fmt.Println(postCategory)
+		// fmt.Println(postCategory)
 		postTitle := request.FormValue("title")
 		postContent := request.FormValue("content")
-		imageName := ""
-		postImage, postImageHeader, err := request.FormFile("image-input")
-		if err != nil {
-			fmt.Printf("unable to parse image from form, this may not be a problem: %+v\n", err)
-		} else {
-			fmt.Println("image name is " + postImageHeader.Filename)
-			if postImageHeader.Size > 20000000 {
-				http.Error(writer, "400 Bad Request", http.StatusBadRequest)
-				fmt.Printf("file is too large, want 20000000 bytes, got %d bytes\n", postImageHeader.Size)
-				return
-			}
-			imageContent := []byte{}
-			n, err := postImage.Read(imageContent)
-			if err != nil {
-				http.Error(writer, "500 Internal Server Error", http.StatusInternalServerError)
-				fmt.Printf("unable to read image %s for storage: %+v\n", postImageHeader.Filename, err)
-				return
-			} else if n > 20000000 {
-				http.Error(writer, "400 Bad Request", http.StatusBadRequest)
-				fmt.Printf("file is too large, want 20000000 bytes, got %d bytes\n", postImageHeader.Size)
-				return
-			}
-			imageName = uuid.NewV4().String() + "-" + postImageHeader.Filename
-			f, err := os.Create(fmt.Sprintf("uploaded-images/%s", imageName))
-			if err != nil {
-				http.Error(writer, "500 Internal Server Error", http.StatusInternalServerError)
-				fmt.Printf("cannot create image file: %+v\n", err)
-				return
-			}
-			defer f.Close()
-			filenameSplit := strings.Split(postImageHeader.Filename, ".")
-			switch filenameSplit[len(filenameSplit)-1] {
-			case "jpeg":
-				img, err := jpeg.Decode(postImage)
-				if err != nil {
-					http.Error(writer, "500 Internal Server Error", http.StatusInternalServerError)
-					fmt.Printf("cannot decode jpeg: %+v\n", err)
-					return
-				}
-				opt := jpeg.Options{
-					Quality: 90,
-				}
-				err = jpeg.Encode(f, img, &opt)
-				if err != nil {
-					http.Error(writer, "500 Internal Server Error", http.StatusInternalServerError)
-					fmt.Printf("cannot encode jpeg: %+v\n", err)
-					return
-				}
-			case "jpg":
-				img, err := jpeg.Decode(postImage)
-				if err != nil {
-					http.Error(writer, "500 Internal Server Error", http.StatusInternalServerError)
-					fmt.Printf("cannot decode jpg: %+v\n", err)
-					return
-				}
-				opt := jpeg.Options{
-					Quality: 90,
-				}
-				err = jpeg.Encode(f, img, &opt)
-				if err != nil {
-					http.Error(writer, "500 Internal Server Error", http.StatusInternalServerError)
-					fmt.Printf("cannot encode jpg: %+v\n", err)
-					return
-				}
-			case "gif":
-				img, err := gif.DecodeAll(postImage)
-				if err != nil {
-					http.Error(writer, "500 Internal Server Error", http.StatusInternalServerError)
-					fmt.Printf("cannot decode gif: %+v\n", err)
-					return
-				}
 
-				err = gif.EncodeAll(f, img)
-				if err != nil {
-					http.Error(writer, "500 Internal Server Error", http.StatusInternalServerError)
-					fmt.Printf("cannot encode gif: %+v\n", err)
-					return
-				}
-			case "png":
-				img, err := png.Decode(postImage)
-				if err != nil {
-					http.Error(writer, "500 Internal Server Error", http.StatusInternalServerError)
-					fmt.Printf("cannot decode png: %+v\n", err)
-					return
-				}
-				err = png.Encode(f, img)
-				if err != nil {
-					http.Error(writer, "500 Internal Server Error", http.StatusInternalServerError)
-					fmt.Printf("cannot encode png: %+v\n", err)
-					return
-				}
-			}
-		}
-
+		postLikes := 0
+		postDislikes := 0
 		time := time.Now()
 		postCreated := time.Format("01-02-2006 15:04")
 
@@ -477,14 +404,15 @@ func (data *Forum) HomePage(writer http.ResponseWriter, request *http.Request) {
 			return
 		} else {
 			// postAndSession.UserSession = data.GetSessions()[0]
-			if postTitle != "" || postContent != "" || postCategory != "" {
+			if postTitle != "" || postContent != "" {
 				err := data.CreatePost(PostFeed{
 					Username:  user,
 					Title:     postTitle,
 					Content:   postContent,
+					Likes:     postLikes,
+					Dislikes:  postDislikes,
 					Category:  postCategory,
 					CreatedAt: postCreated,
-					Image:     imageName,
 				})
 				if err != nil {
 					fmt.Printf("HomePage (CreatePost) items error: %+v\n", err)
@@ -517,6 +445,20 @@ func (data *Forum) HomePage(writer http.ResponseWriter, request *http.Request) {
 			fmt.Printf("HomePage ExecuteTemplate (home.html) error: %+v\n", err)
 			return
 		}
+		return
+	}
+}
+
+func (data *Forum) GuestView(writer http.ResponseWriter, r *http.Request) {
+	tpl := template.Must(template.ParseGlob("templates/*"))
+	items, err := data.GetPosts()
+	if err != nil {
+		fmt.Printf("GuestView (GetPosts) items error: %+v\n", err)
+		return
+	}
+	err = tpl.ExecuteTemplate(writer, "guest.html", items)
+	if err != nil {
+		fmt.Printf("GuestView ExecuteTemplate error: %+v\n", err)
 		return
 	}
 }
@@ -571,9 +513,13 @@ func (data *Forum) CategoryDump(w http.ResponseWriter, r *http.Request) {
 	// check every post to find ones whose category matches our url path
 	categoryFound := false // used to check if a valid category was entered
 	for _, post := range posts {
+		var multiCat []string
+		if strings.Contains(post.Category, " ") {
+			multiCat = append(multiCat, strings.Split(post.Category, " ")...)
+		}
 		// fmt.Println(cat, post.Category)
 		// fmt.Println(post.Category)
-		if cat == post.Category {
+		if cat == post.Category || len(multiCat) > 1 && cat == multiCat[0] || len(multiCat) > 1 && cat == multiCat[1] {
 			// fmt.Println(post)
 			categoryFound = true
 			postByCategory.Post = append(postByCategory.Post, post) // add the matching post to our post[] in struct
@@ -718,6 +664,54 @@ func (data *Forum) Threads(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (data *Forum) ThreadGuest(w http.ResponseWriter, r *http.Request) {
+	tpl := template.Must(template.ParseGlob("templates/*"))
+	w.WriteHeader(http.StatusOK)
+	// grab current url, parse the form to allow taking data from html
+	url := r.URL.Path
+	err := r.ParseForm()
+	if err != nil {
+		fmt.Printf("Threads ParseForm error: %+v\n", err)
+		return
+	}
+
+	idstr := strings.Trim(url, "/threadg") // trim text so  we are only left with the final end point (postID)
+	id, err := strconv.Atoi(idstr)         // convert to number as postID is stored as an int on our database
+	if err != nil {
+		http.Error(w, "400 Bad Request", 400)
+	}
+
+	var postWithComments Databases
+	post, err := data.GetPosts() // get all posts
+	if err != nil {
+		fmt.Printf("ThreadGuest (GetPosts) posts error: %+v\n\n", err)
+		return
+	}
+	if id > len(post) { // checks so that a post that is not higher than total post amount and returns an error
+		http.Error(w, "404 post not found", 400)
+	}
+	commentdb, err := data.GetComments() // get data from comment database
+	if err != nil {
+		fmt.Printf("ThreadGuest (GetComments) error: %+v\n", err)
+		return
+	}
+	// only adds a comment into database if the post id matches the url id (post requested)--- to only fetch the same ids
+	for _, comment := range commentdb {
+		// fmt.Println("value", v, "comment ", comment)
+		if comment.PostID == id {
+			postWithComments.Comment = append(postWithComments.Comment, comment) // only adds matching comments to the database to be called only for specific posts
+			// fmt.Println(comment)
+		}
+	}
+
+	postWithComments.Post = post[id-1] // only allows us to send the requested post
+	err = tpl.ExecuteTemplate(w, "threadGuest.html", postWithComments)
+	if err != nil {
+		fmt.Printf("ThreadGuest ExecuteTemplate (threadGuest.html) error: %+v\n", err)
+		return
+	}
+}
+
 func (data *Forum) AboutFunc(w http.ResponseWriter, r *http.Request) {
 	tpl := template.Must(template.ParseGlob("templates/*"))
 	loggedIn := data.CheckCookie(w, r)
@@ -802,6 +796,65 @@ func (data *Forum) UserPosts(writer http.ResponseWriter, request *http.Request) 
 	}
 }
 
+func (data *Forum) UserLikes(writer http.ResponseWriter, request *http.Request) {
+	tpl := template.Must(template.ParseGlob("templates/*"))
+	writer.WriteHeader(http.StatusOK)
+	writer.Header().Set("Content-Type", "text/html")
+	// user, err := data.GetSessions()
+	// if err != nil {
+	// 	fmt.Printf("UserLikes GetSessions error: %+v\n", err)
+	// }
+
+	// currentUser := user[len(user)-1]
+
+	allReactions, err := data.GetReactions()
+	if err != nil {
+		fmt.Printf("UserLikes (GetReactions) error: %+v\n", err)
+		return
+	}
+
+	posts, err := data.GetPosts()
+	if err != nil {
+		fmt.Printf("UserLikes GetPosts error: %+v\n", err)
+		return
+	}
+
+	comments, err := data.GetComments()
+	if err != nil {
+		fmt.Printf("UserLikes GetComments error: %+v\n", err)
+		return
+	}
+
+	type UserLikes struct {
+		Posts    []PostFeed
+		Comments []Comment
+	}
+	var likesByUser UserLikes
+
+	for _, post := range posts {
+		// if post.Username == currentUser.Username {
+		for _, reaction := range allReactions {
+			if reaction.Liked && post.Username == reaction.Username && post.PostID == reaction.PostID {
+				likesByUser.Posts = append(likesByUser.Posts, post)
+			}
+		}
+	}
+
+	for _, comment := range comments {
+		// if comment.UserId == currentUser.Username {
+		for _, reaction := range allReactions {
+			if reaction.Liked && comment.UserId == reaction.Username && comment.CommentID == reaction.CommentID {
+				likesByUser.Comments = append(likesByUser.Comments, comment)
+			}
+		}
+	}
+
+	err = tpl.ExecuteTemplate(writer, "likes.html", likesByUser)
+	if err != nil {
+		fmt.Printf("UserLikes ExecuteTemplate (likes.html) error: %+v\n", err)
+	}
+}
+
 func (data *Forum) UserInfo(writer http.ResponseWriter, request *http.Request) {
 	tpl := template.Must(template.ParseGlob("templates/*"))
 	writer.WriteHeader(http.StatusOK)
@@ -821,6 +874,253 @@ func (data *Forum) Customization(writer http.ResponseWriter, request *http.Reque
 	if err != nil {
 		fmt.Printf("Customization ExecuteTemplate (customize.html) error: %+v\n", err)
 		return
+	}
+}
+
+func (data *Forum) HandleLikeDislikeForPost(writer http.ResponseWriter, request *http.Request, isLike bool) {
+	loggedIn := data.CheckCookie(writer, request)
+	if !loggedIn {
+		fmt.Printf("Guests are unable to like/dislike posts\n")
+		return
+	}
+	items, err := data.GetPosts()
+	// fmt.Printf("Items: %+v\n", items)
+	if err != nil {
+		fmt.Printf("HandleLikeDislike (GetPost) posts error: %+v\n", err)
+		return
+	}
+	reqItemIDraw := request.URL.Query().Get("id")
+	reqItemID, err := strconv.Atoi(reqItemIDraw)
+	if err != nil {
+		fmt.Printf("unable to parse post id: %v\n", err)
+		writer.WriteHeader(http.StatusInternalServerError)
+		writer.Header().Set("Content-Type", "application/json")
+		_, err := writer.Write([]byte("{\"500\": \"Error parsing post id\"}"))
+		if err != nil {
+			fmt.Printf("unable to send json response for post %d\n", reqItemID)
+			return
+		}
+		return
+	}
+	requestedItem := PostFeed{}
+
+	for _, item := range items {
+		if item.PostID == reqItemID {
+			requestedItem = item
+		}
+	}
+
+	if requestedItem.CreatedAt == "" {
+		fmt.Printf("unable to find post %d in db: %v\n", reqItemID, err)
+		writer.WriteHeader(http.StatusNotFound)
+		writer.Header().Set("Content-Type", "application/json")
+		_, err := writer.Write([]byte("{\"404\": \"Error finding post\"}"))
+		if err != nil {
+			fmt.Printf("unable to send json response for post %d\n", reqItemID)
+			return
+		}
+		return
+	}
+
+	j, err := requestedItem.MarshallJSON()
+	if err != nil {
+		fmt.Printf("unable to marshal json for post %d: %v\n", reqItemID, err)
+		writer.WriteHeader(http.StatusInternalServerError)
+		writer.Header().Set("Content-Type", "application/json")
+		_, err := writer.Write([]byte("{\"500\": \"Error marshalling json for post\"}"))
+		if err != nil {
+			fmt.Printf("unable to send json response for post %d\n", reqItemID)
+			return
+		}
+		return
+	}
+
+	switch request.Method {
+	case http.MethodGet:
+		writer.Header().Set("Content-Type", "application/json")
+		_, err := writer.Write(j)
+		if err != nil {
+			fmt.Printf("unable to send json response for post %d\n", reqItemID)
+		}
+	case http.MethodPost:
+		username := data.GetUsernameFromSessionID(writer, request)
+		reaction, error := data.GetReactionByPostID(strconv.Itoa(requestedItem.PostID), username)
+		if error != nil {
+			fmt.Printf("HandleLikeDislike (GetReactionByPostID) error: %v\n", error)
+		}
+		if reaction == nil {
+			err := data.CreateReaction(Reaction{
+				PostID:   requestedItem.PostID,
+				Username: username,
+				Liked:    isLike,
+				Disliked: !isLike,
+			})
+			if err != nil {
+				fmt.Printf("HandleLikeDislike (CreateReaction) error: %v\n", err)
+			}
+		}
+		if reaction != nil {
+			err := data.UpdateReaction(Reaction{
+				ReactionID: reaction.ReactionID,
+				PostID:     requestedItem.PostID,
+				Username:   username,
+				Liked:      isLike,
+				Disliked:   !isLike,
+			})
+			if err != nil {
+				fmt.Printf("HandleLikeDislike (UpdateReaction) error: %v\n", err)
+			}
+		}
+
+		// we need to know if anything actually happened
+		// we check to see if the reaction will have changed based on what it was already compared with isLike
+		success := false
+		// if wasLikedBefore != clientAskedForLike OR wasDislikedBefore != clientAskedForDislike THEN success=true
+		if reaction == nil {
+			success = true
+		} else if reaction.Liked != isLike || reaction.Disliked != !isLike {
+			success = true
+		}
+
+		updatedLikes, err := getLikesForPost(data.DB, requestedItem.PostID)
+		if err != nil {
+			fmt.Printf("HandleLikeDislike (getLikesForPost) error: %v\n", err)
+		}
+
+		updatedDislikes, err := getDislikesForPost(data.DB, requestedItem.PostID)
+		if err != nil {
+			fmt.Printf("HandleLikeDislike (getLikesForPost) error: %v\n", err)
+		}
+
+		writer.Header().Set("Content-Type", "application/json")
+		_, err = writer.Write([]byte(fmt.Sprintf("{\"success\":%t,\"likes\":%d,\"dislikes\":%d}", success, updatedLikes, updatedDislikes)))
+		if err != nil {
+			fmt.Printf("unable to send json response for post %d\n", reqItemID)
+			return
+		}
+		fmt.Printf("modified dis/likes on post %d\n", reqItemID)
+	}
+}
+
+func (data *Forum) HandleLikeDislikeForComment(writer http.ResponseWriter, request *http.Request, isLike bool) {
+	loggedIn := data.CheckCookie(writer, request)
+	if !loggedIn {
+		fmt.Printf("Guests are unable to like/dislike comments\n")
+		return
+	}
+	items, err := data.GetComments()
+	// fmt.Printf("Items: %+v\n", items)
+	if err != nil {
+		fmt.Printf("HandleLikeDislike (GetComments) comments error: %+v\n", err)
+		return
+	}
+
+	reqItemIDraw := request.URL.Query().Get("id")
+	reqItemID, err := strconv.Atoi(reqItemIDraw)
+	if err != nil {
+		fmt.Printf("unable to parse comment id: %v\n", err)
+		writer.WriteHeader(http.StatusInternalServerError)
+		writer.Header().Set("Content-Type", "application/json")
+		_, err := writer.Write([]byte("{\"500\": \"Error parsing comment id\"}"))
+		if err != nil {
+			fmt.Printf("unable to send json response for comments %d\n", reqItemID)
+			return
+		}
+		return
+	}
+	requestedItem := Comment{}
+
+	for _, item := range items {
+		if item.CommentID == reqItemID {
+			requestedItem = item
+		}
+	}
+
+	if requestedItem.CreatedAt == "" {
+		fmt.Printf("unable to find comment %d in db: %v\n", reqItemID, err)
+		writer.WriteHeader(http.StatusNotFound)
+		writer.Header().Set("Content-Type", "application/json")
+		_, err := writer.Write([]byte("{\"404\": \"Error finding comment\"}"))
+		if err != nil {
+			fmt.Printf("unable to send json response for comment %d\n", reqItemID)
+			return
+		}
+		return
+	}
+
+	j, err := requestedItem.MarshallJSON()
+	if err != nil {
+		fmt.Printf("unable to marshal json for comment %d: %v\n", reqItemID, err)
+		writer.WriteHeader(http.StatusInternalServerError)
+		writer.Header().Set("Content-Type", "application/json")
+		_, err := writer.Write([]byte("{\"500\": \"Error marshalling json for comment\"}"))
+		if err != nil {
+			fmt.Printf("unable to send json response for comment %d\n", reqItemID)
+			return
+		}
+		return
+	}
+
+	switch request.Method {
+	case http.MethodGet:
+		writer.Header().Set("Content-Type", "application/json")
+		_, err := writer.Write(j)
+		if err != nil {
+			fmt.Printf("unable to send json response for comment %d\n", reqItemID)
+		}
+	case http.MethodPost:
+		username := data.GetUsernameFromSessionID(writer, request)
+		reaction, error := data.GetReactionByCommentID(strconv.Itoa(requestedItem.CommentID), username)
+		if error != nil {
+			fmt.Printf("HandleLikeDislike (GetReactionByCommentID) error: %v\n", error)
+		}
+		if reaction == nil {
+			err := data.CreateReaction(Reaction{
+				CommentID: requestedItem.CommentID,
+				Username:  username,
+				Liked:     isLike,
+				Disliked:  !isLike,
+			})
+			if err != nil {
+				fmt.Printf("HandleLikeDislike (CreateReaction) comment error: %v\n", err)
+			}
+		}
+		if reaction != nil {
+			err := data.UpdateReaction(Reaction{
+				ReactionID: reaction.ReactionID,
+				CommentID:  requestedItem.CommentID,
+				Username:   username,
+				Liked:      isLike,
+				Disliked:   !isLike,
+			})
+			if err != nil {
+				fmt.Printf("HandleLikeDislike (UpdateReaction) comment error: %v\n", err)
+			}
+		}
+		success := false
+		// if wasLikedBefore != clientAskedForLike OR wasDislikedBefore != clientAskedForDislike THEN success=true
+		if reaction == nil {
+			success = true
+		} else if reaction.Liked != isLike || reaction.Disliked != !isLike {
+			success = true
+		}
+
+		updatedLikes, err := getLikesForComment(data.DB, requestedItem.CommentID)
+		if err != nil {
+			fmt.Printf("HandleLikeDislike (getLikesForComment) error: %v\n", err)
+		}
+
+		updatedDislikes, err := getDislikesForComment(data.DB, requestedItem.CommentID)
+		if err != nil {
+			fmt.Printf("HandleLikeDislike (getLikesForComment) error: %v\n", err)
+		}
+		writer.Header().Set("Content-Type", "application/json")
+		_, err = writer.Write([]byte(fmt.Sprintf("{\"success\":%t,\"likes\":%d,\"dislikes\":%d}", success, updatedLikes, updatedDislikes)))
+		if err != nil {
+			fmt.Printf("unable to send json response for comment %d\n", reqItemID)
+			return
+		}
+		fmt.Printf("modified dis/likes on comment %d\n", reqItemID)
 	}
 }
 
@@ -857,12 +1157,20 @@ func (data *Forum) Handler(w http.ResponseWriter, r *http.Request) {
 		data.AboutFunc(w, r)
 	case "/contact-us":
 		data.ContactUs(w, r)
+	case "/guest":
+		data.GuestView(w, r)
 
 		// user handlers
 	case "/photo":
 		data.UserPhoto(w, r)
 	case "/posts":
 		data.UserPosts(w, r)
+	// case "/comments":
+	// data.UserComments(w, r)
+	case "/likes":
+		data.UserLikes(w, r)
+	// case "/shares":
+	// data.UserShares(w, r)
 	case "/info":
 		data.UserInfo(w, r)
 	case "/custom":
@@ -898,5 +1206,15 @@ func (data *Forum) Handler(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "./images/tech.jpg")
 	case "/travel":
 		http.ServeFile(w, r, "./images/travel.jpg")
+
+		// api handlers
+	case "/likePost":
+		data.HandleLikeDislikeForPost(w, r, true)
+	case "/dislikePost":
+		data.HandleLikeDislikeForPost(w, r, false)
+	case "/likeComment":
+		data.HandleLikeDislikeForComment(w, r, true)
+	case "/dislikeComment":
+		data.HandleLikeDislikeForComment(w, r, false)
 	}
 }

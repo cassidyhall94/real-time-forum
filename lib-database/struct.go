@@ -1,9 +1,9 @@
-package main
+package database
 
 import (
 	"database/sql"
 	"time"
-	// "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 )
 
 type User struct {
@@ -29,7 +29,6 @@ type PostFeed struct {
 	Dislikes  int `json:"dislikes"`
 	Category  string
 	CreatedAt string
-	Image     string
 }
 
 type Session struct {
@@ -89,10 +88,11 @@ type Databases struct {
 	Comment []Comment
 }
 
-// type GoogleClaims struct {
-// 	Email         string `json:"email"`
-// 	EmailVerified bool   `json:"email_verified"`
-// 	FirstName     string `json:"given_name"`
-// 	LastName      string `json:"family_name"`
-// 	jwt.StandardClaims
-// }
+type GoogleClaims struct {
+	Email         string `json:"email"`
+	EmailVerified bool   `json:"email_verified"`
+	FirstName     string `json:"given_name"`
+	LastName      string `json:"family_name"`
+	jwt.StandardClaims
+}
+

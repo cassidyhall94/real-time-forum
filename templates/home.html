@@ -65,6 +65,15 @@
                         <option value="Fitness">Fitness</option>
                         <option value="Technology">Technology</option>
                         <option value="Travel">Travel</option>
+                    </select> 
+                    <select id="category2" name="category2">
+                        <option value =""></option>
+                        <option value="Health">Health</option>
+                        <option value="Finance">Finance</option>
+                        <option value="Animals">Animals</option>
+                        <option value="Fitness">Fitness</option>
+                        <option value="Technology">Technology</option>
+                        <option value="Travel">Travel</option>
                     </select> <br>
                     <label for="title"> Title:</label> <br>
                     <input type="text" id="title" name="title" required>
@@ -73,12 +82,7 @@
                     <textarea name="content" id="postcontent" placeholder="Please enter post content here"
                         required></textarea>
                     <br>
-
-                    <input type="file" id="image-input" name="image-input" accept="image/jpeg, image/png, image/gif">
-                    <div id="display-image"></div>
-
-                    <input id="submit-button" type="submit" value="post" a href="/home" value="reset form"
-                        formenctype="multipart/form-data" formmethod="post">
+                    <input type="submit" value="post" a href="/home" value="reset form">
                 </form>
 
             </div>
@@ -99,7 +103,6 @@
                         <div class="content">
                             <a href="thread/{{.PostID}}">
                                 <p1>{{.Content}} </p1>
-                                <img src="/postimages/{{.Image}}" class="uploaded-image">
                             </a>
                             <br>
                             <p1>Category: {{.Category}}</p1>
@@ -178,23 +181,6 @@
             dislikesElement.innerHTML = postResult.dislikes + " Dislikes";
         }
     }
-
-    const image_input = document.querySelector("#image-input");
-    let image_filename = "";
-    image_input.addEventListener("change", function () {
-        if (image_input.files[0].size > 20000000) {
-            alert("File size must be under 20mb!");
-            return;
-        }
-        const reader = new FileReader();
-        reader.addEventListener("load", () => {
-            const uploaded_image = reader.result;
-            document.querySelector("#display-image").style.backgroundImage = `url(${uploaded_image})`;
-        });
-        reader.readAsDataURL(this.files[0]);
-        image_filename = this.files[0].name;
-    });
-    
 </script>
 
 </html>
