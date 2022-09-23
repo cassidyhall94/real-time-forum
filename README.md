@@ -2,22 +2,20 @@ PROJECT: https://learn.01founders.co/git/root/public/src/branch/master/subjects/
 
 AUDIT: https://learn.01founders.co/git/root/public/src/branch/master/subjects/real-time-forum/audit
 
-- this all must be LIVE using WebSockets in backend/frontend
+WebSockets in backend/frontend
     - https://pkg.go.dev/github.com/gorilla/websocket
     - https://medium.com/@bootcampmillionaire/what-i-learned-about-websockets-by-building-a-real-time-chat-application-using-socket-io-3d9e163e504
     - https://javascript.info/websocket
 
-TODO:
+RESOURCES:
     - https://developer.mozilla.org/en-US/docs/Web/API/WebSocket#examples
     - https://tutorialedge.net/golang/go-websocket-tutorial/
         - https://github.com/TutorialEdge/go-websockets-tutorial
-
     - websockets depend on two hosts having a connection, so they run on top of a TCP layer and modify the TCP layer so that the client and server agree for the socket to stay open
         - https://en.wikipedia.org/wiki/Transmission_Control_Protocol
         - https://en.wikipedia.org/wiki/Connection-oriented_communication
     - websocket handshake: how the data being exchanged should be interpreted by both client and server 
     - user does not have to refresh the page to see
-
 
 - one HTML file only: https://en.wikipedia.org/wiki/Single-page_application
 
@@ -28,6 +26,7 @@ TODO:
 
 - Creation of posts and comments
     - posts will have categories
+    - does not have to be live
 
 - Private messaging
     - online/offline section
