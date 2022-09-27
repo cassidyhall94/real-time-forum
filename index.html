@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Real Time Forum</title>
+    <style>
+        .msg {
+            background-color: aqua;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .self {
+            background-color: rgb(0, 153, 255);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="msgcontainer" style="height:500px; width: 320px; border: 2px solid rgb(0, 0, 0); background:#eee;overflow-y: auto;"></div>
+    <div style="overflow: hidden;">
+        <input id="ipt" style="width: 300px; padding: 10px; border-right: 2px solid rgb(0, 0, 0); border-left: 2px solid rgb(0, 0, 0); border-bottom: 2px solid rgb(0, 0, 0); border-top: hidden" onkeypress="mysocket.keypress(event)" type="text" />
+    </div>
+
+    <script src="websocket.js"></script>
+    <script>
+        var mysocket = new MySocket()
+        mysocket.connectSocket();
+    </script>
+</body>
+
+</html>
