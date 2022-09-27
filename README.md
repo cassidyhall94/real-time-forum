@@ -2,12 +2,12 @@ PROJECT: https://learn.01founders.co/git/root/public/src/branch/master/subjects/
 
 AUDIT: https://learn.01founders.co/git/root/public/src/branch/master/subjects/real-time-forum/audit
 
-WebSockets in backend/frontend
+RESOURCES:
     - https://pkg.go.dev/github.com/gorilla/websocket
     - https://medium.com/@bootcampmillionaire/what-i-learned-about-websockets-by-building-a-real-time-chat-application-using-socket-io-3d9e163e504
     - https://javascript.info/websocket
 
-RESOURCES:
+WebSockets in backend/frontend
     - https://developer.mozilla.org/en-US/docs/Web/API/WebSocket#examples
     - https://tutorialedge.net/golang/go-websocket-tutorial/
         - https://github.com/TutorialEdge/go-websockets-tutorial

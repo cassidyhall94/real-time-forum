@@ -3,10 +3,10 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	database "forum/lib-database"
 	"log"
 	"net/http"
 	"os"
+	database "real-time-forum/lib-database"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -66,7 +66,6 @@ func main() {
 		log.Fatal(500, "500 Internal server error:", err)
 		fmt.Printf("main ListenAndServe error: %+v\n", err)
 	}
-
 }
 
 // We'll need to define an Upgrader
@@ -100,7 +99,6 @@ func reader(conn *websocket.Conn) {
 }
 
 func wsEndpoint(w http.ResponseWriter, r *http.Request) {
-
 	fmt.Println("Client Connected")
 	// upgrade this connection to a WebSocket
 	// connection
