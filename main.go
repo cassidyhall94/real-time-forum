@@ -51,10 +51,6 @@ func main() {
 	mux.HandleFunc("/ws", wsEndpoint)
 
 	mux.HandleFunc("/", data.Handler)
-	mux.HandleFunc("/category/", data.CategoryDump)
-	mux.HandleFunc("/categoryg/", data.CategoryDump)
-	mux.HandleFunc("/threadg/", data.ThreadGuest)
-	mux.HandleFunc("/thread/", data.Threads)
 	mux.HandleFunc("/category/stylesheet", cssHandler)
 	mux.HandleFunc("/threadg/stylesheet", cssHandler)
 	mux.HandleFunc("/thread/stylesheet", cssHandler)

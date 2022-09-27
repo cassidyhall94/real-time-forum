@@ -49,19 +49,6 @@ func (forum *Forum) CreatePost(post PostFeed) error {
 	return nil
 }
 
-func (forum *Forum) CreateReaction(reaction Reaction) error {
-	stmt, err := forum.DB.Prepare("INSERT INTO reaction (postid, username, commentid, liked, disliked) VALUES (?, ?, ?, ?, ?);")
-	defer stmt.Close()
-	if err != nil {
-		return fmt.Errorf("CreateReaction DB Prepare error: %+v\n", err)
-	}
-	_, err = stmt.Exec(reaction.PostID, reaction.Username, reaction.CommentID, reaction.Liked, reaction.Disliked)
-	if err != nil {
-		return fmt.Errorf("CreateReactions Exec error: %+v\n", err)
-	}
-	return nil
-}
-
 func (forum *Forum) CreateComment(comment Comment) error {
 	stmt, err := forum.DB.Prepare("INSERT INTO comments ( postID, userID, content, dateCreated) VALUES (?, ?, ?, ?);")
 	defer stmt.Close()
@@ -86,19 +73,6 @@ func (feed *Forum) UpdatePost(item PostFeed) error {
 	_, err = stmt.Exec(item.Title, item.Content, item.Category, item.PostID)
 	if err != nil {
 		return fmt.Errorf("unable to insert item into post: %w", err)
-	}
-	return nil
-}
-
-func (feed *Forum) UpdateReaction(item Reaction) error {
-	stmt, err := feed.DB.Prepare("UPDATE reaction SET liked = ?, disliked = ? WHERE (postid = ? AND username = ? AND reactionID = ?) OR (commentid = ? AND username = ? AND reactionID = ?);")
-	defer stmt.Close()
-	if err != nil {
-		return fmt.Errorf("UpdateReaction DB Prepare error: %+v", err)
-	}
-	_, err = stmt.Exec(item.Liked, item.Disliked, item.PostID, item.Username, item.ReactionID, item.CommentID, item.Username, item.ReactionID)
-	if err != nil {
-		return fmt.Errorf("unable to update reaction: %w", err)
 	}
 	return nil
 }
@@ -198,26 +172,6 @@ func commentTable(db *sql.DB) error {
 	return nil
 }
 
-func reactionsTable(db *sql.DB) error {
-	stmt, err := db.Prepare(`CREATE TABLE IF NOT EXISTS reaction (
-   reactionID INTEGER PRIMARY KEY AUTOINCREMENT,
-   postID INTEGER REFERENCES posts(postID),
-   username TEXT REFERENCES people(username),
-   commentID INTEGER REFERENCES comments(commentID),
-   liked BOOL,
-   disliked BOOL);
-	`)
-	defer stmt.Close()
-	if err != nil {
-		return fmt.Errorf("reactionsTable DB Prepare error: %+v\n", err)
-	}
-	_, err = stmt.Exec()
-	if err != nil {
-		return fmt.Errorf("reactionsTable Exec error: %+v\n", err)
-	}
-	return nil
-}
-
 func Connect(db *sql.DB) (*Forum, error) {
 	err := userTable(db)
 	if err != nil {
@@ -234,10 +188,6 @@ func Connect(db *sql.DB) (*Forum, error) {
 	err4 := commentTable(db)
 	if err != nil {
 		return nil, fmt.Errorf("Connect commentTable error: %+v\n", err4)
-	}
-	err5 := reactionsTable(db)
-	if err != nil {
-		return nil, fmt.Errorf("Connect reactionsTable error: %+v\n", err5)
 	}
 
 	return &Forum{
@@ -265,16 +215,6 @@ func (data *Forum) GetPosts() ([]PostFeed, error) {
 			return posts, fmt.Errorf("GetPosts rows.Scan error: %+v\n", err)
 		}
 
-		likes, err := getLikesForPost(data.DB, id)
-		if err != nil {
-			return posts, fmt.Errorf("GetPosts getLikesForPost error: %+v\n", err)
-		}
-
-		dislikes, err := getDislikesForPost(data.DB, id)
-		if err != nil {
-			return posts, fmt.Errorf("GetPosts getDislikesForPost error: %+v\n", err)
-		}
-
 		posts = append(posts, PostFeed{
 			PostID:    id,
 			Username:  uiD,
@@ -282,190 +222,11 @@ func (data *Forum) GetPosts() ([]PostFeed, error) {
 			Content:   content,
 			Category:  category,
 			CreatedAt: created,
-			Likes:     likes,
-			Dislikes:  dislikes,
 		})
 	}
-
-	// fmt.Println(posts)
 	return posts, nil
 }
 
-func getLikesForPost(db *sql.DB, id int) (int, error) {
-	stmt, err := db.Prepare("SELECT liked FROM reaction WHERE liked = TRUE AND postID = ?")
-	defer stmt.Close()
-	if err != nil {
-		return 0, fmt.Errorf("getLikesForPost DB Prepare error: %+v\n", err)
-	}
-	rows, err := stmt.Query(id)
-	if err != nil {
-		return 0, fmt.Errorf("getLikesForPost DB Query error: %+v\n", err)
-	}
-
-	counter := 0
-	for rows.Next() {
-		counter++
-	}
-	return counter, nil
-}
-
-func getDislikesForPost(db *sql.DB, id int) (int, error) {
-	stmt, err := db.Prepare("SELECT disliked FROM reaction WHERE disliked = TRUE AND postID = ?")
-	defer stmt.Close()
-	if err != nil {
-		return 0, fmt.Errorf("getDislikesForPost DB Prepare error: %+v\n", err)
-	}
-	rows, err := stmt.Query(id)
-	if err != nil {
-		return 0, fmt.Errorf("getDislikesForPost DB Query error: %+v\n", err)
-	}
-
-	counter := 0
-	for rows.Next() {
-		counter++
-	}
-	return counter, nil
-}
-
-func getLikesForComment(db *sql.DB, id int) (int, error) {
-	stmt, err := db.Prepare("SELECT liked FROM reaction WHERE liked = TRUE AND commentID = ?")
-	defer stmt.Close()
-	if err != nil {
-		return 0, fmt.Errorf("getLikesForComment DB Prepare error: %+v\n", err)
-	}
-	rows, err := stmt.Query(id)
-	if err != nil {
-		return 0, fmt.Errorf("getLikesForComment DB Query error: %+v\n", err)
-	}
-
-	counter := 0
-	for rows.Next() {
-		counter++
-	}
-	return counter, nil
-}
-
-func getDislikesForComment(db *sql.DB, id int) (int, error) {
-	stmt, err := db.Prepare("SELECT disliked FROM reaction WHERE disliked = TRUE AND commentID = ?")
-	defer stmt.Close()
-	if err != nil {
-		return 0, fmt.Errorf("getDislikesForComment DB Prepare error: %+v\n", err)
-	}
-	rows, err := stmt.Query(id)
-	if err != nil {
-		return 0, fmt.Errorf("getDislikesForComment DB Query error: %+v\n", err)
-	}
-
-	counter := 0
-	for rows.Next() {
-		counter++
-	}
-	return counter, nil
-}
-
-func (data *Forum) GetReactions() ([]Reaction, error) {
-	reactions := []Reaction{}
-	rows, err := data.DB.Query(`SELECT * FROM reaction`)
-	if err != nil {
-		return reactions, fmt.Errorf("GetReactions DB Query error: %+v\n", err)
-	}
-
-	var reactionID int
-	var postID int
-	var username string
-	var commentID int
-	var liked bool
-	var disliked bool
-
-	for rows.Next() {
-		err := rows.Scan(&reactionID, &postID, &username, &commentID, &liked, &disliked)
-		if err != nil {
-			return reactions, fmt.Errorf("GetReactions rows.Scan error: %+v\n", err)
-		}
-		reactions = append(reactions, Reaction{
-			ReactionID: reactionID,
-			PostID:     postID,
-			Username:   username,
-			CommentID:  commentID,
-			Liked:      liked,
-			Disliked:   disliked,
-		})
-	}
-	// fmt.Println(reactions)
-	return reactions, nil
-}
-
-func (data *Forum) GetReactionByPostID(targetPostID, targetUsername string) (*Reaction, error) {
-	stmt, err := data.DB.Prepare("SELECT * FROM reaction WHERE postID = ? AND username = ?")
-	defer stmt.Close()
-	if err != nil {
-		return nil, fmt.Errorf("GetReactionByPostID DB Prepare error: %+v", err)
-	}
-	rows, err := stmt.Query(targetPostID, targetUsername)
-	if err != nil {
-		return nil, fmt.Errorf("GetReactionByPostID DB Query error: %+v", err)
-	}
-
-	var reactionID int
-	var postID int
-	var username string
-	var commentID int
-	var liked bool
-	var disliked bool
-
-	for rows.Next() {
-		err := rows.Scan(&reactionID, &postID, &username, &commentID, &liked, &disliked)
-		if err != nil {
-			return nil, fmt.Errorf("GetReactionByPostID rows.Scan error: %+v\n", err)
-		}
-		return &Reaction{
-			ReactionID: reactionID,
-			PostID:     postID,
-			Username:   username,
-			CommentID:  commentID,
-			Liked:      liked,
-			Disliked:   disliked,
-		}, nil
-	}
-	return nil, nil
-}
-
-func (data *Forum) GetReactionByCommentID(targetCommentID, targetUsername string) (*Reaction, error) {
-	stmt, err := data.DB.Prepare("SELECT * FROM reaction WHERE commentID = ? AND username = ?")
-	defer stmt.Close()
-	if err != nil {
-		return nil, fmt.Errorf("GetReactionByCommentID DB Prepare error: %+v", err)
-	}
-	rows, err := stmt.Query(targetCommentID, targetUsername)
-	if err != nil {
-		return nil, fmt.Errorf("GetReactionByCommentID DB Query error: %+v", err)
-	}
-
-	var reactionID int
-	var postID int
-	var username string
-	var commentID int
-	var liked bool
-	var disliked bool
-
-	for rows.Next() {
-		err := rows.Scan(&reactionID, &postID, &username, &commentID, &liked, &disliked)
-		if err != nil {
-			return nil, fmt.Errorf("GetReactionByCommentID rows.Scan error: %+v\n", err)
-		}
-		return &Reaction{
-			ReactionID: reactionID,
-			PostID:     postID,
-			Username:   username,
-			CommentID:  commentID,
-			Liked:      liked,
-			Disliked:   disliked,
-		}, nil
-	}
-	return nil, nil
-}
-
-// @TODO: add likes/dislikes(reactions) to comments.
 func (data *Forum) GetComments() ([]Comment, error) {
 	comments := []Comment{}
 	rows, err := data.DB.Query(`SELECT * FROM comments`)
@@ -483,15 +244,6 @@ func (data *Forum) GetComments() ([]Comment, error) {
 		if err != nil {
 			return comments, fmt.Errorf("GetComments rows.Scan error: %+v\n", err)
 		}
-		likes, err := getLikesForComment(data.DB, commentid)
-		if err != nil {
-			return comments, fmt.Errorf("GetComments getLikesForComment error: %+v\n", err)
-		}
-
-		dislikes, err := getDislikesForComment(data.DB, commentid)
-		if err != nil {
-			return comments, fmt.Errorf("GetComments getDislikesForComment error: %+v\n", err)
-		}
 
 		comments = append(comments, Comment{
 			CommentID: commentid,
@@ -499,8 +251,6 @@ func (data *Forum) GetComments() ([]Comment, error) {
 			UserId:    userid,
 			Content:   content,
 			CreatedAt: created,
-			Likes:     likes,
-			Dislikes:  dislikes,
 		})
 	}
 	return comments, nil
