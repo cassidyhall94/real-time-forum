@@ -12,12 +12,12 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-var savedsocketreader []*socketReader
+var savedChatSockets []*chatSocket
 
-func socketReaderCreate(w http.ResponseWriter, r *http.Request) {
+func chatSocketCreate(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("socket request")
-	if savedsocketreader == nil {
-		savedsocketreader = make([]*socketReader, 0)
+	if savedChatSockets == nil {
+		savedChatSockets = make([]*chatSocket, 0)
 	}
 
 	defer func() {
@@ -28,25 +28,23 @@ func socketReaderCreate(w http.ResponseWriter, r *http.Request) {
 		r.Body.Close()
 	}()
 	con, _ := upgrader.Upgrade(w, r, nil)
-
-	ptrSocketReader := &socketReader{
+	ptrChatSocket := &chatSocket{
 		con: con,
 	}
 
-	savedsocketreader = append(savedsocketreader, ptrSocketReader)
-
-	ptrSocketReader.startThread()
+	savedChatSockets = append(savedChatSockets, ptrChatSocket)
+	ptrChatSocket.startThread()
 }
 
-// socketReader struct
-type socketReader struct {
+// chatSocket struct
+type chatSocket struct {
 	con  *websocket.Conn
 	mode int
 	name string
 }
 
-func (i *socketReader) broadcast(str string) {
-	for _, g := range savedsocketreader {
+func (i *chatSocket) broadcast(str string) {
+	for _, g := range savedChatSockets {
 
 		if g == i {
 			// no send message to himself
@@ -61,7 +59,7 @@ func (i *socketReader) broadcast(str string) {
 	}
 }
 
-func (i *socketReader) read() {
+func (i *chatSocket) read() {
 	_, b, er := i.con.ReadMessage()
 	if er != nil {
 		panic(er)
@@ -71,23 +69,20 @@ func (i *socketReader) read() {
 
 	if i.mode == 1 {
 		i.name = string(b)
-		i.writeMsg("Admin", "Welcome "+i.name+", please write a message and we will broadcast it to other users.")
+		i.writeMsg("Admin", "Welcome "+i.name+"!")
 		i.mode = 2 // real msg mode
-
 		return
 	}
-
 	i.broadcast(string(b))
-
 	fmt.Println(i.name + " " + string(b))
 }
 
-func (i *socketReader) writeMsg(name string, str string) {
+func (i *chatSocket) writeMsg(name string, str string) {
 	i.con.WriteMessage(websocket.TextMessage, []byte("<b>"+name+": </b>"+str))
 }
 
-func (i *socketReader) startThread() {
-	i.writeMsg("Admin", "Please write your name")
+func (i *chatSocket) startThread() {
+	i.writeMsg("Admin", "Please enter your username.")
 	i.mode = 1 // mode 1 get user name
 
 	go func() {

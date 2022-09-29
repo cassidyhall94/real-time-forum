@@ -1,23 +1,21 @@
 class MySocket {
     constructor() {
         this.mysocket = null;
-        this.vMsgContainer = document.getElementById("msgcontainer");
-        this.vMsgIpt = document.getElementById("ipt");
     }
 
-    showMessage(text, myself) {
+    chatHandler(text, myself) {
         var div = document.createElement("div");
         div.innerHTML = text;
         var cself = (myself) ? "self" : "";
         div.className = "msg " + cself;
-        this.vMsgContainer.appendChild(div);
+        document.getElementById("msgcontainer").appendChild(div);
     }
 
     send() {
-        var txt = this.vMsgIpt.value;
-        this.showMessage("<b>You:</b> " + txt, true);
+        var txt = document.getElementById("ipt").value;
+        this.chatHandler("<b>You:</b> " + txt, true);
         this.mysocket.send(txt);
-        this.vMsgIpt.value = ""
+        document.getElementById("ipt").value = ""
     }
 
     keypress(e) {
@@ -26,14 +24,17 @@ class MySocket {
         }
     }
 
-    connectSocket() {
+    contentHandler(text) {
+        document.getElementById("content").innerHTML = text;
+    }
+
+    connectSocket(URI, handler) {
         console.log("websocket connected");
-        var socket = new WebSocket("ws://localhost:8080/socket"); //make sure the port matches with your golang code
+        var socket = new WebSocket("ws://localhost:8080/" + URI); //make sure the port matches with your golang code
         this.mysocket = socket;
 
         socket.onmessage = (e) => {
-            this.showMessage(e.data, false);
-
+            handler(e.data, false);
         }
         socket.onopen = () => {
             console.log("socket opened")
