@@ -28,9 +28,18 @@ class MySocket {
         document.getElementById("content").innerHTML = text;
     }
 
+    requestContent(text) {
+        this.mysocket.send(text);
+    }
+
     connectSocket(URI, handler) {
-        console.log("websocket connected");
-        var socket = new WebSocket("ws://localhost:8080/" + URI); //make sure the port matches with your golang code
+        if (URI === 'chat') {
+            console.log("Chat Websocket Connected");
+        }
+        if (URI === 'content') {
+            console.log("Content Websocket Connected");
+        }
+        var socket = new WebSocket("ws://localhost:8080/" + URI);
         this.mysocket = socket;
 
         socket.onmessage = (e) => {

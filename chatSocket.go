@@ -14,8 +14,15 @@ var upgrader = websocket.Upgrader{
 
 var savedChatSockets []*chatSocket
 
+// chatSocket struct
+type chatSocket struct {
+	con      *websocket.Conn
+	mode     int
+	username string
+}
+
 func chatSocketCreate(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("socket request")
+	fmt.Println("Chat Socket Request")
 	if savedChatSockets == nil {
 		savedChatSockets = make([]*chatSocket, 0)
 	}
@@ -36,26 +43,17 @@ func chatSocketCreate(w http.ResponseWriter, r *http.Request) {
 	ptrChatSocket.startThread()
 }
 
-// chatSocket struct
-type chatSocket struct {
-	con  *websocket.Conn
-	mode int
-	name string
-}
-
 func (i *chatSocket) broadcast(str string) {
-	for _, g := range savedChatSockets {
-
-		if g == i {
-			// no send message to himself
+	for _, currentChatSocket := range savedChatSockets {
+		if currentChatSocket == i {
+			// users cannot send messages to themselves
 			continue
 		}
-
-		if g.mode == 1 {
-			// no send message to connected user before user write his name
+		if currentChatSocket.mode == 1 {
+			// message cannot be sent until username is given
 			continue
 		}
-		g.writeMsg(i.name, str)
+		currentChatSocket.writeMsg(i.username, str)
 	}
 }
 
@@ -64,17 +62,17 @@ func (i *chatSocket) read() {
 	if er != nil {
 		panic(er)
 	}
-	fmt.Println(i.name + " " + string(b))
+	fmt.Println(i.username + " " + string(b))
 	fmt.Println(i.mode)
 
 	if i.mode == 1 {
-		i.name = string(b)
-		i.writeMsg("Admin", "Welcome "+i.name+"!")
+		i.username = string(b)
+		i.writeMsg("Admin", "Welcome "+i.username+"!")
 		i.mode = 2 // real msg mode
 		return
 	}
 	i.broadcast(string(b))
-	fmt.Println(i.name + " " + string(b))
+	fmt.Println(i.username + " " + string(b))
 }
 
 func (i *chatSocket) writeMsg(name string, str string) {
@@ -91,7 +89,7 @@ func (i *chatSocket) startThread() {
 			if err != nil {
 				fmt.Println(err)
 			}
-			fmt.Println("thread socketreader finish")
+			fmt.Println("Chat thread finished")
 		}()
 
 		for {
