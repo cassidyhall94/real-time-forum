@@ -55,8 +55,6 @@ func (i *contentSocket) pollContentWS() {
 			if err != nil {
 				panic(err)
 			}
-			// b is a string: "home"
-			// parse templates
 			tpl, err := template.ParseGlob("templates/*")
 			if err != nil {
 				panic(err)
@@ -72,10 +70,6 @@ func (i *contentSocket) pollContentWS() {
 					return
 				}
 			}
-			
-			// if home, execute home template
-			// use: i.con.NextWriter() as w in execute template
-			//
 		}
 	}()
 }

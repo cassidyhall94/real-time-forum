@@ -3,9 +3,13 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
+
+var t = time.Now()
+var dateTime = t.Format("1/2/2006, 3:04:05 PM")
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
@@ -62,8 +66,8 @@ func (i *chatSocket) read() {
 	if er != nil {
 		panic(er)
 	}
-	fmt.Println(i.username + " " + string(b))
-	fmt.Println(i.mode)
+	// fmt.Println(i.username + " " + string(b))
+	// fmt.Println(i.mode)
 
 	if i.mode == 1 {
 		i.username = string(b)
@@ -72,11 +76,12 @@ func (i *chatSocket) read() {
 		return
 	}
 	i.broadcast(string(b))
-	fmt.Println(i.username + " " + string(b))
+	// fmt.Println(i.username + " " + string(b))
 }
 
 func (i *chatSocket) writeMsg(name string, str string) {
-	i.con.WriteMessage(websocket.TextMessage, []byte("<b>"+name+": </b>"+str))
+
+	i.con.WriteMessage(websocket.TextMessage, []byte("<b>"+dateTime+" </b>"+"<br>"+"<b>"+name+": </b>"+str))
 }
 
 func (i *chatSocket) startThread() {

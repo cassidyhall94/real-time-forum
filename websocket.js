@@ -13,7 +13,9 @@ class MySocket {
 
     send() {
         var txt = document.getElementById("ipt").value;
-        this.chatHandler("<b>You:</b> " + txt, true);
+        let time = new Date().toLocaleString();
+        let line = "<b>" + time + " </b>" + "<br>" + "<b>You:</b> " + txt
+        this.chatHandler(line, true);
         this.mysocket.send(txt);
         document.getElementById("ipt").value = ""
     }
