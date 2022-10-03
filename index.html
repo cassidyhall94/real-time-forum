@@ -2,33 +2,33 @@
 <html>
 
 <head>
+    <link rel="stylesheet" href="styles/styles.css" type="text/css">
     <title>Real Time Forum</title>
-    <style>
-        .msg {
-            background-color: rgb(178, 252, 252);
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-
-        .self {
-            background-color: rgb(147, 252, 153);
-        }
-    </style>
-
-    <button onclick="contentSocket.requestContent('home')">Home</button>
+ 
 </head>
+<header>01 Founders
+    <button onclick="contentSocket.requestContent('home')">Home</button>
+    NAVIGATION BAR
+</header>
 
 <body>
-    <div id="msgcontainer"
-        style="height:500px; width: 320px; border: 2px solid rgb(0, 0, 0); background:rgb(255, 255, 255);overflow-y: auto;">
-    </div>
-    <div style="overflow: hidden;">
-        <input id="ipt"
-            style="width: 300px; padding: 10px; border-right: 2px solid rgb(0, 0, 0); border-left: 2px solid rgb(0, 0, 0); border-bottom: 2px solid rgb(0, 0, 0); border-top: hidden"
-            onkeypress="chatSocket.keypress(event)" type="text" />
-    </div>
-    <div id="content"></div>
+
+    <article>
+        <div class="banner">
+            POSTS
+            <div id="content"></div>
+        </div>
+
+    </article>
+
 </body>
+<aside> CHAT
+    <div id="msgcontainer">
+        <div style="overflow: hidden;">
+            <input id="ipt" onkeypress="chatSocket.keypress(event)" type="text" />
+        </div>
+</aside>
+<footer>Footer</footer>
 
 <script src="websocket.js"></script>
 <script>
