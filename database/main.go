@@ -39,8 +39,6 @@ func main() {
 			"postID"	TEXT,
 			"userName"	TEXT NOT NULL,
 			"category"	TEXT ,
-			"likes" INTEGER,
-			"dislikes" INTEGER,
 			"title" TEXT,
 			"post" TEXT
 		);
