@@ -5,10 +5,12 @@ class MySocket {
 
     chatHandler(text, myself) {
         var div = document.createElement("div");
+        let msgContainer = document.getElementById('ipt')
         div.innerHTML = text;
         var cself = (myself) ? "self" : "";
         div.className = "msg " + cself;
         document.getElementById("msgcontainer").appendChild(div);
+        div.after(msgContainer)
     }
 
     send() {
