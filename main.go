@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"net/http"
 )
 
@@ -13,7 +12,7 @@ func main() {
 	database, err1 := sql.Open("sqlite3", "sqlite-database.db")
 	sqliteDatabase = database
 	if err1 != nil {
-		log.Fatal(err1.Error())
+		fmt.Println(err1.Error())
 	}
 	defer sqliteDatabase.Close()
 	myhttp := http.NewServeMux()
@@ -22,6 +21,7 @@ func main() {
 
 	myhttp.HandleFunc("/chat", chatSocketCreate)
 	myhttp.HandleFunc("/content", contentSocketCreate)
+	myhttp.HandleFunc("/post", postSocketCreate)
 
 	fmt.Println("http://localhost:8080")
 	http.ListenAndServe(":8080", myhttp)

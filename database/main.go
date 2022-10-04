@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"os"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -12,13 +11,13 @@ import (
 func main() {
 	file, err := os.Create("sqlite-database.db")
 	if err != nil {
-		log.Fatal(err.Error())
+		fmt.Println(err.Error())
 	}
 	file.Close()
 	fmt.Println("SQL Databasefile created")
 	sqliteDatabase, err1 := sql.Open("sqlite3", "sqlite-database.db")
 	if err1 != nil {
-		log.Fatal(err1.Error())
+		fmt.Println(err1.Error())
 	}
 	defer sqliteDatabase.Close()
 	_, errTbl := sqliteDatabase.Exec(`
@@ -32,7 +31,7 @@ func main() {
 	`)
 	if errTbl != nil {
 		fmt.Println("USER TABLE ERROR")
-		log.Fatal(errTbl.Error())
+		fmt.Println(errTbl.Error())
 	}
 	_, errPosts := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "posts" (
@@ -45,7 +44,7 @@ func main() {
 	`)
 	if errPosts != nil {
 		fmt.Println("POST ERROR")
-		log.Fatal(errPosts.Error())
+		fmt.Println(errPosts.Error())
 	}
 	_, errCookie := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "cookies" (
@@ -55,7 +54,7 @@ func main() {
 	`)
 	if errCookie != nil {
 		fmt.Println("TABLE ERROR")
-		log.Fatal(errTbl.Error())
+		fmt.Println(errTbl.Error())
 	}
 
 	_, errComments := sqliteDatabase.Exec(`
@@ -69,7 +68,7 @@ func main() {
 	`)
 	if errComments != nil {
 		fmt.Println("USER ERROR")
-		log.Fatal(errTbl.Error())
+		fmt.Println(errTbl.Error())
 	}
 	_, errCategories := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "categories" (
@@ -80,7 +79,7 @@ func main() {
 	`)
 	if errCategories != nil {
 		fmt.Println("Creating Category table ERROR")
-		log.Fatal(errCategories.Error())
+		fmt.Println(errCategories.Error())
 	}
 
 	_, errChats := sqliteDatabase.Exec(`
@@ -92,6 +91,6 @@ func main() {
 	`)
 	if errChats != nil {
 		fmt.Println("Creating Chat table ERROR")
-		log.Fatal(errCategories.Error())
+		fmt.Println(errCategories.Error())
 	}
 }
