@@ -1,6 +1,11 @@
+
+902 B
+Raw
+Permalink
+Blame
+History
 <!DOCTYPE html>
 <html>
-
 <head>
     <link rel="stylesheet" href="styles/styles.css" type="text/css">
     <title>Real Time Forum</title>
@@ -10,17 +15,15 @@
     <button onclick="contentSocket.requestContent('home')">Home</button>
     NAVIGATION BAR
 </header>
-
 <body>
-
     <article>
-        <div class="banner">
-            POSTS
+        <div id="postcontainer">
+            <div style="overflow: hidden;">
+                <input id="postIPT" onkeypress="postSocket.keypress(event)" type="text" />
+            </div>
             <div id="content"></div>
         </div>
-
     </article>
-
 </body>
 <aside> CHAT
     <div id="msgcontainer">
@@ -29,13 +32,13 @@
         </div>
 </aside>
 <footer>Footer</footer>
-
 <script src="websocket.js"></script>
 <script>
     let contentSocket = new MySocket()
     contentSocket.connectSocket("content", contentSocket.contentHandler);
     let chatSocket = new MySocket()
     chatSocket.connectSocket("chat", chatSocket.chatHandler);
+    let postSocket = new MySocket()
+    postSocket.connectSocket("post", postSocket.postHandler);
 </script>
-
 </html>

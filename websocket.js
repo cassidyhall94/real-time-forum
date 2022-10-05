@@ -1,3 +1,5 @@
+let wsType = ""
+
 class MySocket {
     constructor() {
         this.mysocket = null;
@@ -13,13 +15,37 @@ class MySocket {
         div.after(msgContainer)
     }
 
+    postHandler(text, myself) {
+        var post = document.createElement("div");
+        post.innerHTML = text;
+      
+        var cself = (myself) ? "self" : "";
+        post.className = "post " + cself;
+        document.getElementById("postcontainer").appendChild(post);
+    }
+
     send() {
-        var txt = document.getElementById("ipt").value;
         let time = new Date().toLocaleString();
-        let line = "<b>" + time + " </b>" + "<br>" + "<b>You:</b> " + txt
-        this.chatHandler(line, true);
-        this.mysocket.send(txt);
-        document.getElementById("ipt").value = ""
+      
+        console.log(txt)
+        if (wsType === 'chat') {
+            var txt = document.getElementById("ipt").value;
+            let line = "<b>" + time + " </b>" + "<br>" + "<b>You:</b> " + txt
+            this.chatHandler(line, true);
+            this.mysocket.send(txt);
+            document.getElementById("ipt").value = ""
+            
+        } else if (wsType === 'post') {
+            txt = document.getElementById("postIPT").value;
+            let line = "<b>" + time + " </b>" + "<br>" + "<b>You:</b> " + txt
+            this.postHandler(line, true);
+            this.mysocket.send(txt);
+            document.getElementById("postIPT").value = ""
+           
+        }
+      
+       
+       
     }
 
     keypress(e) {
@@ -38,10 +64,15 @@ class MySocket {
 
     connectSocket(URI, handler) {
         if (URI === 'chat') {
+            wsType = 'chat'
             console.log("Chat Websocket Connected");
         }
         if (URI === 'content') {
             console.log("Content Websocket Connected");
+        }
+        if (URI === 'post') {
+            wsType = 'post'
+            console.log("Post Websocket Connected");
         }
         var socket = new WebSocket("ws://localhost:8080/" + URI);
         this.mysocket = socket;
