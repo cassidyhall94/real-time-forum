@@ -29,12 +29,11 @@ class MySocket {
         let time = new Date().toLocaleString();
         let txt
         if (wsType === 'chat') {
-             txt = document.getElementById("chatIPT").value;
+            txt = document.getElementById("chatIPT").value;
             let line = "<b>" + time + " </b>" + "<br>" + "<b>You:</b> " + txt
             this.chatHandler(line, true);
             this.mysocket.send(txt);
             document.getElementById("chatIPT").value = ""
-           
 
         }
         if (wsType === 'post') {
@@ -43,9 +42,9 @@ class MySocket {
             this.postHandler(line, true);
             this.mysocket.send(txt);
             document.getElementById("postIPT").value = ""
-            
+
         }
-        
+
     }
 
     keypress(e) {
