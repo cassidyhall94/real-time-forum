@@ -7,19 +7,22 @@ class MySocket {
 
     chatHandler(text, myself) {
         var div = document.createElement("div");
+        let msgContainer = document.getElementById('ipt')
         div.innerHTML = text;
         var cself = (myself) ? "self" : "";
         div.className = "msg " + cself;
         document.getElementById("msgcontainer").appendChild(div);
+        div.after(msgContainer)
     }
 
     postHandler(text, myself) {
         var post = document.createElement("div");
+        let postContainer = document.getElementById('postIPT')
         post.innerHTML = text;
-      
         var cself = (myself) ? "self" : "";
         post.className = "post " + cself;
         document.getElementById("postcontainer").appendChild(post);
+        post.after(postContainer)
     }
 
     send() {
@@ -41,9 +44,6 @@ class MySocket {
             document.getElementById("postIPT").value = ""
            
         }
-      
-       
-       
     }
 
     keypress(e) {
