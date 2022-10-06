@@ -1,7 +1,7 @@
 body {
     font-size: 16px;
     font-family: 'Fira Sans', sans-serif;
-    color: #fff;
+    color: rgb(0, 0, 0);
     display: grid;
     grid-template-columns: 1fr;
     gap: 0.75rem;
@@ -72,7 +72,7 @@ aside .msg .self {
     background-color: #A39C95;
 }
 
-aside .ipt {
+aside .chatIPT {
     width: 300px;
     padding: 10px;
     border-right: 2px solid rgb(0, 0, 0);
@@ -115,4 +115,9 @@ article .postIPT {
     .postcontainer {
         grid-column: 1 / 4;
     }
+}
+
+form {
+    margin: 0 auto;
+    /* width: 600px; */
 }

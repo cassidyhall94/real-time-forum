@@ -1,34 +1,23 @@
-
-902 B
-Raw
-Permalink
-Blame
-History
 <!DOCTYPE html>
 <html>
+
 <head>
     <link rel="stylesheet" href="styles/styles.css" type="text/css">
     <title>Real Time Forum</title>
- 
 </head>
 <header>01 Founders
     <button onclick="contentSocket.requestContent('home')">Home</button>
-    NAVIGATION BAR
+    <button onclick="contentSocket.requestContent('login')">Login/Register</button>
+    <button onclick="contentSocket.requestContent('posts')">Posts</button>
 </header>
+
 <body>
-    <article>
-        <div id="postcontainer">
-            <div style="overflow: hidden;">
-                <input id="postIPT" onkeypress="postSocket.keypress(event)" type="text" />
-            </div>
-            <div id="content"></div>
-        </div>
-    </article>
+    <div id="content"></div>
 </body>
 <aside> CHAT
     <div id="msgcontainer">
         <div style="overflow: hidden;">
-            <input id="ipt" onkeypress="chatSocket.keypress(event)" type="text" />
+            <input id="chatIPT" onkeypress="chatSocket.keypress(event)" type="text" />
         </div>
 </aside>
 <footer>Footer</footer>

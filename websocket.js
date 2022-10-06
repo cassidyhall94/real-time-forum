@@ -7,7 +7,7 @@ class MySocket {
 
     chatHandler(text, myself) {
         var div = document.createElement("div");
-        let msgContainer = document.getElementById('ipt')
+        let msgContainer = document.getElementById('chatIPT')
         div.innerHTML = text;
         var cself = (myself) ? "self" : "";
         div.className = "msg " + cself;
@@ -27,27 +27,30 @@ class MySocket {
 
     send() {
         let time = new Date().toLocaleString();
-      
-        console.log(txt)
+        let txt
         if (wsType === 'chat') {
-            var txt = document.getElementById("ipt").value;
+             txt = document.getElementById("chatIPT").value;
             let line = "<b>" + time + " </b>" + "<br>" + "<b>You:</b> " + txt
             this.chatHandler(line, true);
             this.mysocket.send(txt);
-            document.getElementById("ipt").value = ""
-            
-        } else if (wsType === 'post') {
+            document.getElementById("chatIPT").value = ""
+           
+
+        }
+        if (wsType === 'post') {
             txt = document.getElementById("postIPT").value;
             let line = "<b>" + time + " </b>" + "<br>" + "<b>You:</b> " + txt
             this.postHandler(line, true);
             this.mysocket.send(txt);
             document.getElementById("postIPT").value = ""
-           
+            
         }
+        
     }
 
     keypress(e) {
         if (e.keyCode == 13) {
+            wsType = e.target.id.slice(0, -3)
             this.send();
         }
     }

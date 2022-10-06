@@ -33,7 +33,6 @@ func postSocketCreate(w http.ResponseWriter, r *http.Request) {
 	ptrPostSocket := &postSocket{
 		con: con,
 	}
-
 	savedPostSockets = append(savedPostSockets, ptrPostSocket)
 	ptrPostSocket.startThread()
 }
