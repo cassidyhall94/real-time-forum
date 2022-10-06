@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var sqliteDatabase *sql.DB
