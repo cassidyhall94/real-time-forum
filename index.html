@@ -1,41 +1,60 @@
 <!DOCTYPE html>
 <html>
-
-<head>
+  <head>
     <title>Real Time Forum</title>
     <style>
-        .msg {
-            background-color: rgb(178, 252, 252);
-            padding: 10px;
-            margin-bottom: 10px;
-        }
+      .msg {
+        background-color: rgb(178, 252, 252);
+        padding: 10px;
+        margin-bottom: 10px;
+      }
 
-        .self {
-            background-color: rgb(147, 252, 153);
-        }
+      .self {
+        background-color: rgb(147, 252, 153);
+      }
     </style>
 
     <button onclick="contentSocket.requestContent('home')">Home</button>
-</head>
+    <button onclick="contentSocket.requestContent('reg-log')">Sign In</button>
+  </head>
 
-<body>
-    <div id="msgcontainer"
-        style="height:500px; width: 320px; border: 2px solid rgb(0, 0, 0); background:rgb(255, 255, 255);overflow-y: auto;">
+  <body>
+    <div
+      id="msgcontainer"
+      style="
+        height: 500px;
+        width: 320px;
+        border: 2px solid rgb(0, 0, 0);
+        background: rgb(255, 255, 255);
+        overflow-y: auto;
+      "
+    ></div>
+    <div style="overflow: hidden">
+      <input
+        id="ipt"
+        style="
+          width: 300px;
+          padding: 10px;
+          border-right: 2px solid rgb(0, 0, 0);
+          border-left: 2px solid rgb(0, 0, 0);
+          border-bottom: 2px solid rgb(0, 0, 0);
+          border-top: hidden;
+        "
+        onkeypress="chatSocket.keypress(event)"
+        type="text"
+      />
     </div>
-    <div style="overflow: hidden;">
-        <input id="ipt"
-            style="width: 300px; padding: 10px; border-right: 2px solid rgb(0, 0, 0); border-left: 2px solid rgb(0, 0, 0); border-bottom: 2px solid rgb(0, 0, 0); border-top: hidden"
-            onkeypress="chatSocket.keypress(event)" type="text" />
+    <div id="content">
+      
     </div>
-    <div id="content"></div>
-</body>
+  </body>
 
-<script src="websocket.js"></script>
-<script>
-    let contentSocket = new MySocket()
+  <script src="websocket.js"></script>
+  <script>
+    let contentSocket = new MySocket();
     contentSocket.connectSocket("content", contentSocket.contentHandler);
-    let chatSocket = new MySocket()
+    let chatSocket = new MySocket();
     chatSocket.connectSocket("chat", chatSocket.chatHandler);
-</script>
 
+  </script>
 </html>
