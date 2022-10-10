@@ -10,6 +10,7 @@ import (
 
 var sqliteDatabase *sql.DB
 
+
 func main() {
 	database, err1 := sql.Open("sqlite3", "sqlite-database.db")
 	sqliteDatabase = database
