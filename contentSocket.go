@@ -53,20 +53,30 @@ func (i *contentSocket) pollContentWS() {
 		for {
 			_, b, err := i.con.ReadMessage()
 			if err != nil {
-				panic(err)
+				fmt.Println(err)
 			}
 			tpl, err := template.ParseGlob("templates/*")
 			if err != nil {
-				panic(err)
+				fmt.Println(err)
 			}
 			w, err := i.con.NextWriter(websocket.TextMessage)
 			if err != nil {
-				panic(err)
+				fmt.Println(err)
 			}
 			switch string(b) {
 			case "home":
 				if err := tpl.ExecuteTemplate(w, "home.template", nil); err != nil {
 					fmt.Printf("Home ExecuteTemplate error: %+v\n", err)
+					return
+				}
+			case "posts":
+				if err := tpl.ExecuteTemplate(w, "posts.template", nil); err != nil {
+					fmt.Printf("Posts ExecuteTemplate error: %+v\n", err)
+					return
+				}
+			case "login":
+				if err := tpl.ExecuteTemplate(w, "login.template", nil); err != nil {
+					fmt.Printf("Login ExecuteTemplate error: %+v\n", err)
 					return
 				}
 			}
