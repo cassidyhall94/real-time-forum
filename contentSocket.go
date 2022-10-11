@@ -45,7 +45,7 @@ func (i *contentSocket) pollContentWS() {
 		defer func() {
 			err := recover()
 			if err != nil {
-				fmt.Println(err)
+				fmt.Println("recovered panic:", err)
 			}
 			fmt.Println("pollContentWS finished")
 		}()
@@ -53,32 +53,34 @@ func (i *contentSocket) pollContentWS() {
 		for {
 			_, b, err := i.con.ReadMessage()
 			if err != nil {
-				fmt.Println(err)
+				panic(err)
 			}
 			tpl, err := template.ParseGlob("templates/*")
 			if err != nil {
-				fmt.Println(err)
+				panic(err)
 			}
 			w, err := i.con.NextWriter(websocket.TextMessage)
 			if err != nil {
-				fmt.Println(err)
+				panic(err)
 			}
 			switch string(b) {
 			case "home":
 				if err := tpl.ExecuteTemplate(w, "home.template", nil); err != nil {
-					fmt.Printf("Home ExecuteTemplate error: %+v\n", err)
-					return
+					panic(fmt.Errorf("Home ExecuteTemplate error: %w", err))
 				}
 			case "posts":
 				if err := tpl.ExecuteTemplate(w, "posts.template", nil); err != nil {
-					fmt.Printf("Posts ExecuteTemplate error: %+v\n", err)
-					return
+					panic(fmt.Errorf("Posts ExecuteTemplate error: %w", err))
 				}
 			case "login":
 				if err := tpl.ExecuteTemplate(w, "login.template", nil); err != nil {
-					fmt.Printf("Login ExecuteTemplate error: %+v\n", err)
-					return
+					panic(fmt.Errorf("Login ExecuteTemplate error: %w", err))
 				}
+			default:
+				panic(fmt.Errorf("template %s not found", string(b)))
+			}
+			if err := w.Close(); err != nil {
+				panic(err)
 			}
 		}
 	}()

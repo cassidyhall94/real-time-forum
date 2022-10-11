@@ -1,6 +1,7 @@
-let wsType = ""
+
 
 class MySocket {
+    wsType = ""
     constructor() {
         this.mysocket = null;
     }
@@ -25,53 +26,56 @@ class MySocket {
         post.after(postContainer)
     }
 
+    contentHandler(text) {
+        console.log('----------------------')
+        console.log(text)
+        console.log('----------------------')
+        document.getElementById("content").innerHTML = text;
+    }
+
+    requestContent(e) {
+        console.log(e.target.id)
+        console.log(this)
+        this.mysocket.send(e.target.id);
+    }
+
     send() {
         let time = new Date().toLocaleString();
         let txt
-        if (wsType === 'chat') {
+        if (this.wsType === 'chat') {
             txt = document.getElementById("chatIPT").value;
             let line = "<b>" + time + " </b>" + "<br>" + "<b>You:</b> " + txt
             this.chatHandler(line, true);
             this.mysocket.send(txt);
             document.getElementById("chatIPT").value = ""
-
         }
-        if (wsType === 'post') {
+        if (this.wsType === 'post') {
             txt = document.getElementById("postIPT").value;
             let line = "<b>" + time + " </b>" + "<br>" + "<b>You:</b> " + txt
             this.postHandler(line, true);
             this.mysocket.send(txt);
             document.getElementById("postIPT").value = ""
-
         }
-
     }
 
     keypress(e) {
         if (e.keyCode == 13) {
-            wsType = e.target.id.slice(0, -3)
+            this.wsType = e.target.id.slice(0, -3)
             this.send();
         }
     }
 
-    contentHandler(text) {
-        document.getElementById("content").innerHTML = text;
-    }
-
-    requestContent(text) {
-        this.mysocket.send(text);
-    }
-
     connectSocket(URI, handler) {
         if (URI === 'chat') {
-            wsType = 'chat'
+            this.wsType = 'chat'
             console.log("Chat Websocket Connected");
         }
         if (URI === 'content') {
+            this.wsType = 'content'
             console.log("Content Websocket Connected");
         }
         if (URI === 'post') {
-            wsType = 'post'
+            this.wsType = 'post'
             console.log("Post Websocket Connected");
         }
         var socket = new WebSocket("ws://localhost:8080/" + URI);

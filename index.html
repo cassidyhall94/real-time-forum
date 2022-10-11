@@ -6,9 +6,9 @@
     <title>Real Time Forum</title>
 </head>
 <header>01 Founders
-    <button onclick="contentSocket.requestContent('home')">Home</button>
-    <button onclick="contentSocket.requestContent('login')">Login/Register</button>
-    <button onclick="contentSocket.requestContent('posts')">Posts</button>
+    <button id="home" onclick="contentSocket.requestContent(event)">Home</button>
+    <button id="login" onclick="contentSocket.requestContent(event)">Login/Register</button>
+    <button id="posts" onclick="contentSocket.requestContent(event)">Posts</button>
 </header>
 
 <body>
@@ -25,9 +25,10 @@
 <script>
     let contentSocket = new MySocket()
     contentSocket.connectSocket("content", contentSocket.contentHandler);
-    let chatSocket = new MySocket()
-    chatSocket.connectSocket("chat", chatSocket.chatHandler);
     let postSocket = new MySocket()
     postSocket.connectSocket("post", postSocket.postHandler);
+    let chatSocket = new MySocket()
+    chatSocket.connectSocket("chat", chatSocket.chatHandler);
 </script>
+
 </html>
