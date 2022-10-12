@@ -18,12 +18,12 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
+// eventually === map[string (username?)]*chatSocket
 var savedChatSockets []*chatSocket
 
 // chatSocket struct
 type chatSocket struct {
 	con      *websocket.Conn
-	mode     int
 	username string
 }
 
@@ -57,20 +57,9 @@ func ChatSocketCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (i *chatSocket) broadcast(c *ChatMessage) error {
-	j, err := json.Marshal(c)
-	if err != nil {
-		return fmt.Errorf("unable to marshal chat message: %w", err)
-	}
-	for _, currentChatSocket := range savedChatSockets {
-		if currentChatSocket == i {
-			// users cannot send messages to themselves
-			continue
-		}
-		if currentChatSocket.mode == 1 {
-			// message cannot be sent until username is given
-			continue
-		}
-		if err := i.con.WriteMessage(websocket.TextMessage, j); err != nil {
+	for range savedChatSockets {
+		// when savedChatSockets is turned into a map[username]socket, this will need to be changed to filter for specific usernames (DMing)
+		if err := i.con.WriteJSON(c); err != nil {
 			return fmt.Errorf("unable to send chat message: %w", err)
 		}
 	}
@@ -82,26 +71,16 @@ func (i *chatSocket) read() {
 	if er != nil {
 		panic(er)
 	}
-fmt.Println(string(b))
+	fmt.Println(string(b))
 	c := &ChatMessage{}
 	if err := json.Unmarshal(b, c); err != nil {
 		panic(err)
 	}
-	if i.mode == 1 {
-		c.Username = auth.Person.Username
-		i.mode = 2 // real msg mode
-		return
-	}
+	c.Username = auth.Person.Username
 	i.broadcast(c)
 }
 
-func (i *chatSocket) writeMsg(name string, str string) {
-
-	i.con.WriteMessage(websocket.TextMessage, []byte("<b>"+dateTime+" </b>"+"<br>"+"<b>"+name+": </b>"+str))
-}
-
 func (i *chatSocket) startThread() {
-	i.mode = 1
 	go func() {
 		defer func() {
 			err := recover()
