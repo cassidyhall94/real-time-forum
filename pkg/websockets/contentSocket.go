@@ -6,6 +6,7 @@ import (
 	"text/template"
 
 	"github.com/gorilla/websocket"
+	auth "real-time-forum/pkg/authentication"
 )
 
 var savedContentSocket *contentSocket
@@ -27,21 +28,21 @@ var savedContentSockets []*contentSocket
 func ContentSocketCreate(w http.ResponseWriter, r *http.Request) {
 
 		c1, err1 := r.Cookie("1st-cookie")
-	if err1 == nil && !Person.Accesslevel {
+	if err1 == nil && !auth.Person.Accesslevel {
 		// first home page access 
 		c1.MaxAge = -1
 		http.SetCookie(w, c1)
 	}
 	_, err := r.Cookie("1st-cookie")
-	if err != nil && Person.Accesslevel {
+	if err != nil && auth.Person.Accesslevel {
 		// logged in and on 2nd browser
-		Person.CookieChecker = false
-	} else if err == nil && Person.Accesslevel {
+		auth.Person.CookieChecker = false
+	} else if err == nil && auth.Person.Accesslevel {
 		// Original browser and logged in
-		Person.CookieChecker = true
+		auth.Person.CookieChecker = true
 	} else {
 		// not logged in yet
-	Person.CookieChecker = false
+	auth.Person.CookieChecker = false
 	}
 
 	fmt.Println("Content Socket Request")

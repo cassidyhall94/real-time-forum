@@ -4,7 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
-	socket "real-time-forum/websockets"
+	auth "real-time-forum/pkg/authentication"
+	socket "real-time-forum/pkg/websockets"
 	"text/template"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -34,7 +35,7 @@ func main() {
 
 func mainHandler(w http.ResponseWriter, r *http.Request) {
 	tpl := template.Must(template.ParseGlob("index.html"))
-	if err := tpl.Execute(w, Person); err != nil {
+	if err := tpl.Execute(w, auth.Person); err != nil {
 		http.Error(w, "No such file or directory: Internal Server Error 500", http.StatusInternalServerError)
 	}
 }
