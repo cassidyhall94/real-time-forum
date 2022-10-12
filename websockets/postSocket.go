@@ -57,7 +57,7 @@ func (i *postSocket) read() {
 		panic(er)
 	}
 	fmt.Println(i.username + " " + string(b))
-	 fmt.Println(i.mode)
+	fmt.Println(i.mode)
 
 	if i.mode == 1 {
 		i.username = string(b)

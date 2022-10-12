@@ -1,91 +1,119 @@
-
-
 class MySocket {
-    wsType = ""
-    constructor() {
-        this.mysocket = null;
-    }
+  wsType = ""
 
-    chatHandler(text, myself) {
-        var div = document.createElement("div");
-        let msgContainer = document.getElementById('chatIPT')
-        div.innerHTML = text;
-        var cself = (myself) ? "self" : "";
-        div.className = "msg " + cself;
-        document.getElementById("msgcontainer").appendChild(div);
-        div.after(msgContainer)
-    }
+  constructor() {
+    this.mysocket = null;
+  }
 
-    postHandler(text, myself) {
-        var post = document.createElement("div");
-        let postContainer = document.getElementById('postIPT')
-        post.innerHTML = text;
-        var cself = (myself) ? "self" : "";
-        post.className = "post " + cself;
-        document.getElementById("postcontainer").appendChild(post);
-        post.after(postContainer)
-    }
+  chatHandler(text, myself) {
+    var div = document.createElement("div");
+    let msgContainer = document.getElementById('chatIPT')
+    div.innerHTML = text;
+    var cself = (myself) ? "self" : "";
+    div.className = "msg " + cself;
+    document.getElementById("msgcontainer").appendChild(div);
+    div.after(msgContainer)
+  }
 
-    contentHandler(text) {
-        document.getElementById("content").innerHTML = text;
-    }
+  postHandler(text, myself) {
+    var post = document.createElement("div");
+    let postContainer = document.getElementById('postIPT')
+    post.innerHTML = text;
+    var cself = (myself) ? "self" : "";
+    post.className = "post " + cself;
+    document.getElementById("postcontainer").appendChild(post);
+    post.after(postContainer)
+  }
 
-    requestContent(e) {
-        console.log(e.target.id)
-        console.log(this)
-        this.mysocket.send(e.target.id);
-    }
+  contentHandler(text) {
+    document.getElementById("content").innerHTML = text;
+  }
 
-    send() {
-        let time = new Date().toLocaleString();
-        let txt
-        if (this.wsType === 'chat') {
-            txt = document.getElementById("chatIPT").value;
-            let line = "<b>" + time + " </b>" + "<br>" + "<b>You:</b> " + txt
-            this.chatHandler(line, true);
-            this.mysocket.send(txt);
-            document.getElementById("chatIPT").value = ""
-        }
-        if (this.wsType === 'post') {
-            txt = document.getElementById("postIPT").value;
-            let line = "<b>" + time + " </b>" + "<br>" + "<b>You:</b> " + txt
-            this.postHandler(line, true);
-            this.mysocket.send(txt);
-            document.getElementById("postIPT").value = ""
-        }
-    }
+  requestContent(e) {
+    console.log(e.target.id)
+    console.log(this)
+    this.mysocket.send(e.target.id);
+  }
 
-    keypress(e) {
-        if (e.keyCode == 13) {
-            this.wsType = e.target.id.slice(0, -3)
-            this.send();
-        }
+  send() {
+    let time = new Date().toLocaleString();
+    let txt
+    if (this.wsType === 'chat') {
+      txt = document.getElementById("chatIPT").value;
+      let line = "<b>" + time + " </b>" + "<br>" + "<b>You:</b> " + txt
+      this.chatHandler(line, true);
+      this.mysocket.send(txt);
+      document.getElementById("chatIPT").value = ""
     }
-
-    connectSocket(URI, handler) {
-        if (URI === 'chat') {
-            this.wsType = 'chat'
-            console.log("Chat Websocket Connected");
-        }
-        if (URI === 'content') {
-            this.wsType = 'content'
-            console.log("Content Websocket Connected");
-        }
-        if (URI === 'post') {
-            this.wsType = 'post'
-            console.log("Post Websocket Connected");
-        }
-        var socket = new WebSocket("ws://localhost:8080/" + URI);
-        this.mysocket = socket;
-
-        socket.onmessage = (e) => {
-            handler(e.data, false);
-        }
-        socket.onopen = () => {
-            console.log("socket opened")
-        };
-        socket.onclose = () => {
-            console.log("socket closed")
-        }
+    if (this.wsType === 'post') {
+      txt = document.getElementById("postIPT").value;
+      let line = "<b>" + time + " </b>" + "<br>" + "<b>You:</b> " + txt
+      this.postHandler(line, true);
+      this.mysocket.send(txt);
+      document.getElementById("postIPT").value = ""
     }
+  }
+
+  keypress(e) {
+    if (e.keyCode == 13) {
+      this.wsType = e.target.id.slice(0, -3)
+      this.send();
+    }
+  }
+
+  connectSocket(URI, handler) {
+    if (URI === 'chat') {
+      this.wsType = 'chat'
+      console.log("Chat Websocket Connected");
+    }
+    if (URI === 'content') {
+      this.wsType = 'content'
+      console.log("Content Websocket Connected");
+    }
+    if (URI === 'post') {
+      this.wsType = 'post'
+      console.log("Post Websocket Connected");
+    }
+    var socket = new WebSocket("ws://localhost:8080/" + URI);
+    this.mysocket = socket;
+
+    socket.onmessage = (e) => {
+      handler(e.data, false);
+    };
+    socket.onopen = () => {
+      console.log("socket opened");
+    };
+    socket.onclose = () => {
+      console.log("socket closed");
+    };
+  }
+
+  getRegistrationDetails() {
+    //AJAX html request
+    httpRequest = new XMLHttpRequest();
+    if (!httpRequest) {
+      console.log("Giving up :( Cannot create an XMLHTTP instance'");
+    }
+    url = "ws://localhost:8080/";
+    httpRequest.onreadystatechange = sendContents;
+    httpRequest.open("POST", url);
+    httpRequest.setRequestHeader(
+      "Content-type",
+      "application/x-www-form-urlencoded"
+    );
+    var fd = new FormData();
+    fd.set("username", document.getElementById("reg-username").value);
+    fd.set("email", document.getElementById("reg-email").value);
+    fd.set("password", document.getElementsByClassName("reg-password").value);
+
+    httpRequest.send(fd);
+
+    function sendContents() {
+      if (httpRequest.readyState === 4) {
+        if (httpRequest.Status === 200) {
+          alert(httpRequest.responseText);
+        }
+      }
+    }
+  }
 }
