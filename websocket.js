@@ -1,3 +1,11 @@
+let presentUsers = []
+
+class Message {
+  Text = ""
+  Timestamp = ""
+  Username = ""
+}
+
 class MySocket {
   wsType = ""
 
@@ -6,9 +14,16 @@ class MySocket {
   }
 
   chatHandler(text, myself) {
+    console.log(text)
+    const m = JSON.parse(text)
+    if (m.hasOwnProperty('presenceList')) {
+      presentUsers = m.PresenceList
+    }
+
+    console.log(m)
     var div = document.createElement("div");
     let msgContainer = document.getElementById('chatIPT')
-    div.innerHTML = text;
+    div.innerHTML = "<b>" + m.Timestamp + " </b>" + "<br>" + "<b>"+ m.Username +":</b> " + m.Text;
     var cself = (myself) ? "self" : "";
     div.className = "msg " + cself;
     document.getElementById("msgcontainer").appendChild(div);
@@ -41,8 +56,12 @@ class MySocket {
     if (this.wsType === 'chat') {
       txt = document.getElementById("chatIPT").value;
       let line = "<b>" + time + " </b>" + "<br>" + "<b>You:</b> " + txt
-      this.chatHandler(line, true);
-      this.mysocket.send(txt);
+      // this.chatHandler(line, true);
+      let m = new Message()
+      m.Text = txt
+      m.Timestamp = time
+      m.Username = "?"
+      this.mysocket.send(JSON.stringify(m));
       document.getElementById("chatIPT").value = ""
     }
     if (this.wsType === 'post') {
@@ -78,6 +97,7 @@ class MySocket {
     this.mysocket = socket;
 
     socket.onmessage = (e) => {
+      console.log("socket message")
       handler(e.data, false);
     };
     socket.onopen = () => {

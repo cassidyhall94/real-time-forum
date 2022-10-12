@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"text/template"
 
-	"github.com/gorilla/websocket"
 	auth "real-time-forum/pkg/authentication"
+
+	"github.com/gorilla/websocket"
 )
 
 var savedContentSocket *contentSocket
@@ -27,9 +28,9 @@ var savedContentSockets []*contentSocket
 
 func ContentSocketCreate(w http.ResponseWriter, r *http.Request) {
 
-		c1, err1 := r.Cookie("1st-cookie")
+	c1, err1 := r.Cookie("1st-cookie")
 	if err1 == nil && !auth.Person.Accesslevel {
-		// first home page access 
+		// first home page access
 		c1.MaxAge = -1
 		http.SetCookie(w, c1)
 	}
@@ -42,7 +43,7 @@ func ContentSocketCreate(w http.ResponseWriter, r *http.Request) {
 		auth.Person.CookieChecker = true
 	} else {
 		// not logged in yet
-	auth.Person.CookieChecker = false
+		auth.Person.CookieChecker = false
 	}
 
 	fmt.Println("Content Socket Request")
@@ -77,12 +78,28 @@ func (i *contentSocket) pollContentWS() {
 			fmt.Println("pollContentWS finished")
 		}()
 
-		for {
-			_, b, err := i.con.ReadMessage()
+		tpl, err := template.ParseGlob("templates/*")
+		if err != nil {
+			panic(err)
+		}
+
+		{
+			// before doing anything else, send the splash page
+			w, err := i.con.NextWriter(websocket.TextMessage)
 			if err != nil {
 				panic(err)
 			}
-			tpl, err := template.ParseGlob("templates/*")
+			if err := tpl.ExecuteTemplate(w, "home.template", nil); err != nil {
+				panic(fmt.Errorf("Home ExecuteTemplate error: %w", err))
+			}
+			err = w.Close()
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		for {
+			_, b, err := i.con.ReadMessage()
 			if err != nil {
 				panic(err)
 			}

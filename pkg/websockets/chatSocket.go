@@ -1,9 +1,12 @@
 package websockets
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
+	auth "real-time-forum/pkg/authentication"
 	"time"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -22,6 +25,13 @@ type chatSocket struct {
 	con      *websocket.Conn
 	mode     int
 	username string
+}
+
+type ChatMessage struct {
+	PresenceList []string
+	Text         string
+	Timestamp    string
+	Username     string
 }
 
 func ChatSocketCreate(w http.ResponseWriter, r *http.Request) {
@@ -46,7 +56,11 @@ func ChatSocketCreate(w http.ResponseWriter, r *http.Request) {
 	ptrChatSocket.startThread()
 }
 
-func (i *chatSocket) broadcast(str string) {
+func (i *chatSocket) broadcast(c *ChatMessage) error {
+	j, err := json.Marshal(c)
+	if err != nil {
+		return fmt.Errorf("unable to marshal chat message: %w", err)
+	}
 	for _, currentChatSocket := range savedChatSockets {
 		if currentChatSocket == i {
 			// users cannot send messages to themselves
@@ -56,8 +70,11 @@ func (i *chatSocket) broadcast(str string) {
 			// message cannot be sent until username is given
 			continue
 		}
-		currentChatSocket.writeMsg(i.username, str)
+		if err := i.con.WriteMessage(websocket.TextMessage, j); err != nil {
+			return fmt.Errorf("unable to send chat message: %w", err)
+		}
 	}
+	return nil
 }
 
 func (i *chatSocket) read() {
@@ -65,17 +82,17 @@ func (i *chatSocket) read() {
 	if er != nil {
 		panic(er)
 	}
-	// fmt.Println(i.username + " " + string(b))
-	// fmt.Println(i.mode)
-
+fmt.Println(string(b))
+	c := &ChatMessage{}
+	if err := json.Unmarshal(b, c); err != nil {
+		panic(err)
+	}
 	if i.mode == 1 {
-		i.username = string(b)
-		i.writeMsg("Admin", "Welcome "+i.username+"!")
+		c.Username = auth.Person.Username
 		i.mode = 2 // real msg mode
 		return
 	}
-	i.broadcast(string(b))
-	// fmt.Println(i.username + " " + string(b))
+	i.broadcast(c)
 }
 
 func (i *chatSocket) writeMsg(name string, str string) {
@@ -84,9 +101,7 @@ func (i *chatSocket) writeMsg(name string, str string) {
 }
 
 func (i *chatSocket) startThread() {
-	i.writeMsg("Admin", "Please enter your username.")
-	i.mode = 1 // mode 1 get user name
-
+	i.mode = 1
 	go func() {
 		defer func() {
 			err := recover()
