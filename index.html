@@ -2,38 +2,39 @@
 <html>
 
 <head>
+    <link rel="stylesheet" href="styles/styles.css" type="text/css">
     <title>Real Time Forum</title>
-    <style>
-        .msg {
-            background-color: rgb(178, 252, 252);
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-
-        .self {
-            background-color: rgb(147, 252, 153);
-        }
-    </style>
-
-    <button onclick="contentSocket.requestContent('home')">Home</button>
 </head>
+<header>01 Founders
+    <button id="post" onclick="contentSocket.requestContent(event)">Home</button>
+    <button id="login" onclick="contentSocket.requestContent(event)">Login/Register</button>
+    <button id="profile" onclick="contentSocket.requestContent(event)">Profile</button>
+</header>
 
 <body>
-    <div id="msgcontainer"
-        style="height:500px; width: 320px; border: 2px solid rgb(0, 0, 0); background:rgb(255, 255, 255);overflow-y: auto;">
-    </div>
-    <div style="overflow: hidden;">
-        <input id="ipt"
-            style="width: 300px; padding: 10px; border-right: 2px solid rgb(0, 0, 0); border-left: 2px solid rgb(0, 0, 0); border-bottom: 2px solid rgb(0, 0, 0); border-top: hidden"
-            onkeypress="chatSocket.keypress(event)" type="text" />
-    </div>
-    <div id="content"></div>
-</body>
+    <article>
+        <div id="content">
+            <div id="postcontainer">
+                <div style="overflow: hidden;">
+                    <input id="postIPT" onkeypress="postSocket.keypress(event)" type="text" />
+                </div>
+            </div>
+    </article>
 
+    <aside> CHAT
+        <div id="msgcontainer">
+            <div style="overflow: hidden;">
+                <input id="chatIPT" onkeypress="chatSocket.keypress(event)" type="text" />
+            </div>
+    </aside>
+</body>
+<footer>Footer</footer>
 <script src="websocket.js"></script>
 <script>
     let contentSocket = new MySocket()
     contentSocket.connectSocket("content", contentSocket.contentHandler);
+    let postSocket = new MySocket()
+    postSocket.connectSocket("post", postSocket.postHandler);
     let chatSocket = new MySocket()
     chatSocket.connectSocket("chat", chatSocket.chatHandler);
 </script>

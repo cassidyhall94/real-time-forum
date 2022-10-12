@@ -1,3 +1,5 @@
+TRELLO BOARD: https://trello.com/b/YQclPFFE/real-time-forum
+
 PROJECT: https://learn.01founders.co/git/root/public/src/branch/master/subjects/real-time-forum
 
 AUDIT: https://learn.01founders.co/git/root/public/src/branch/master/subjects/real-time-forum/audit
@@ -8,6 +10,7 @@ RESOURCES:
     - https://javascript.info/websocket
     - https://medium.com/@antoharyanto/make-simple-chat-application-using-golang-websocket-and-vanilla-js-f600e8020961
         - https://github.com/nnttoo/Simple-Chat-Apps-Goalang
+    - https://www.figma.com/community/file/1114929434468857549
 
 WebSockets in backend/frontend
     - https://developer.mozilla.org/en-US/docs/Web/API/WebSocket#examples

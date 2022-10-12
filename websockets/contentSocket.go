@@ -1,4 +1,4 @@
-package main
+package websockets
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ type contentSocket struct {
 	template string
 }
 
-func contentSocketCreate(w http.ResponseWriter, r *http.Request) {
+func ContentSocketCreate(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Content Socket Request")
 
 	defer func() {
@@ -45,7 +45,7 @@ func (i *contentSocket) pollContentWS() {
 		defer func() {
 			err := recover()
 			if err != nil {
-				fmt.Println(err)
+				fmt.Println("recovered panic:", err)
 			}
 			fmt.Println("pollContentWS finished")
 		}()
@@ -64,11 +64,23 @@ func (i *contentSocket) pollContentWS() {
 				panic(err)
 			}
 			switch string(b) {
-			case "home":
+			case "post":
 				if err := tpl.ExecuteTemplate(w, "home.template", nil); err != nil {
-					fmt.Printf("Home ExecuteTemplate error: %+v\n", err)
-					return
+					panic(fmt.Errorf("Home ExecuteTemplate error: %w", err))
 				}
+			case "profile":
+				if err := tpl.ExecuteTemplate(w, "profile.template", nil); err != nil {
+					panic(fmt.Errorf("Profile ExecuteTemplate error: %w", err))
+				}
+			case "login":
+				if err := tpl.ExecuteTemplate(w, "login.template", nil); err != nil {
+					panic(fmt.Errorf("Login ExecuteTemplate error: %w", err))
+				}
+			default:
+				panic(fmt.Errorf("template %s not found", string(b)))
+			}
+			if err := w.Close(); err != nil {
+				panic(err)
 			}
 		}
 	}()

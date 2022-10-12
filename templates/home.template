@@ -1,1 +1,4 @@
-<p>HELLOOOOOO</p>
+<div id="postcontainer">
+    <div style="overflow: hidden;">
+        <input id="postIPT" onkeypress="postSocket.keypress(event)" type="text"/>
+    </div>
