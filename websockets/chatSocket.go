@@ -1,10 +1,9 @@
-package main
+package websockets
 
 import (
 	"fmt"
 	"net/http"
 	"time"
-
 	"github.com/gorilla/websocket"
 )
 
@@ -25,7 +24,7 @@ type chatSocket struct {
 	username string
 }
 
-func chatSocketCreate(w http.ResponseWriter, r *http.Request) {
+func ChatSocketCreate(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Chat Socket Request")
 	if savedChatSockets == nil {
 		savedChatSockets = make([]*chatSocket, 0)

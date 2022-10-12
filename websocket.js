@@ -27,9 +27,6 @@ class MySocket {
     }
 
     contentHandler(text) {
-        console.log('----------------------')
-        console.log(text)
-        console.log('----------------------')
         document.getElementById("content").innerHTML = text;
     }
 

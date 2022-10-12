@@ -6,20 +6,28 @@
     <title>Real Time Forum</title>
 </head>
 <header>01 Founders
-    <button id="home" onclick="contentSocket.requestContent(event)">Home</button>
+    <button id="post" onclick="contentSocket.requestContent(event)">Home</button>
     <button id="login" onclick="contentSocket.requestContent(event)">Login/Register</button>
-    <button id="posts" onclick="contentSocket.requestContent(event)">Posts</button>
+    <button id="profile" onclick="contentSocket.requestContent(event)">Profile</button>
 </header>
 
 <body>
-    <div id="content"></div>
+    <article>
+        <div id="content">
+            <div id="postcontainer">
+                <div style="overflow: hidden;">
+                    <input id="postIPT" onkeypress="postSocket.keypress(event)" type="text" />
+                </div>
+            </div>
+    </article>
+
+    <aside> CHAT
+        <div id="msgcontainer">
+            <div style="overflow: hidden;">
+                <input id="chatIPT" onkeypress="chatSocket.keypress(event)" type="text" />
+            </div>
+    </aside>
 </body>
-<aside> CHAT
-    <div id="msgcontainer">
-        <div style="overflow: hidden;">
-            <input id="chatIPT" onkeypress="chatSocket.keypress(event)" type="text" />
-        </div>
-</aside>
 <footer>Footer</footer>
 <script src="websocket.js"></script>
 <script>

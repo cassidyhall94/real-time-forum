@@ -1,4 +1,4 @@
-package main
+package websockets
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ type contentSocket struct {
 	template string
 }
 
-func contentSocketCreate(w http.ResponseWriter, r *http.Request) {
+func ContentSocketCreate(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Content Socket Request")
 
 	defer func() {
@@ -64,13 +64,13 @@ func (i *contentSocket) pollContentWS() {
 				panic(err)
 			}
 			switch string(b) {
-			case "home":
+			case "post":
 				if err := tpl.ExecuteTemplate(w, "home.template", nil); err != nil {
 					panic(fmt.Errorf("Home ExecuteTemplate error: %w", err))
 				}
-			case "posts":
-				if err := tpl.ExecuteTemplate(w, "posts.template", nil); err != nil {
-					panic(fmt.Errorf("Posts ExecuteTemplate error: %w", err))
+			case "profile":
+				if err := tpl.ExecuteTemplate(w, "profile.template", nil); err != nil {
+					panic(fmt.Errorf("Profile ExecuteTemplate error: %w", err))
 				}
 			case "login":
 				if err := tpl.ExecuteTemplate(w, "login.template", nil); err != nil {

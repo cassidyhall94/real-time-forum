@@ -1,4 +1,4 @@
-package main
+package websockets
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ type postSocket struct {
 	username string
 }
 
-func postSocketCreate(w http.ResponseWriter, r *http.Request) {
+func PostSocketCreate(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Post Socket Request")
 	if savedPostSockets == nil {
 		savedPostSockets = make([]*postSocket, 0)
