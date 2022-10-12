@@ -9,7 +9,7 @@ import (
 )
 
 var sqliteDatabase *sql.DB
-
+var Person userDetails
 
 func main() {
 	database, err1 := sql.Open("sqlite3", "sqlite-database.db")

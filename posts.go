@@ -1,11 +1,27 @@
 package main
+
 import (
 	"database/sql"
 	"fmt"
 	"log"
 	"strings"
+
 	uuid "github.com/satori/go.uuid"
 )
+type userDetails struct {
+	ID                     string
+	Email                  string
+	Username               string
+	Nickname               string
+	Password               string
+	Accesslevel            bool
+	CookieChecker          bool
+	Attempted              bool
+	RegistrationAttempted  bool
+	FailedRegister         bool
+	SuccessfulRegistration bool
+	PostAdded              bool
+}
 type postDisplay struct {
 	PostID        string
 	Username      string
@@ -22,6 +38,7 @@ type commentStruct struct {
 	CommentText     string
 	CookieChecker   bool
 }
+
 func newPost(userName, category, title, post string, db *sql.DB) {
 	if title == "" {
 		return
@@ -35,9 +52,9 @@ func newPost(userName, category, title, post string, db *sql.DB) {
 	}
 	Person.PostAdded = true
 	catSlc := strings.Split(category, " ")
-	animalsSelected := 0
-	travelSelected := 0
-	moviesSelected := 0
+	golangSelected := 0
+	javascriptSelected := 0
+	rustSelected := 0
 	for _, r := range catSlc {
 		if r == "Golang" {
 			golangSelected = 1
@@ -52,7 +69,6 @@ func newPost(userName, category, title, post string, db *sql.DB) {
 		fmt.Println("ERROR when adding into the category table")
 	}
 }
-
 func postData(db *sql.DB) []postDisplay {
 	rows, err := db.Query("SELECT postID, userName, category, title, post FROM posts")
 	if err != nil {
@@ -87,7 +103,6 @@ func postData(db *sql.DB) []postDisplay {
 				&tempComStruct.CpostID,
 				&tempComStruct.CommentUsername,
 				&tempComStruct.CommentText,
-				
 			)
 			tempComStruct.CookieChecker = Person.CookieChecker
 			if err != nil {
@@ -105,8 +120,6 @@ func postData(db *sql.DB) []postDisplay {
 	}
 	return finalArray
 }
-
-
 func newComment(userName, postID, commentText string, db *sql.DB) {
 	if commentText == "" {
 		return
@@ -120,8 +133,6 @@ func newComment(userName, postID, commentText string, db *sql.DB) {
 	}
 	Person.PostAdded = true
 }
-
-
 func PostGetter(postIDSlc []string, db *sql.DB) []postDisplay {
 	finalArray := []postDisplay{}
 	for _, r := range postIDSlc {
