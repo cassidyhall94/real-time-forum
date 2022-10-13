@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"strings"
 	"text/template"
-
-	"github.com/gorilla/websocket"
 )
 
 type ContentMessage struct {
@@ -33,16 +31,18 @@ func OnContentConnect(s *socket) error {
 		return err
 	}
 
-	w, err := s.con.NextWriter(websocket.TextMessage)
-	if err != nil {
-		return err
-	}
+	sb := &strings.Builder{}
 
-	if err := tpl.ExecuteTemplate(w, "home.template", nil); err != nil {
+	if err := tpl.ExecuteTemplate(sb, "home.template", nil); err != nil {
 		return fmt.Errorf("Home ExecuteTemplate error: %w", err)
 	}
 
-	return w.Close()
+	c := &ContentMessage{
+		Type: content,
+		Body: sb.String(),
+	}
+
+	return c.Broadcast(s)
 }
 
 func (m *ContentMessage) Handle(s *socket) error {

@@ -8,19 +8,19 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	uuid "github.com/satori/go.uuid"
 )
 
 type SocketMessage struct {
-	Type    messageType `json:"type,omitempty"`
+	Type messageType `json:"type,omitempty"`
 }
 
 type socket struct {
 	con      *websocket.Conn
 	username string
 	t        messageType
+	uuid     uuid.UUID
 }
-
-var savedSockets []*socket
 
 var (
 	t        = time.Now()
@@ -29,6 +29,7 @@ var (
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 	}
+	savedSockets = make([]*socket, 0)
 )
 
 func SocketCreate(w http.ResponseWriter, r *http.Request) {
@@ -51,13 +52,10 @@ func SocketCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Println("Socket Request on " + r.RequestURI)
-	if savedSockets == nil {
-		savedSockets = make([]*socket, 0)
-	}
-
 	con, _ := upgrader.Upgrade(w, r, nil)
 	ptrSocket := &socket{
-		con: con,
+		con:  con,
+		uuid: uuid.NewV4(),
 	}
 	// add new case here when added to main.go for handlers
 	switch r.RequestURI {
@@ -79,6 +77,13 @@ func SocketCreate(w http.ResponseWriter, r *http.Request) {
 
 	savedSockets = append(savedSockets, ptrSocket)
 	ptrSocket.pollSocket()
+	for i, so := range savedSockets {
+		if so.uuid == ptrSocket.uuid {
+			ret := make([]*socket, 0)
+			ret = append(ret, savedSockets[:i]...)
+			savedSockets = append(ret, savedSockets[i+1:]...)
+		}
+	}
 }
 
 func (s *socket) pollSocket() {

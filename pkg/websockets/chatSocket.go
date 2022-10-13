@@ -21,5 +21,5 @@ func (m *ChatMessage) Broadcast() error {
 }
 
 func (m *ChatMessage) Handle(s *socket) error {
-	return nil
+	return m.Broadcast()
 }

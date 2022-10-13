@@ -1,3 +1,5 @@
+const time = () => { new Date().toLocaleString() };
+
 let presentUsers = []
 
 class MySocket {
@@ -14,7 +16,7 @@ class MySocket {
     }
     var div = document.createElement("div");
     let msgContainer = document.getElementById('chatIPT')
-    div.innerHTML = "<b>" + m.Timestamp + " </b>" + "<br>" + "<b>" + m.Username + ":</b> " + m.Text;
+    div.innerHTML = "<b>" + m.timestamp + " </b>" + "<br>" + "<b>" + m.username + ":</b> " + m.text;
     var cself = (myself) ? "self" : "";
     div.className = "msg " + cself;
     document.getElementById("msgcontainer").appendChild(div);
@@ -32,47 +34,51 @@ class MySocket {
   }
 
   contentHandler(text) {
-    document.getElementById("content").innerHTML = text;
+    const c = JSON.parse(text)
+    document.getElementById("content").innerHTML = c.body;
   }
 
   requestContent(e) {
-    // console.log(e.target.id)
-    // console.log(this)
     this.mysocket.send(JSON.stringify({
-      type: 'content',
+      type: "content",
       username: "?",
       resource: e.target.id,
     }));
   }
 
-  send() {
-    let time = new Date().toLocaleString();
-    let txt
-    if (this.wsType === 'chat') {
-      txt = document.getElementById("chatIPT").value;
-      let line = "<b>" + time + " </b>" + "<br>" + "<b>You:</b> " + txt
-      let m = {
-        type: 'chat',
-        text: txt,
-        timestamp: time,
-        username: "?",
-      }
-      this.mysocket.send(JSON.stringify(m));
-      document.getElementById("chatIPT").value = ""
+  requestChat() {
+    let m = {
+      type: 'chat',
+      text: document.getElementById("chatIPT").value,
+      timestamp: time(),
+      username: "?",
     }
-    if (this.wsType === 'post') {
-      txt = document.getElementById("postIPT").value;
-      let line = "<b>" + time + " </b>" + "<br>" + "<b>You:</b> " + txt
-      this.postHandler(line, true);
-      this.mysocket.send(txt);
-      document.getElementById("postIPT").value = ""
-    }
+    this.mysocket.send(JSON.stringify(m));
+    document.getElementById("chatIPT").value = ""
+  }
+
+  requestPost() {
+    let txt = document.getElementById("postIPT").value;
+    let line = "<b>" + time + " </b>" + "<br>" + "<b>You:</b> " + txt
+    this.postHandler(line, true);
+    this.mysocket.send(txt);
+    document.getElementById("postIPT").value = ""
   }
 
   keypress(e) {
     if (e.keyCode == 13) {
       this.wsType = e.target.id.slice(0, -3)
-      this.send();
+      switch (this.wsType) {
+        case 'post':
+          this.requestPost()
+          break;
+        case 'chat':
+          this.requestChat()
+          break;
+        default:
+          console.log("keypress registered for unknown wsType")
+          break;
+      }
     }
   }
 
