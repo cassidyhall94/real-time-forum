@@ -1,0 +1,5 @@
+CHAT
+<div id="msgcontainer">
+    <div style="overflow: hidden;">
+        <input id="chatIPT" onkeypress="chatSocket.keypress(event)" type="text" />
+</div>

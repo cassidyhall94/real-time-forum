@@ -36,16 +36,16 @@ func newUser(username string, email string, password string, db *sql.DB) {
 		fmt.Printf("The error is %v", errNewUser.Error())
 	}
 }
+
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err
 }
 
-// // store user details in database
-//login
-// // create a cookie and a sessionID on login
-//
-// // check login info against database
+// store user details in database
+// login
+// create a cookie and a sessionID on login
+// check login info against database
 func Register(username string, email string, password string, db *sql.DB) {
 	rows, err := db.Query("SELECT email FROM users WHERE email = ?", email)
 	if err != nil {
@@ -64,6 +64,5 @@ func Register(username string, email string, password string, db *sql.DB) {
 		count2++
 	}
 	if count == 0 && count2 == 0 {
-
 	}
 }

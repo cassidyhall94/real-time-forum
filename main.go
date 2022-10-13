@@ -22,9 +22,10 @@ func main() {
 	fs := http.FileServer(http.Dir("./."))
 	myhttp.Handle("/", http.StripPrefix("", fs))
 
-	myhttp.HandleFunc("/chat", socket.ChatSocketCreate)
-	myhttp.HandleFunc("/content", socket.ContentSocketCreate)
-	myhttp.HandleFunc("/post", socket.PostSocketCreate)
+	// when adding a new websocket endpoint make sure to update the switch case in the websocket connection function to account for it
+	myhttp.HandleFunc("/chat", socket.SocketCreate)
+	myhttp.HandleFunc("/content", socket.SocketCreate)
+	myhttp.HandleFunc("/post", socket.SocketCreate)
 	// myhttp.HandleFunc("/home", mainHandler)
 	fmt.Println("http://localhost:8080")
 	http.ListenAndServe(":8080", myhttp)

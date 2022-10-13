@@ -18,10 +18,9 @@
 
     </article>
 
-    <aside> CHAT
-        <div id="msgcontainer">
-            <div style="overflow: hidden;">
-                <input id="chatIPT" onkeypress="chatSocket.keypress(event)" type="text" />
+    <aside>
+        <div id="presencecontainer">
+            <button id="presence" onclick="contentSocket.requestContent(event)">USER ?</button>
             </div>
     </aside>
 </body>
