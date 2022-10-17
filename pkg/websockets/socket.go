@@ -64,13 +64,19 @@ func SocketCreate(w http.ResponseWriter, r *http.Request) {
 
 		// before doing anything else, send the splash(home) page
 		if err := OnContentConnect(ptrSocket); err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Println(err)
 			return
 		}
 	case "/post":
 		ptrSocket.t = post
 	case "/chat":
 		ptrSocket.t = chat
+	case "/presence":
+		ptrSocket.t = presence
+		if err := OnPresenceConnect(ptrSocket); err != nil {
+			fmt.Println(err)
+			return
+		}
 	default:
 		ptrSocket.t = unknown
 	}
@@ -124,6 +130,14 @@ func (s *socket) pollSocket() {
 				}
 			case content:
 				m := &ContentMessage{}
+				if err := json.Unmarshal(b, m); err != nil {
+					panic(err)
+				}
+				if err := m.Handle(s); err != nil {
+					panic(err)
+				}
+			case presence:
+				m := &PresenceMessage{}
 				if err := json.Unmarshal(b, m); err != nil {
 					panic(err)
 				}

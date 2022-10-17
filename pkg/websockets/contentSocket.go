@@ -17,7 +17,7 @@ type ContentMessage struct {
 func (m *ContentMessage) Broadcast(s *socket) error {
 	if s.t == m.Type {
 		if err := s.con.WriteJSON(m); err != nil {
-			return fmt.Errorf("unable to send message: %w", err)
+			return fmt.Errorf("unable to send (content) message: %w", err)
 		}
 	} else {
 		return fmt.Errorf("cannot send content message down ws of type %s", s.t.String())

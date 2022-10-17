@@ -26,6 +26,8 @@ func main() {
 	myhttp.HandleFunc("/chat", socket.SocketCreate)
 	myhttp.HandleFunc("/content", socket.SocketCreate)
 	myhttp.HandleFunc("/post", socket.SocketCreate)
+	myhttp.HandleFunc("/presence", socket.SocketCreate)
+
 	// myhttp.HandleFunc("/home", mainHandler)
 	fmt.Println("http://localhost:8080")
 	http.ListenAndServe(":8080", myhttp)

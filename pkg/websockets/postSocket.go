@@ -21,7 +21,7 @@ func (m *PostMessage) Broadcast() error {
 	for _, s := range savedSockets {
 		if s.t == m.Type {
 			if err := s.con.WriteJSON(m); err != nil {
-				return fmt.Errorf("unable to send message: %w", err)
+				return fmt.Errorf("unable to send (post )message: %w", err)
 			}
 		}
 	}

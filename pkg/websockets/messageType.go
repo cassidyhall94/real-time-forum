@@ -15,6 +15,7 @@ const (
 	chat
 	post
 	content
+	presence
 )
 
 func (m messageType) String() string {
@@ -25,6 +26,8 @@ func (m messageType) String() string {
 		return "post"
 	case content:
 		return "content"
+	case presence:
+		return "presence"
 	default:
 		return "unknown"
 	}
@@ -38,6 +41,8 @@ func ParseMessageType(s string) (messageType, error) {
 		return post, nil
 	case "content":
 		return content, nil
+	case "presence":
+		return presence, nil
 	default:
 		return unknown, fmt.Errorf("unknown message type %s", s)
 	}

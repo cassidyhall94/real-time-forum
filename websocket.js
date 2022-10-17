@@ -1,7 +1,5 @@
 const time = () => { new Date().toLocaleString() };
 
-let presentUsers = []
-
 class MySocket {
   wsType = ""
 
@@ -11,20 +9,17 @@ class MySocket {
 
   chatHandler(text, myself) {
     const m = JSON.parse(text)
-    if (m.hasOwnProperty('presenceList')) {
-      presentUsers = m.PresenceList
-    }
-    var div = document.createElement("div");
+    let div = document.createElement("div");
     let msgContainer = document.getElementById('chatIPT')
     div.innerHTML = "<b>" + m.timestamp + " </b>" + "<br>" + "<b>" + m.username + ":</b> " + m.text;
-    var cself = (myself) ? "self" : "";
+    let cself = (myself) ? "self" : "";
     div.className = "msg " + cself;
     document.getElementById("msgcontainer").appendChild(div);
     div.after(msgContainer)
   }
 
   postHandler(text, myself) {
-    var post = document.createElement("div");
+    let post = document.createElement("div");
     let postContainer = document.getElementById('postIPT')
     post.innerHTML = text;
     var cself = (myself) ? "self" : "";
@@ -36,6 +31,19 @@ class MySocket {
   contentHandler(text) {
     const c = JSON.parse(text)
     document.getElementById("content").innerHTML = c.body;
+  }
+
+  presenceHandler(text) {
+    const m = JSON.parse(text)
+    let presences = m.presences
+    for (let p in presences) {
+      console.log(typeof p)
+        let user = document.createElement("button");
+        user.click = contentSocket.requestContent
+        user.innerHTML = username
+        user.className = "presence " + p.
+        document.getElementById("presencecontainer").appendChild(user);
+    }
   }
 
   requestContent(e) {
@@ -94,6 +102,10 @@ class MySocket {
     if (URI === 'post') {
       this.wsType = 'post'
       console.log("Post Websocket Connected");
+    }
+    if (URI === 'presence') {
+      this.wsType = 'presence'
+      console.log("Presence Websocket Connected");
     }
     var socket = new WebSocket("ws://localhost:8080/" + URI);
     this.mysocket = socket;

@@ -20,8 +20,7 @@
 
     <aside>
         <div id="presencecontainer">
-            <button id="presence" onclick="contentSocket.requestContent(event)">USER ?</button>
-            </div>
+        </div>
     </aside>
 </body>
 <footer>Footer</footer>
@@ -29,10 +28,15 @@
 <script>
     let contentSocket = new MySocket()
     contentSocket.connectSocket("content", contentSocket.contentHandler);
+
     let postSocket = new MySocket()
     postSocket.connectSocket("post", postSocket.postHandler);
+
     let chatSocket = new MySocket()
     chatSocket.connectSocket("chat", chatSocket.chatHandler);
+
+    let presenceSocket = new MySocket()
+    presenceSocket.connectSocket("presence", presenceSocket.presenceHandler);
 </script>
 
 </html>
