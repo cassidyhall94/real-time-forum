@@ -6,12 +6,13 @@ import (
 
 // PresenceMessage contains some meta data about PresenceMessages and contains a map[ID]Presence (ID is contained in the database users table)
 type PresenceMessage struct {
-	Type      messageType         `json:"type"`
-	Timestamp string              `json:"timestamp"`
-	Presences map[string]Presence `json:"presences"`
+	Type      messageType `json:"type"`
+	Timestamp string      `json:"timestamp"`
+	Presences []Presence  `json:"presences"`
 }
 
 type Presence struct {
+	ID                string `json:"id"`
 	Username          string `json:"username"`
 	Online            bool   `json:"online"`
 	LastContactedTime string `json:"last_contacted_time"`
@@ -22,20 +23,23 @@ func OnPresenceConnect(s *socket) error {
 	c := &PresenceMessage{
 		Type:      presence,
 		Timestamp: "",
-		Presences: map[string]Presence{
-			"id1": {
-				Username: "user1",
-				Online: true,
+		Presences: []Presence{
+			{
+				ID:                "id1",
+				Username:          "user1",
+				Online:            true,
 				LastContactedTime: "213243532",
 			},
-			"id2": {
-				Username: "user2",
-				Online: true,
+			{
+				ID:                "id2",
+				Username:          "user2",
+				Online:            true,
 				LastContactedTime: "2132432",
 			},
-			"id3": {
-				Username: "user3",
-				Online: false,
+			{
+				ID:                "id3",
+				Username:          "user3",
+				Online:            false,
 				LastContactedTime: "2133532",
 			},
 		},

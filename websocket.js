@@ -35,14 +35,13 @@ class MySocket {
 
   presenceHandler(text) {
     const m = JSON.parse(text)
-    let presences = m.presences
-    for (let p in presences) {
-      console.log(typeof p)
-        let user = document.createElement("button");
-        user.click = contentSocket.requestContent
-        user.innerHTML = username
-        user.className = "presence " + p.
-        document.getElementById("presencecontainer").appendChild(user);
+    for (let p of m.presences) {
+      
+      let user = document.createElement("button");
+      user.click = contentSocket.requestContent
+      user.innerHTML = p.username
+      user.className = "presence " + p.username
+      document.getElementById("presencecontainer").appendChild(user)
     }
   }
 
