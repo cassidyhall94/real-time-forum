@@ -62,7 +62,7 @@ func SocketCreate(w http.ResponseWriter, r *http.Request) {
 	case "/content":
 		ptrSocket.t = content
 
-		// before doing anything else, send the splash(home) page
+		// loads the home page (which contains the posts form)
 		if err := OnContentConnect(ptrSocket); err != nil {
 			fmt.Println(err)
 			return
@@ -73,6 +73,7 @@ func SocketCreate(w http.ResponseWriter, r *http.Request) {
 		ptrSocket.t = chat
 	case "/presence":
 		ptrSocket.t = presence
+		// loads the presence list on window load
 		if err := OnPresenceConnect(ptrSocket); err != nil {
 			fmt.Println(err)
 			return

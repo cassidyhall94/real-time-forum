@@ -41,8 +41,8 @@ class MySocket {
         event.target.id = "presence"
         contentSocket.requestContent(event)
       });
-      user.innerHTML = p.userid
-      user.className = "presence " + p.userid
+      user.innerHTML = p.username
+      user.className = "presence " + p.username
       document.getElementById("presencecontainer").appendChild(user)
     }
   }

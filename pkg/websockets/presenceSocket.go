@@ -5,7 +5,7 @@ import (
 	"real-time-forum/pkg/database"
 )
 
-// PresenceMessage contains some meta data about PresenceMessages and contains a map[ID]Presence (ID is contained in the database users table)
+// PresenceMessage contains some meta data about PresenceMessages and contains a []Presence (ID is contained in the database users table)
 type PresenceMessage struct {
 	Type      messageType `json:"type"`
 	Timestamp string      `json:"timestamp"`

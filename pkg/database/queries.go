@@ -38,6 +38,5 @@ func GetUsers() ([]User, error) {
 	if err != nil {
 		return users, err
 	}
-	fmt.Println(users)
 	return users, nil
 }
