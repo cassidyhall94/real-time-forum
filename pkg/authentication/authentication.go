@@ -8,9 +8,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var Person userDetails
+var Person UserDetails
 
-type userDetails struct {
+type UserDetails struct {
 	ID                     string
 	Email                  string
 	Username               string

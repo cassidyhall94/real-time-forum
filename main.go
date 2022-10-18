@@ -1,23 +1,31 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"net/http"
+	"os"
+	"real-time-forum/pkg/database"
 	socket "real-time-forum/pkg/websockets"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var sqliteDatabase *sql.DB
+const databaseFilePath string = "sqlite-database.db"
+
+func init() {
+	// set dev mode:
+	// `DEV=true go run .`
+	// set dev mode for all `go run`'s in this terminal:
+	// `export DEV=true` - now run go run
+	devMode := false
+	if _, ok := os.LookupEnv("DEV"); ok {
+		devMode = true
+	}
+	database.InitialiseDB(databaseFilePath, devMode)
+}
 
 func main() {
-	database, err1 := sql.Open("sqlite3", "sqlite-database.db")
-	sqliteDatabase = database
-	if err1 != nil {
-		fmt.Println(err1.Error())
-	}
-	defer sqliteDatabase.Close()
+	defer database.DB.Close()
 	myhttp := http.NewServeMux()
 	fs := http.FileServer(http.Dir("./."))
 	myhttp.Handle("/", http.StripPrefix("", fs))
@@ -31,7 +39,6 @@ func main() {
 	// myhttp.HandleFunc("/home", mainHandler)
 	fmt.Println("http://localhost:8080")
 	http.ListenAndServe(":8080", myhttp)
-
 }
 
 // func mainHandler(w http.ResponseWriter, r *http.Request) {
