@@ -14,18 +14,13 @@
 <body>
     <article>
         <div id="content">
-            <div id="postcontainer">
-                <div style="overflow: hidden;">
-                    <input id="postIPT" onkeypress="postSocket.keypress(event)" type="text" />
-                </div>
-            </div>
+        </div>
+
     </article>
 
-    <aside> CHAT
-        <div id="msgcontainer">
-            <div style="overflow: hidden;">
-                <input id="chatIPT" onkeypress="chatSocket.keypress(event)" type="text" />
-            </div>
+    <aside>
+        <div id="presencecontainer">
+        </div>
     </aside>
 </body>
 <footer>Footer</footer>
@@ -33,10 +28,15 @@
 <script>
     let contentSocket = new MySocket()
     contentSocket.connectSocket("content", contentSocket.contentHandler);
+
     let postSocket = new MySocket()
     postSocket.connectSocket("post", postSocket.postHandler);
+
     let chatSocket = new MySocket()
     chatSocket.connectSocket("chat", chatSocket.chatHandler);
+
+    let presenceSocket = new MySocket()
+    presenceSocket.connectSocket("presence", presenceSocket.presenceHandler);
 </script>
 
 </html>

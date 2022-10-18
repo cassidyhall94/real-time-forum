@@ -2,114 +2,76 @@ package websockets
 
 import (
 	"fmt"
-	"net/http"
+	"strings"
 	"text/template"
-
-	"github.com/gorilla/websocket"
-	auth "real-time-forum/pkg/authentication"
 )
 
-var savedContentSocket *contentSocket
-
-// contentSocket struct
-type contentSocket struct {
-	con *websocket.Conn
-	// mode int
-	template string
+type ContentMessage struct {
+	Type      messageType `json:"type,omitempty"`
+	Body      string      `json:"body,omitempty"`
+	Timestamp string      `json:"timestamp,omitempty"`
+	Username  string      `json:"username,omitempty"`
+	Resource  string      `json:"resource,omitempty"`
 }
 
-var contentUpgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
-
-var savedContentSockets []*contentSocket
-
-func ContentSocketCreate(w http.ResponseWriter, r *http.Request) {
-
-		c1, err1 := r.Cookie("1st-cookie")
-	if err1 == nil && !auth.Person.Accesslevel {
-		// first home page access 
-		c1.MaxAge = -1
-		http.SetCookie(w, c1)
-	}
-	_, err := r.Cookie("1st-cookie")
-	if err != nil && auth.Person.Accesslevel {
-		// logged in and on 2nd browser
-		auth.Person.CookieChecker = false
-	} else if err == nil && auth.Person.Accesslevel {
-		// Original browser and logged in
-		auth.Person.CookieChecker = true
+func (m *ContentMessage) Broadcast(s *socket) error {
+	if s.t == m.Type {
+		if err := s.con.WriteJSON(m); err != nil {
+			return fmt.Errorf("unable to send (content) message: %w", err)
+		}
 	} else {
-		// not logged in yet
-	auth.Person.CookieChecker = false
+		return fmt.Errorf("cannot send content message down ws of type %s", s.t.String())
 	}
-
-	fmt.Println("Content Socket Request")
-
-	defer func() {
-		err := recover()
-		if err != nil {
-			fmt.Println(err)
-		}
-		r.Body.Close()
-	}()
-	con, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		fmt.Println(err)
-	}
-	ptrContentSocket := &contentSocket{
-		con: con,
-	}
-
-	savedContentSocket = ptrContentSocket
-	ptrContentSocket.pollContentWS()
+	return nil
 }
 
-// pollContentWS starts listening on a websocket for messages
-func (i *contentSocket) pollContentWS() {
-	go func() {
-		defer func() {
-			err := recover()
-			if err != nil {
-				fmt.Println("recovered panic:", err)
-			}
-			fmt.Println("pollContentWS finished")
-		}()
+func OnContentConnect(s *socket) error {
+	tpl, err := template.ParseGlob("templates/*")
+	if err != nil {
+		return err
+	}
 
-		for {
-			_, b, err := i.con.ReadMessage()
-			if err != nil {
-				panic(err)
-			}
-			tpl, err := template.ParseGlob("templates/*")
-			if err != nil {
-				panic(err)
-			}
-			w, err := i.con.NextWriter(websocket.TextMessage)
-			if err != nil {
-				panic(err)
-			}
-			switch string(b) {
-			case "post":
-				if err := tpl.ExecuteTemplate(w, "home.template", nil); err != nil {
-					panic(fmt.Errorf("Home ExecuteTemplate error: %w", err))
-				}
-			case "profile":
-				if err := tpl.ExecuteTemplate(w, "profile.template", nil); err != nil {
-					panic(fmt.Errorf("Profile ExecuteTemplate error: %w", err))
-				}
-			case "login":
-				if err := tpl.ExecuteTemplate(w, "reg-log.template", nil); err != nil {
-					fmt.Printf("Reg-Log ExecuteTemplate error: %+v\n", err)
-					return
-				}
-			default:
-				panic(fmt.Errorf("template %s not found", string(b)))
-			}
-			if err := w.Close(); err != nil {
-				panic(err)
-			}
+	sb := &strings.Builder{}
+
+	if err := tpl.ExecuteTemplate(sb, "home.template", nil); err != nil {
+		return fmt.Errorf("Home ExecuteTemplate error: %w", err)
+	}
+
+	c := &ContentMessage{
+		Type: content,
+		Body: sb.String(),
+	}
+
+	return c.Broadcast(s)
+}
+
+func (m *ContentMessage) Handle(s *socket) error {
+	tpl, err := template.ParseGlob("templates/*")
+	if err != nil {
+		return err
+	}
+
+	sb := &strings.Builder{}
+	switch m.Resource {
+	case "post":
+		if err := tpl.ExecuteTemplate(sb, "home.template", nil); err != nil {
+			return fmt.Errorf("Home ExecuteTemplate error: %w", err)
 		}
-	}()
+	case "profile":
+		if err := tpl.ExecuteTemplate(sb, "profile.template", nil); err != nil {
+			return fmt.Errorf("Profile ExecuteTemplate error: %w", err)
+		}
+	case "login":
+		if err := tpl.ExecuteTemplate(sb, "reg-log.template", nil); err != nil {
+			return fmt.Errorf("Reg-Log ExecuteTemplate error: %+v\n", err)
+		}
+	case "presence":
+		if err := tpl.ExecuteTemplate(sb, "presence.template", nil); err != nil {
+			return fmt.Errorf("Presence ExecuteTemplate error: %+v\n", err)
+		}
+	default:
+		return fmt.Errorf("template %s not found", m.Resource)
+	}
+	m.Body = sb.String()
+	return m.Broadcast(s)
 }

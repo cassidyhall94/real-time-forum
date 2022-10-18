@@ -7,21 +7,29 @@ import (
 	"os"
 
 	_ "github.com/mattn/go-sqlite3"
+	uuid "github.com/satori/go.uuid"
 )
-func main() {
-	file, err := os.Create("sqlite-database.db")
-	if err != nil {
-		log.Fatal(err.Error())
+
+var DB *sql.DB
+
+func InitialiseDB(path string, insertPlaceholders bool) {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		file, err := os.Create(path)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		if insertPlaceholders {
+			defer insertPlaceholdersInDB()
+		}
+		file.Close()
 	}
-	file.Close()
-	fmt.Println("SQL Databasefile created")
 	//Open the database SQLite file and create the database table
-	sqliteDatabase, err1 := sql.Open("sqlite3", "sqlite-database.db")
+	sqliteDatabase, err1 := sql.Open("sqlite3", path)
 	if err1 != nil {
 		log.Fatal(err1.Error())
 	}
 	//Defer the close
-	defer sqliteDatabase.Close()
+	// defer sqliteDatabase.Close()
 	//Create the database for each user
 	_, errTbl := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "users" (
@@ -100,5 +108,21 @@ func main() {
 	if errChats != nil {
 		fmt.Println("CHAT TABLE ERROR")
 		log.Fatal(errCategories.Error())
+	}
+
+	DB = sqliteDatabase
+}
+
+func insertPlaceholdersInDB() {
+	queries := map[string]string{
+		"add some dummy users": fmt.Sprintf(`INSERT INTO users values ("%s", "foo@bar.com", "foo", "s0fj489fhjsof", "bar")`, uuid.NewV4()),
+	}
+
+	for purpose, q := range queries {
+		if _, err := DB.Exec(q); err != nil {
+			panic(fmt.Errorf("placeholder query '%s' failed with err: %w", purpose, err))
+		} else {
+			fmt.Println("successfully executed " + purpose)
+		}
 	}
 }

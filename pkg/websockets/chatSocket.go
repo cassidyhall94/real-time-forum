@@ -1,103 +1,25 @@
 package websockets
 
-import (
-	"fmt"
-	"net/http"
-	"time"
-	"github.com/gorilla/websocket"
-)
+import "fmt"
 
-var t = time.Now()
-var dateTime = t.Format("1/2/2006, 3:04:05 PM")
-
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
+type ChatMessage struct {
+	Type      messageType `json:"type,omitempty"`
+	Text      string      `json:"text,omitempty"`
+	Timestamp string      `json:"timestamp,omitempty"`
+	Username  string      `json:"username,omitempty"`
 }
 
-var savedChatSockets []*chatSocket
-
-// chatSocket struct
-type chatSocket struct {
-	con      *websocket.Conn
-	mode     int
-	username string
-}
-
-func ChatSocketCreate(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Chat Socket Request")
-	if savedChatSockets == nil {
-		savedChatSockets = make([]*chatSocket, 0)
-	}
-
-	defer func() {
-		err := recover()
-		if err != nil {
-			fmt.Println(err)
-		}
-		r.Body.Close()
-	}()
-	con, _ := upgrader.Upgrade(w, r, nil)
-	ptrChatSocket := &chatSocket{
-		con: con,
-	}
-
-	savedChatSockets = append(savedChatSockets, ptrChatSocket)
-	ptrChatSocket.startThread()
-}
-
-func (i *chatSocket) broadcast(str string) {
-	for _, currentChatSocket := range savedChatSockets {
-		if currentChatSocket == i {
-			// users cannot send messages to themselves
-			continue
-		}
-		if currentChatSocket.mode == 1 {
-			// message cannot be sent until username is given
-			continue
-		}
-		currentChatSocket.writeMsg(i.username, str)
-	}
-}
-
-func (i *chatSocket) read() {
-	_, b, er := i.con.ReadMessage()
-	if er != nil {
-		panic(er)
-	}
-	// fmt.Println(i.username + " " + string(b))
-	// fmt.Println(i.mode)
-
-	if i.mode == 1 {
-		i.username = string(b)
-		i.writeMsg("Admin", "Welcome "+i.username+"!")
-		i.mode = 2 // real msg mode
-		return
-	}
-	i.broadcast(string(b))
-	// fmt.Println(i.username + " " + string(b))
-}
-
-func (i *chatSocket) writeMsg(name string, str string) {
-
-	i.con.WriteMessage(websocket.TextMessage, []byte("<b>"+dateTime+" </b>"+"<br>"+"<b>"+name+": </b>"+str))
-}
-
-func (i *chatSocket) startThread() {
-	i.writeMsg("Admin", "Please enter your username.")
-	i.mode = 1 // mode 1 get user name
-
-	go func() {
-		defer func() {
-			err := recover()
-			if err != nil {
-				fmt.Println(err)
+func (m *ChatMessage) Broadcast() error {
+	for _, s := range savedSockets {
+		if s.t == m.Type {
+			if err := s.con.WriteJSON(m); err != nil {
+				return fmt.Errorf("unable to send (chat) message: %w", err)
 			}
-			fmt.Println("Chat thread finished")
-		}()
-
-		for {
-			i.read()
 		}
-	}()
+	}
+	return nil
+}
+
+func (m *ChatMessage) Handle(s *socket) error {
+	return m.Broadcast()
 }
