@@ -55,6 +55,8 @@ class MySocket {
       resource: e.target.id,
     }));
   }
+}
+
 
   requestChat() {
     let m = {
@@ -85,11 +87,15 @@ class MySocket {
         case 'chat':
           this.requestChat()
           break;
-        default:
+        case 'comment':
+          this.requestComment()
+          break;
+          default:
           console.log("keypress registered for unknown wsType")
           break;
       }
     }
+
   }
 
   connectSocket(URI, handler) {
@@ -109,6 +115,12 @@ class MySocket {
       this.wsType = 'presence'
       console.log("Presence Websocket Connected");
     }
+    if (URI === 'comment') {
+      this.wsType = 'comment'
+      console.log("comment Websocket Connected");
+    }
+  
+  }
     var socket = new WebSocket("ws://localhost:8080/" + URI);
     this.mysocket = socket;
 
@@ -122,7 +134,7 @@ class MySocket {
     socket.onclose = () => {
       console.log("socket closed");
     };
-  }
+  
 
   getRegistrationDetails() {
     //AJAX html request
@@ -152,4 +164,4 @@ class MySocket {
       }
     }
   }
-}
+

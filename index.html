@@ -37,6 +37,10 @@
 
     let presenceSocket = new MySocket()
     presenceSocket.connectSocket("presence", presenceSocket.presenceHandler);
+
+    let commentSocket = new MySocket()
+    commentSocket.connectSocket('comment', commentSocket.commentHandler);
 </script>
+
 
 </html>
