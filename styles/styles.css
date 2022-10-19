@@ -130,3 +130,30 @@ aside .presencecontainer {
 form {
     margin: 0 auto;
 }
+
+
+#comment-image {
+    width: 55px;
+  }
+  
+  #comment-comment {
+    margin: 0.5rem 0 0 0;
+    font-size: 17px;
+  }
+  
+  #comment-list {
+    margin: 2rem 0;
+  }
+  
+  #comment-list li {
+    border-bottom: 1px solid #8d8d8d1a;
+    font-size: 18px;
+    color: rgb(61, 61, 61);
+    padding: 1rem 0;
+  }
+  
+  #comment-list li span {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
