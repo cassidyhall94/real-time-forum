@@ -1,0 +1,13 @@
+<form>
+        <div class="input">
+            <div class="input-top">
+                <input required type="text" id="name" placeholder="Name">
+                <input required type="email" id="email" placeholder="Email">
+            </div>
+            <textarea required placeholder="Your Comment" id="comment" cols="30" rows="10"></textarea>
+            <button id="button" type="submit" onclick="myFunction();">Post a Comment</button>
+    </form>
+    <ul id="comment-list">
+    <!-- data are comes from local storage -->
+    </ul>
+    </div>

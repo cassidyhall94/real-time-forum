@@ -10,32 +10,35 @@
     <button id="login" onclick="contentSocket.requestContent(event)">Login/Register</button>
     <button id="profile" onclick="contentSocket.requestContent(event)">Profile</button>
 </header>
-    <body>
-        <article>
-            <div id="content">
-            </div>
 
-        </article>
+<body>
+    <article>
+        <div id="content">
+        </div>
 
-        <aside>
-            <div id="presencecontainer">
-            </div>
-        </aside>
-    </body>
-    <footer>Footer</footer>
-    <script src="websocket.js"></script>
-    <script>
-        let contentSocket = new MySocket()
-        contentSocket.connectSocket("content", contentSocket.contentHandler);
+    </article>
 
-        let postSocket = new MySocket()
-        postSocket.connectSocket("post", postSocket.postHandler);
+    <aside>
+        <div id="presencecontainer">
+        </div>
+    </aside>
+</body>
+<footer>Footer</footer>
+<script src="websocket.js"></script>
+<script>
+    let contentSocket = new MySocket()
+    contentSocket.connectSocket("content", contentSocket.contentHandler);
 
-        let chatSocket = new MySocket()
-        chatSocket.connectSocket("chat", chatSocket.chatHandler);
+    let postSocket = new MySocket()
+    postSocket.connectSocket("post", postSocket.postHandler);
 
-        let presenceSocket = new MySocket()
-        presenceSocket.connectSocket("presence", presenceSocket.presenceHandler);
-    </script>
+    let chatSocket = new MySocket()
+    chatSocket.connectSocket("chat", chatSocket.chatHandler);
 
+    let presenceSocket = new MySocket()
+    presenceSocket.connectSocket("presence", presenceSocket.presenceHandler);
+
+    let commentSocket = new MySocket()
+    commentSocket.connectSocket('comment', commentSocket.commentHandler);
+</script>
 </html>
