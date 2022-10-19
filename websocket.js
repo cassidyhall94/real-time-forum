@@ -55,8 +55,6 @@ class MySocket {
       resource: e.target.id,
     }));
   }
-}
-
 
   requestChat() {
     let m = {
@@ -119,8 +117,7 @@ class MySocket {
       this.wsType = 'comment'
       console.log("comment Websocket Connected");
     }
-  
-  }
+
     var socket = new WebSocket("ws://localhost:8080/" + URI);
     this.mysocket = socket;
 
@@ -134,8 +131,8 @@ class MySocket {
     socket.onclose = () => {
       console.log("socket closed");
     };
+  }
   
-
   getRegistrationDetails() {
     //AJAX html request
     httpRequest = new XMLHttpRequest();
@@ -164,4 +161,4 @@ class MySocket {
       }
     }
   }
-
+}
