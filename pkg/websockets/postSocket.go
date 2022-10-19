@@ -35,21 +35,21 @@ func (m *PostMessage) Broadcast() error {
 }
 
 type postDisplay struct {
-	PostID        string
-	Username      string
-	PostCategory  string
-	TitleText     string
-	PostText      string
-	CookieChecker bool
-	Comments      []commentStruct
+	PostID        string          `json:"post_id,omitempty"`
+	Username      string          `json:"username,omitempty"`
+	PostCategory  string          `json:"post_category,omitempty"`
+	TitleText     string          `json:"title_text,omitempty"`
+	PostText      string          `json:"post_text,omitempty"`
+	CookieChecker bool            `json:"cookie_checker,omitempty"`
+	Comments      []commentStruct `json:"comments,omitempty"`
 }
 
 type commentStruct struct {
-	CommentID       string
-	CpostID         string
-	CommentUsername string
-	CommentText     string
-	CookieChecker   bool
+	CommentID       string `json:"comment_id,omitempty"`
+	CpostID         string `json:"cpost_id,omitempty"`
+	CommentUsername string `json:"comment_username,omitempty"`
+	CommentText     string `json:"comment_text,omitempty"`
+	CookieChecker   bool   `json:"cookie_checker,omitempty"`
 }
 
 func newPost(userName, category, title, post string, db *sql.DB) {

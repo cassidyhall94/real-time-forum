@@ -19,13 +19,11 @@ class MySocket {
   }
 
   postHandler(text, myself) {
-    let post = document.createElement("div");
-    let postContainer = document.getElementById('postIPT')
-    post.innerHTML = text;
-    var cself = (myself) ? "self" : "";
-    post.className = "post " + cself;
-    document.getElementById("postcontainer").appendChild(post);
-    post.after(postContainer)
+    let div = document.createElement("div");
+    div.innerHTML = "<b>" + m.timestamp + " </b>" + "<br>" + "<b>" + m.username + ":</b> " + m.text;
+    let cself = (myself) ? "self" : "";
+    div.className = "msg " + cself;
+    document.getElementById("submittedposts").appendChild(div);
   }
 
   contentHandler(text) {
@@ -67,33 +65,53 @@ class MySocket {
     document.getElementById("chatIPT").value = ""
   }
 
-  requestPost() {
-    let txt = document.getElementById("postIPT").value;
-    let line = "<b>" + time + " </b>" + "<br>" + "<b>You:</b> " + txt
-    this.postHandler(line, true);
-    this.mysocket.send(txt);
-    document.getElementById("postIPT").value = ""
+  requestPost(e) {
+    let m = {
+      type: 'post',
+      text: e.value,
+      timestamp: time(),
+      username: "?",
+    }
+    this.mysocket.send(JSON.stringify(m));
+    // document.getElementById("chatIPT").value = ""
   }
 
   keypress(e) {
     if (e.keyCode == 13) {
       this.wsType = e.target.id.slice(0, -3)
       switch (this.wsType) {
-        case 'post':
-          this.requestPost()
-          break;
+        // case 'post':
+        //   this.requestPost()
+        //   break;
         case 'chat':
           this.requestChat()
           break;
-        case 'comment':
-          this.requestComment()
-          break;
-          default:
+        // case 'comment':
+        //   this.requestComment()
+        //   break;
+        default:
           console.log("keypress registered for unknown wsType")
           break;
       }
     }
+  }
 
+  mouseclick(e) {
+    console.log(this.wsType)
+    switch (this.wsType) {
+      case 'post':
+        this.requestPost(e)
+        break;
+      // case 'chat':
+      // this.requestChat()
+      // break;
+      // case 'comment':
+      //   this.requestComment()
+      // break;
+      default:
+        console.log("mouseclick registered for unknown wsType")
+        break;
+    }
   }
 
   connectSocket(URI, handler) {
@@ -132,7 +150,7 @@ class MySocket {
       console.log("socket closed");
     };
   }
-  
+
   getRegistrationDetails() {
     //AJAX html request
     httpRequest = new XMLHttpRequest();
