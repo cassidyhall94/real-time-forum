@@ -1,31 +1,49 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"net/http"
+	"os"
+	"real-time-forum/pkg/database"
+	socket "real-time-forum/pkg/websockets"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var sqliteDatabase *sql.DB
-var Person userDetails
+const databaseFilePath string = "sqlite-database.db"
+
+func init() {
+	// set dev mode:
+	// `DEV=true go run .`
+	// set dev mode for all `go run`'s in this terminal:
+	// `export DEV=true` - now run go run
+	devMode := false
+	if _, ok := os.LookupEnv("DEV"); ok {
+		devMode = true
+	}
+	database.InitialiseDB(databaseFilePath, devMode)
+}
 
 func main() {
-	database, err1 := sql.Open("sqlite3", "sqlite-database.db")
-	sqliteDatabase = database
-	if err1 != nil {
-		fmt.Println(err1.Error())
-	}
-	defer sqliteDatabase.Close()
+	defer database.DB.Close()
 	myhttp := http.NewServeMux()
 	fs := http.FileServer(http.Dir("./."))
 	myhttp.Handle("/", http.StripPrefix("", fs))
 
-	myhttp.HandleFunc("/chat", chatSocketCreate)
-	myhttp.HandleFunc("/content", contentSocketCreate)
-	myhttp.HandleFunc("/post", postSocketCreate)
+	// when adding a new websocket endpoint make sure to update the switch case in the websocket connection function to account for it
+	myhttp.HandleFunc("/chat", socket.SocketCreate)
+	myhttp.HandleFunc("/content", socket.SocketCreate)
+	myhttp.HandleFunc("/post", socket.SocketCreate)
+	myhttp.HandleFunc("/presence", socket.SocketCreate)
 
+	// myhttp.HandleFunc("/home", mainHandler)
 	fmt.Println("http://localhost:8080")
 	http.ListenAndServe(":8080", myhttp)
 }
+
+// func mainHandler(w http.ResponseWriter, r *http.Request) {
+// 	tpl := template.Must(template.ParseGlob("index.html"))
+// 	if err := tpl.Execute(w, auth.Person); err != nil {
+// 		http.Error(w, "No such file or directory: Internal Server Error 500", http.StatusInternalServerError)
+// 	}
+// }

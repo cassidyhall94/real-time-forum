@@ -6,28 +6,36 @@
     <title>Real Time Forum</title>
 </head>
 <header>01 Founders
-    <button onclick="contentSocket.requestContent('home')">Home</button>
-    <button onclick="contentSocket.requestContent('login')">Login/Register</button>
-    <button onclick="contentSocket.requestContent('posts')">AddNewPosts</button>
+    <button id="post" onclick="contentSocket.requestContent(event)">Home</button>
+    <button id="login" onclick="contentSocket.requestContent(event)">Login/Register</button>
+    <button id="profile" onclick="contentSocket.requestContent(event)">Profile</button>
 </header>
+    <body>
+        <article>
+            <div id="content">
+            </div>
 
-<body>
-    <div id="content"></div>
-</body>
-<aside> CHAT
-    <div id="msgcontainer">
-        <div style="overflow: hidden;">
-            <input id="chatIPT" onkeypress="chatSocket.keypress(event)" type="text" />
-        </div>
-</aside>
-<footer>Footer</footer>
-<script src="websocket.js"></script>
-<script>
-    let contentSocket = new MySocket()
-    contentSocket.connectSocket("content", contentSocket.contentHandler);
-    let chatSocket = new MySocket()
-    chatSocket.connectSocket("chat", chatSocket.chatHandler);
-    let postSocket = new MySocket()
-    postSocket.connectSocket("post", postSocket.postHandler);
-</script>
+        </article>
+
+        <aside>
+            <div id="presencecontainer">
+            </div>
+        </aside>
+    </body>
+    <footer>Footer</footer>
+    <script src="websocket.js"></script>
+    <script>
+        let contentSocket = new MySocket()
+        contentSocket.connectSocket("content", contentSocket.contentHandler);
+
+        let postSocket = new MySocket()
+        postSocket.connectSocket("post", postSocket.postHandler);
+
+        let chatSocket = new MySocket()
+        chatSocket.connectSocket("chat", chatSocket.chatHandler);
+
+        let presenceSocket = new MySocket()
+        presenceSocket.connectSocket("presence", presenceSocket.presenceHandler);
+    </script>
+
 </html>

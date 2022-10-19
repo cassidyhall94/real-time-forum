@@ -1,27 +1,39 @@
-package main
+package websockets
 
 import (
 	"database/sql"
 	"fmt"
 	"log"
+	auth "real-time-forum/pkg/authentication"
 	"strings"
 
 	uuid "github.com/satori/go.uuid"
 )
-type userDetails struct {
-	ID                     string
-	Email                  string
-	Username               string
-	Nickname               string
-	Password               string
-	Accesslevel            bool
-	CookieChecker          bool
-	Attempted              bool
-	RegistrationAttempted  bool
-	FailedRegister         bool
-	SuccessfulRegistration bool
-	PostAdded              bool
+
+type PostMessage struct {
+	Type       messageType `json:"type,omitempty"`
+	Header     string      `json:"text,omitempty"`
+	Body       string      `json:"body,omitempty"`
+	Categories []string    `json:"categories,omitempty"`
+	Timestamp  string      `json:"timestamp,omitempty"`
+	Username   string      `json:"username,omitempty"`
 }
+
+func (m PostMessage) Handle(s *socket) error {
+	return nil
+}
+
+func (m *PostMessage) Broadcast() error {
+	for _, s := range savedSockets {
+		if s.t == m.Type {
+			if err := s.con.WriteJSON(m); err != nil {
+				return fmt.Errorf("unable to send (post )message: %w", err)
+			}
+		}
+	}
+	return nil
+}
+
 type postDisplay struct {
 	PostID        string
 	Username      string
@@ -31,6 +43,7 @@ type postDisplay struct {
 	CookieChecker bool
 	Comments      []commentStruct
 }
+
 type commentStruct struct {
 	CommentID       string
 	CpostID         string
@@ -50,7 +63,7 @@ func newPost(userName, category, title, post string, db *sql.DB) {
 		fmt.Println("Error adding new post")
 		log.Fatal(err.Error())
 	}
-	Person.PostAdded = true
+	auth.Person.PostAdded = true
 	catSlc := strings.Split(category, " ")
 	golangSelected := 0
 	javascriptSelected := 0
@@ -69,6 +82,7 @@ func newPost(userName, category, title, post string, db *sql.DB) {
 		fmt.Println("ERROR when adding into the category table")
 	}
 }
+
 func postData(db *sql.DB) []postDisplay {
 	rows, err := db.Query("SELECT postID, userName, category, title, post FROM posts")
 	if err != nil {
@@ -85,7 +99,7 @@ func postData(db *sql.DB) []postDisplay {
 			&u.TitleText,
 			&u.PostText,
 		)
-		u.CookieChecker = Person.CookieChecker
+		u.CookieChecker = auth.Person.CookieChecker
 		if err != nil {
 			fmt.Println("SCANNING ERROR")
 			log.Fatal(err.Error())
@@ -104,7 +118,7 @@ func postData(db *sql.DB) []postDisplay {
 				&tempComStruct.CommentUsername,
 				&tempComStruct.CommentText,
 			)
-			tempComStruct.CookieChecker = Person.CookieChecker
+			tempComStruct.CookieChecker = auth.Person.CookieChecker
 			if err != nil {
 				fmt.Println("Error scanning comments")
 				log.Fatal(err.Error())
@@ -120,6 +134,7 @@ func postData(db *sql.DB) []postDisplay {
 	}
 	return finalArray
 }
+
 func newComment(userName, postID, commentText string, db *sql.DB) {
 	if commentText == "" {
 		return
@@ -131,8 +146,9 @@ func newComment(userName, postID, commentText string, db *sql.DB) {
 		fmt.Println("ERROR ADDING COMMENT TO THE TABLE")
 		log.Fatal(err.Error())
 	}
-	Person.PostAdded = true
+	auth.Person.PostAdded = true
 }
+
 func PostGetter(postIDSlc []string, db *sql.DB) []postDisplay {
 	finalArray := []postDisplay{}
 	for _, r := range postIDSlc {
@@ -150,7 +166,7 @@ func PostGetter(postIDSlc []string, db *sql.DB) []postDisplay {
 				&postDetails.TitleText,
 				&postDetails.PostText,
 			)
-			postDetails.CookieChecker = Person.CookieChecker
+			postDetails.CookieChecker = auth.Person.CookieChecker
 			if err != nil {
 				fmt.Println("ERROR Scanning through the rows (func POSTGETTER)")
 				log.Fatal(err.Error())

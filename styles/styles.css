@@ -7,23 +7,38 @@ body {
     gap: 0.75rem;
 }
 
-@media (min-width: 750px) {
-    main {
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
-
-header,
-aside,
-footer {
+header {
+    background: #374453;
+    padding: 3rem;
+    grid-column: 1 / 2;
     padding: 2rem 3rem;
 }
 
-header,
 footer {
     background: #374453;
     padding: 3rem;
     grid-column: 1 / 2;
+    padding: 2rem 3rem;
+}
+
+article {
+    display: grid;
+    grid-column: 1 / 2;
+    gap: 1rem;
+    background: #FFBB00;
+}
+
+aside {
+    background: #FFBB00;
+    grid-column: 1 / 2;
+    padding: 2rem 3rem;
+}
+
+@media (min-width: 750px) {
+    article {
+        grid-template-columns: repeat(3, 1fr);
+        grid-column: 1 / 4;
+    }
 }
 
 @media (min-width: 750px) {
@@ -34,45 +49,25 @@ footer {
     }
 }
 
-article {
-    display: grid;
-    grid-column: 1 / 2;
-    gap: 1rem;
-}
-
-@media (min-width: 750px) {
-    article {
-        grid-template-columns: repeat(3, 1fr);
-        grid-column: 1 / 4;
-    }
-}
-
-aside {
-    background: #FFBB00;
-    grid-column: 1 / 2;
-}
-
 @media (min-width: 750px) {
     aside {
         grid-column: 4 / 5;
     }
 }
 
-aside .msg {
+article .msg {
     background-color: #A39C95;
     padding: 10px;
     margin-bottom: 10px;
-    /* height: 500px;
-width: 320px; */
     border: 2px solid rgb(0, 0, 0);
     overflow-y: auto;
 }
 
-aside .msg .self {
+article .msg .self {
     background-color: #A39C95;
 }
 
-aside .chatIPT {
+article .chatIPT {
     width: 300px;
     padding: 10px;
     border-right: 2px solid rgb(0, 0, 0);
@@ -80,6 +75,7 @@ aside .chatIPT {
     border-bottom: 2px solid rgb(0, 0, 0);
     border-top: hidden
 }
+
 
 article .postcontainer {
     background: #A39C95;
@@ -92,8 +88,6 @@ article .post {
     background-color: #A39C95;
     padding: 10px;
     margin-bottom: 10px;
-    /* height: 500px;
-width: 320px; */
     border: 2px solid rgb(0, 0, 0);
     overflow-y: auto;
 }
@@ -111,6 +105,22 @@ article .postIPT {
     border-top: hidden
 }
 
+aside .presence {
+    background-color: #A39C95;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 2px solid rgb(0, 0, 0);
+    overflow-y: auto;
+    display: block;
+}
+
+aside .presencecontainer {
+    background: #A39C95;
+    padding: 3rem;
+    grid-column: 1 / 2;
+    height: 300px;
+}
+
 @media (min-width: 750px) {
     .postcontainer {
         grid-column: 1 / 4;
@@ -119,5 +129,4 @@ article .postIPT {
 
 form {
     margin: 0 auto;
-    /* width: 600px; */
 }
