@@ -115,7 +115,8 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 
 func insertPlaceholdersInDB() {
 	queries := map[string]string{
-		"add some dummy users": fmt.Sprintf(`INSERT INTO users values ("%s", "foo@bar.com", "foo", "s0fj489fhjsof", "bar")`, uuid.NewV4()),
+		"fake user 1": fmt.Sprintf(`INSERT INTO users values ("%s", "foo@bar.com", "foo", "s0fj489fhjsof", "bar")`, uuid.NewV4()),
+		"fake user 2": fmt.Sprintf(`INSERT INTO users values ("%s", "bar@foo.com", "bar", "03444f89fsof", "foobar")`, uuid.NewV4()),
 	}
 
 	for purpose, q := range queries {

@@ -3,6 +3,7 @@ package websockets
 import (
 	"fmt"
 	"real-time-forum/pkg/database"
+	"sort"
 )
 
 // PresenceMessage contains some meta data about PresenceMessages and contains a []Presence (ID is contained in the database users table)
@@ -41,6 +42,10 @@ func GetPresences() ([]Presence, error) {
 	if err != nil {
 		return nil, fmt.Errorf("GetUsers (getPresences) error: %+v\n", err)
 	}
+	sort.SliceStable(users[:], func(i, j int) bool {
+		return users[i].Username < users[j].Username
+	})
+	fmt.Println(users)
 	for _, user := range users {
 		presences = append(presences, Presence{
 			ID:       user.ID,
