@@ -4,7 +4,7 @@
 
 
         <h1 style="text-align: center;">POSTS FORM</h1>
-        <form name="PostForm" onsubmit="return GEEKFORGEEKS()" method="post">
+        <form name="PostForm"onsubmit="return false" method="post">
             <p>Title: <input type="text" size="65" name="Title" /></p>
             <br />
 
@@ -15,7 +15,6 @@
 
             <br />
             <p>
-                <input type="submit" value="Submit" name="Submit" />
-                <input type="reset" value="Reset" name="Reset" />
-            </p>
-    </div>
+                 <button id="post" onclick="postSocket.postHandler(event)">Submit</button>
+            </p>   
+ </div>

@@ -19,6 +19,7 @@ class MySocket {
   }
 
   postHandler(text, myself) {
+    console.log(JSON.stringify(text))
     let post = document.createElement("div");
     let postContainer = document.getElementById('postIPT')
     post.innerHTML = text;
