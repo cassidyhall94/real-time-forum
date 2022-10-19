@@ -1,21 +1,14 @@
-<div id="postcontainer">
-         <h1 style="text-align: center;">POSTS FORM</h1>
-        <form name="PostForm" id="PostForm"onsubmit="return false" method="post">
-            <p>Title: <input type="text" size="65" name="Title" /></p>
-            <br />
-            <p>Category: <input type="text" size="65" name="Category" /></p>
-            <br />
-            <p>Contents: <input type="text" size="65" name="Contents" /></p>
-            <br />
-            <br />
-            <form/>
-            <p>
-            
-                   <button id="post" type="submit" form="PostForm" onclick="postSocket.mouseclick(event)">Submit</button>
-            </p>            
-    </div>
-
-    <div id="submittedposts">
-               
-    </div>
-
+            <div id="postcontainer">
+                <h1 style="text-align: center;">POSTS FORM</h1>
+                <form name="PostForm" id="PostForm" onsubmit="return false" method="post">
+                    <p>Title: <input type="text" size="65" name="Title" />
+                    <p>
+                        <br>
+                    <p>Category: <input type="text" size="65" name="Category" /></p>
+                    <br>
+                    <p>Contents: <input type="text" size="65" name="Contents" /></p>
+                    <br>
+                </form>
+                <button id="post" type="submit" form="PostForm" onclick="postSocket.mouseclick(event)">Submit</button>
+            </div>
+            <div id="submittedposts"></div>

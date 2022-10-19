@@ -18,14 +18,6 @@ class MySocket {
     div.after(msgContainer)
   }
 
-  postHandler(text, myself) {
-    let div = document.createElement("div");
-    div.innerHTML = "<b>" + m.timestamp + " </b>" + "<br>" + "<b>" + m.username + ":</b> " + m.text;
-    let cself = (myself) ? "self" : "";
-    div.className = "msg " + cself;
-    document.getElementById("submittedposts").appendChild(div);
-  }
-
   contentHandler(text) {
     const c = JSON.parse(text)
     document.getElementById("content").innerHTML = c.body;
@@ -65,15 +57,43 @@ class MySocket {
     document.getElementById("chatIPT").value = ""
   }
 
+  postHandler(text, myself) {
+    let div = document.createElement("div");
+    div.innerHTML = "<b>" + m.timestamp + " </b>" + "<br>" + "<b>" + m.username + ":</b> " + m.text;
+    let cself = (myself) ? "self" : "";
+    div.className = "msg " + cself;
+    document.getElementById("submittedposts").appendChild(div);
+  }
+
   requestPost(e) {
+    console.log(e.FormData)
     let m = {
       type: 'post',
       text: e.value,
       timestamp: time(),
       username: "?",
     }
+    console.log(JSON.stringify(m))
     this.mysocket.send(JSON.stringify(m));
     // document.getElementById("chatIPT").value = ""
+  }
+
+  mouseclick(e) {
+    console.log(this.wsType)
+    switch (this.wsType) {
+      case 'post':
+        this.requestPost(e)
+        break;
+      // case 'chat':
+      // this.requestChat()
+      // break;
+      // case 'comment':
+      //   this.requestComment()
+      // break;
+      default:
+        console.log("mouseclick registered for unknown wsType: ", this.wsType)
+        break;
+    }
   }
 
   keypress(e) {
@@ -93,24 +113,6 @@ class MySocket {
           console.log("keypress registered for unknown wsType")
           break;
       }
-    }
-  }
-
-  mouseclick(e) {
-    console.log(this.wsType)
-    switch (this.wsType) {
-      case 'post':
-        this.requestPost(e)
-        break;
-      // case 'chat':
-      // this.requestChat()
-      // break;
-      // case 'comment':
-      //   this.requestComment()
-      // break;
-      default:
-        console.log("mouseclick registered for unknown wsType")
-        break;
     }
   }
 
