@@ -38,7 +38,7 @@ class MySocket {
   }
 
   requestContent(e) {
-    console.log(e.target.id)
+    // console.log(e.target.id)
     this.mysocket.send(JSON.stringify({
       type: "content",
       username: "?",
@@ -73,7 +73,7 @@ class MySocket {
       timestamp: time(),
       username: "?",
     }
-    console.log(JSON.stringify(m))
+    // console.log(JSON.stringify(m))
     this.mysocket.send(JSON.stringify(m));
     // document.getElementById("chatIPT").value = ""
   }

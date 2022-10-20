@@ -18,19 +18,20 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 		if err != nil {
 			log.Fatal(err.Error())
 		}
+		fmt.Println(insertPlaceholders)
 		if insertPlaceholders {
 			defer insertPlaceholdersInDB()
 		}
 		file.Close()
 	}
-	//Open the database SQLite file and create the database table
+	// Open the database SQLite file and create the database table
 	sqliteDatabase, err1 := sql.Open("sqlite3", path)
 	if err1 != nil {
 		log.Fatal(err1.Error())
 	}
-	//Defer the close
+	// Defer the close
 	// defer sqliteDatabase.Close()
-	//Create the database for each user
+	// Create the database for each user
 	_, errTbl := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "users" (
 			"ID"	TEXT,
@@ -45,7 +46,7 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 		log.Fatal(errTbl.Error())
 	}
 
-	//Create the posts table
+	// Create the posts table
 	_, errPosts := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "posts" (
 			"postID"	TEXT,
@@ -59,7 +60,7 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 		fmt.Println("POST ERROR")
 		log.Fatal(errPosts.Error())
 	}
-	//Create the cookies table
+	// Create the cookies table
 	_, errCookie := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "cookies" (
 			"name"	TEXT,
@@ -71,7 +72,7 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 		log.Fatal(errTbl.Error())
 	}
 
-	//Create the table for each user
+	// Create the table for each user
 	_, errComments := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "comments" (
 			"commentID" TEXT,
@@ -84,7 +85,7 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 		fmt.Println("USER ERROR")
 		log.Fatal(errTbl.Error())
 	}
-	//Create the database for each user
+	// Create the database for each user
 	_, errCategories := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "categories" (
 			"postID"	TEXT,
@@ -97,7 +98,7 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 		log.Fatal(errCategories.Error())
 	}
 
-	//Create the database for each user
+	// Create the database for each user
 	_, errChats := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "chats" (
 			"chatID"	TEXT,
