@@ -3,6 +3,7 @@ package websockets
 import (
 	"fmt"
 	"real-time-forum/pkg/database"
+	"time"
 )
 
 type PostMessage struct {
@@ -12,6 +13,9 @@ type PostMessage struct {
 }
 
 func (m PostMessage) Handle(s *socket) error {
+	for _, post := range m.Posts {
+		CreatePost(post)
+	}
 	return m.Broadcast(s)
 }
 
@@ -26,40 +30,11 @@ func (m *PostMessage) Broadcast(s *socket) error {
 	return nil
 }
 
-func GetPostsOnConnect() ([]database.Post, error) {
+func OnPostsConnect(s *socket) error {
+	time.Sleep(1 * time.Second)
 	posts, err := database.GetPosts()
 	if err != nil {
-		return posts, fmt.Errorf("GetPostsOnConnect (GetPosts) error: %+v\n", err)
-	}
-
-	for _, post := range posts {
-		posts = append(posts, database.Post{
-			PostID:     post.PostID,
-			Username:   post.Username,
-			Title:      post.Title,
-			Categories: post.Categories,
-			Body:       post.Body,
-			// Comments: ,
-		})
-	}
-	return posts, nil
-}
-
-func OnPostsConnect(s *socket) error {
-	posts, err := GetPostsOnConnect()
-	if err != nil {
-		return fmt.Errorf("OnPostsConnect (GetPostsOnConnect) error: %+v\n", err)
-	}
-
-	for _, post := range posts {
-		posts = append(posts, database.Post{
-			PostID:     post.PostID,
-			Username:   post.Username,
-			Title:      post.Title,
-			Categories: post.Categories,
-			Body:       post.Body,
-			// Comments: ,
-		})
+		return fmt.Errorf("OnPostsConnect (GetPosts) error: %+v\n", err)
 	}
 	c := &PostMessage{
 		Type:      post,
@@ -67,4 +42,18 @@ func OnPostsConnect(s *socket) error {
 		Posts:     posts,
 	}
 	return c.Broadcast(s)
+}
+
+func CreatePost(post database.Post) error {
+	fmt.Println(post)
+	stmt, err := database.DB.Prepare("INSERT INTO posts (postID, username, title, categories, body) VALUES (uuid.NewV4(), ?, ?, ?, ?);")
+	defer stmt.Close()
+	if err != nil {
+		return fmt.Errorf("CreatePost DB Prepare error: %+v\n", err)
+	}
+	_, err = stmt.Exec(post.PostID, post.Username, post.Title, post.Body, post.Categories)
+	if err != nil {
+		return fmt.Errorf("CreatePost Exec error: %+v\n", err)
+	}
+	return nil
 }

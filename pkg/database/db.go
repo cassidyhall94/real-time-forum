@@ -34,11 +34,13 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 	// Create the database for each user
 	_, errTbl := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "users" (
-			"ID"	TEXT,
+			"ID"	TEXT UNIQUE,
 			"email" 	TEXT UNIQUE,
 			"username"	TEXT UNIQUE,
-			"password"	TEXT,
-			"nickname" TEXT
+			"password"	TEXT UNIQUE,
+			"nickname" TEXT,
+			"gender" TEXT,
+			"age" TEXT
 		);
 	`)
 	if errTbl != nil {
@@ -49,11 +51,11 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 	// Create the posts table
 	_, errPosts := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "posts" (
-			"postID"	TEXT,
-			"userName"	TEXT NOT NULL,
-			"category"	TEXT ,
+			"postID"	TEXT UNIQUE,
+			"username"	TEXT NOT NULL,
+			"categories"	TEXT,
 			"title" TEXT,
-			"postContent" TEXT
+			"body" TEXT
 		);
 	`)
 	if errPosts != nil {
@@ -116,9 +118,12 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 
 func insertPlaceholdersInDB() {
 	queries := map[string]string{
-		"fake user 1": fmt.Sprintf(`INSERT INTO users values ("%s", "foo@bar.com", "foo", "s0fj489fhjsof", "bar")`, uuid.NewV4()),
-		"fake user 2": fmt.Sprintf(`INSERT INTO users values ("%s", "bar@foo.com", "bar", "03444f89fsof", "foobar")`, uuid.NewV4()),
+		"fake user 1": fmt.Sprintf(`INSERT INTO users values ("%s", "foo@bar.com", "foo", "s0fj489fhjsof", "bar", "female", "22")`, uuid.NewV4()),
+
+		"fake user 2": fmt.Sprintf(`INSERT INTO users values ("%s", "bar@foo.com", "bar", "03444f89fsof", "foobar", "male", "30")`, uuid.NewV4()),
+
 		"fake post 1": fmt.Sprintf(`INSERT INTO posts values ("%s", "bar", "golang", "Best Coding Language ever", "Golang is really the best!")`, uuid.NewV4()),
+
 		"fake post 2": fmt.Sprintf(`INSERT INTO posts values ("%s", "foo", "javascript", "I love Javascript!", "JS is really neat!")`, uuid.NewV4()),
 	}
 

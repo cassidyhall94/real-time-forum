@@ -38,150 +38,133 @@ class MySocket {
   }
 
   postHandler(text) {
-    console.log(text)
     const m = JSON.parse(text)
     for (let p of m.posts) {
       let post = document.createElement("div");
-      post.className = "post " + p.postid
-      post.innerHTML = p.text + "<br>" + p.username + "<br>" + p.categories + "<br>" + p.body;
+      post.className = "post " + p.id
+      post.innerHTML = p.title + "<br>" + p.username + "<br>" + p.categories + "<br>" + p.body;
       document.getElementById("submittedposts").appendChild(post)
     }
   }
 
   sendPostRequest(e) {
-    console.log(e)
     let m = {
       type: 'post',
-      text: "foo",
-      timestamp: time(),
-      username: "?",
-    }
-    console.log(JSON.stringify(m))
-    this.mysocket.send(JSON.stringify(m));
-    document.getElementById("postform").value = ""
-  }
+      timestamp: "time",
+      posts: [
+        {
+          postid: e.target.postid,
+          username: e.target.username,
+          title: document.getElementById('posttitle').value,
+          categories: document.getElementById('category').value,
+          body: document.getElementById('postbody').value,
+          // comments: document.getElementById(),
 
-  mouseclick(e) {
-    console.log(this.wsType)
-    switch (this.wsType) {
-      case 'post':
-        this.sendPostRequest(e)
-        break;
-      // case 'chat':
-      // this.requestChat()
-      // break;
-      // case 'comment':
-      //   this.requestComment()
-      // break;
-      default:
-        console.log("mouseclick registered for unknown wsType: ", this.wsType)
-        break;
-    }
-  }
-
-  sendContentRequest(e) {
-    // console.log(e.target.id)
-    this.mysocket.send(JSON.stringify({
-      type: "content",
-      username: "?",
-      resource: e.target.id,
-    }));
-  }
-
-  requestChat() {
-    let m = {
-      type: 'chat',
-      text: document.getElementById("chatIPT").value,
-      timestamp: time(),
-      username: "?",
-    }
-    this.mysocket.send(JSON.stringify(m));
-    document.getElementById("chatIPT").value = ""
-  }
-
-  keypress(e) {
-    if (e.keyCode == 13) {
-      this.wsType = e.target.id.slice(0, -3)
-      switch (this.wsType) {
-        // case 'post':
-        //   this.requestPost()
-        //   break;
-        case 'chat':
-          this.requestChat()
-          break;
-        // case 'comment':
-        //   this.requestComment()
-        //   break;
-        default:
-          console.log("keypress registered for unknown wsType")
-          break;
-      }
-    }
-  }
-
-  connectSocket(URI, handler) {
-    if (URI === 'chat') {
-      this.wsType = 'chat'
-      console.log("Chat Websocket Connected");
-    }
-    if (URI === 'content') {
-      this.wsType = 'content'
-      console.log("Content Websocket Connected");
-    }
-    if (URI === 'post') {
-      this.wsType = 'post'
-      console.log("Post Websocket Connected");
-    }
-    if (URI === 'presence') {
-      this.wsType = 'presence'
-      console.log("Presence Websocket Connected");
-    }
-    if (URI === 'comment') {
-      this.wsType = 'comment'
-      console.log("comment Websocket Connected");
-    }
-
-    var socket = new WebSocket("ws://localhost:8080/" + URI);
-    this.mysocket = socket;
-
-    socket.onmessage = (e) => {
-      console.log("socket message")
-      handler(e.data, false);
-    };
-    socket.onopen = () => {
-      console.log("socket opened");
-    };
-    socket.onclose = () => {
-      console.log("socket closed");
-    };
-  }
-
-  getRegistrationDetails() {
-    //AJAX html request
-    httpRequest = new XMLHttpRequest();
-    if (!httpRequest) {
-      console.log("Giving up :( Cannot create an XMLHTTP instance'");
-    }
-    url = "ws://localhost:8080/";
-    httpRequest.onreadystatechange = sendContents;
-    httpRequest.open("POST", url);
-    httpRequest.setRequestHeader(
-      "Content-type",
-      "application/x-www-form-urlencoded"
-    );
-    var fd = new FormData();
-    fd.set("username", document.getElementById("reg-username").value);
-    fd.set("email", document.getElementById("reg-email").value);
-    fd.set("password", document.getElementsByClassName("reg-password").value);
-
-    httpRequest.send(fd);
-
-    function sendContents() {
-      if (httpRequest.readyState === 4) {
-        if (httpRequest.Status === 200) {
-          alert(httpRequest.responseText);
         }
+      ]
+  }
+    this.mysocket.send(JSON.stringify(m));
+document.getElementById('posttitle').value = ""
+document.getElementById('category').value = ""
+document.getElementById('postbody').value = ""
+  }
+
+sendContentRequest(e) {
+  this.mysocket.send(JSON.stringify({
+    type: "content",
+    username: "?",
+    resource: e.target.id,
+  }));
+}
+
+requestChat() {
+  let m = {
+    type: 'chat',
+    text: document.getElementById("chatIPT").value,
+    timestamp: time(),
+    username: "?",
+  }
+  this.mysocket.send(JSON.stringify(m));
+  document.getElementById("chatIPT").value = ""
+}
+
+keypress(e) {
+  if (e.keyCode == 13) {
+    this.wsType = e.target.id.slice(0, -3)
+    switch (this.wsType) {
+      case 'chat':
+        this.requestChat()
+        break;
+      default:
+        console.log("keypress registered for unknown wsType")
+        break;
+    }
+  }
+}
+
+connectSocket(URI, handler) {
+  if (URI === 'chat') {
+    this.wsType = 'chat'
+    console.log("Chat Websocket Connected");
+  }
+  if (URI === 'content') {
+    this.wsType = 'content'
+    console.log("Content Websocket Connected");
+  }
+  if (URI === 'post') {
+    this.wsType = 'post'
+    console.log("Post Websocket Connected");
+  }
+  if (URI === 'presence') {
+    this.wsType = 'presence'
+    console.log("Presence Websocket Connected");
+  }
+  if (URI === 'comment') {
+    this.wsType = 'comment'
+    console.log("comment Websocket Connected");
+  }
+
+  var socket = new WebSocket("ws://localhost:8080/" + URI);
+  this.mysocket = socket;
+
+  socket.onmessage = (e) => {
+    console.log("socket message")
+    handler(e.data, false);
+  };
+  socket.onopen = () => {
+    console.log("socket opened");
+  };
+  socket.onclose = () => {
+    console.log("socket closed");
+  };
+}
+
+getRegistrationDetails() {
+  //AJAX html request
+  httpRequest = new XMLHttpRequest();
+  if (!httpRequest) {
+    console.log("Giving up :( Cannot create an XMLHTTP instance'");
+  }
+  url = "ws://localhost:8080/";
+  httpRequest.onreadystatechange = sendContents;
+  httpRequest.open("POST", url);
+  httpRequest.setRequestHeader(
+    "Content-type",
+    "application/x-www-form-urlencoded"
+  );
+  var fd = new FormData();
+  fd.set("username", document.getElementById("reg-username").value);
+  fd.set("email", document.getElementById("reg-email").value);
+  fd.set("password", document.getElementsByClassName("reg-password").value);
+
+  httpRequest.send(fd);
+
+  function sendContents() {
+    if (httpRequest.readyState === 4) {
+      if (httpRequest.Status === 200) {
+        alert(httpRequest.responseText);
       }
     }
   }
+}
 }

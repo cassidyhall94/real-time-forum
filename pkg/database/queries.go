@@ -3,20 +3,22 @@ package database
 import "fmt"
 
 type User struct {
-	ID       string
-	Email    string
-	Username string
-	Password string
-	Nickname string
+	ID       string `json:"id,omitempty"`
+	Email    string `json:"email,omitempty"`
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
+	Nickname string `json:"nickname,omitempty"`
+	Gender   string `json:"gender,omitempty"`
+	Age      string `json:"age,omitempty"`
 }
 
 type Post struct {
-	PostID     string    `json:"post_id,omitempty"`
-	Username   string    `json:"username,omitempty"`
-	Title      string    `json:"text,omitempty"`
-	Categories string    `json:"categories,omitempty"`
-	Body       string    `json:"body,omitempty"`
-	Comments   []Comment `json:"comments,omitempty"`
+	PostID     string `json:"post_id,omitempty"`
+	Username   string `json:"username,omitempty"`
+	Title      string `json:"title,omitempty"`
+	Categories string `json:"categories,omitempty"`
+	Body       string `json:"body,omitempty"`
+	// Comments   []Comment `json:"comments,omitempty"`
 }
 
 type Comment struct {
@@ -37,8 +39,11 @@ func GetUsers() ([]User, error) {
 	var username string
 	var password string
 	var nickname string
+	var gender string
+	var age string
+
 	for rows.Next() {
-		err := rows.Scan(&id, &email, &username, &password, &nickname)
+		err := rows.Scan(&id, &email, &username, &password, &nickname, &gender, &age)
 		if err != nil {
 			return users, fmt.Errorf("GetUsers rows.Scan error: %+v\n", err)
 		}
@@ -48,6 +53,8 @@ func GetUsers() ([]User, error) {
 			Username: username,
 			Password: password,
 			Nickname: nickname,
+			Gender:   gender,
+			Age:      age,
 		})
 	}
 	err = rows.Err()
@@ -68,6 +75,7 @@ func GetPosts() ([]Post, error) {
 	var category string
 	var title string
 	var postcontent string
+
 	for rows.Next() {
 		err := rows.Scan(&postid, &username, &category, &title, &postcontent)
 		if err != nil {

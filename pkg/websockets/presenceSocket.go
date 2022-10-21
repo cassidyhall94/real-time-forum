@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"real-time-forum/pkg/database"
 	"sort"
+	"time"
 )
 
 type PresenceMessage struct {
@@ -56,6 +57,7 @@ func GetPresences() ([]Presence, error) {
 }
 
 func OnPresenceConnect(s *socket) error {
+	time.Sleep(1 * time.Second)
 	presences, err := GetPresences()
 	if err != nil {
 		return fmt.Errorf("OnPresenceConnect (GetPresences) error: %+v\n", err)
