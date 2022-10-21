@@ -69,6 +69,11 @@ func SocketCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	case "/post":
 		ptrSocket.t = post
+		// loads the saved posts on window load
+		if err := OnPostsConnect(ptrSocket); err != nil {
+			fmt.Println(err)
+			return
+		}
 	case "/chat":
 		ptrSocket.t = chat
 	case "/presence":

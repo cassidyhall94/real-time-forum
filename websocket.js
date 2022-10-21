@@ -29,7 +29,7 @@ class MySocket {
       let user = document.createElement("button");
       user.addEventListener('click', function (event) {
         event.target.id = "presence"
-        contentSocket.requestContent(event)
+        contentSocket.sendContentRequest(event)
       });
       user.innerHTML = p.username
       user.className = "presence " + p.username
@@ -37,7 +37,49 @@ class MySocket {
     }
   }
 
-  requestContent(e) {
+  postHandler(text) {
+    console.log(text)
+    const m = JSON.parse(text)
+    for (let p of m.posts) {
+      let post = document.createElement("div");
+      post.className = "post " + p.postid
+      post.innerHTML = p.text + "<br>" + p.username + "<br>" + p.categories + "<br>" + p.body;
+      document.getElementById("submittedposts").appendChild(post)
+    }
+  }
+
+  sendPostRequest(e) {
+    console.log(e)
+    let m = {
+      type: 'post',
+      text: "foo",
+      timestamp: time(),
+      username: "?",
+    }
+    console.log(JSON.stringify(m))
+    this.mysocket.send(JSON.stringify(m));
+    document.getElementById("postform").value = ""
+  }
+
+  mouseclick(e) {
+    console.log(this.wsType)
+    switch (this.wsType) {
+      case 'post':
+        this.sendPostRequest(e)
+        break;
+      // case 'chat':
+      // this.requestChat()
+      // break;
+      // case 'comment':
+      //   this.requestComment()
+      // break;
+      default:
+        console.log("mouseclick registered for unknown wsType: ", this.wsType)
+        break;
+    }
+  }
+
+  sendContentRequest(e) {
     // console.log(e.target.id)
     this.mysocket.send(JSON.stringify({
       type: "content",
@@ -55,45 +97,6 @@ class MySocket {
     }
     this.mysocket.send(JSON.stringify(m));
     document.getElementById("chatIPT").value = ""
-  }
-
-  postHandler(text, myself) {
-    let div = document.createElement("div");
-    div.innerHTML = "<b>" + m.timestamp + " </b>" + "<br>" + "<b>" + m.username + ":</b> " + m.text;
-    let cself = (myself) ? "self" : "";
-    div.className = "msg " + cself;
-    document.getElementById("submittedposts").appendChild(div);
-  }
-
-  requestPost(e) {
-    console.log(e.FormData)
-    let m = {
-      type: 'post',
-      text: e.value,
-      timestamp: time(),
-      username: "?",
-    }
-    // console.log(JSON.stringify(m))
-    this.mysocket.send(JSON.stringify(m));
-    // document.getElementById("chatIPT").value = ""
-  }
-
-  mouseclick(e) {
-    console.log(this.wsType)
-    switch (this.wsType) {
-      case 'post':
-        this.requestPost(e)
-        break;
-      // case 'chat':
-      // this.requestChat()
-      // break;
-      // case 'comment':
-      //   this.requestComment()
-      // break;
-      default:
-        console.log("mouseclick registered for unknown wsType: ", this.wsType)
-        break;
-    }
   }
 
   keypress(e) {
