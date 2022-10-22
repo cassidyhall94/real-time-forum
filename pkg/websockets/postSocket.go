@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"real-time-forum/pkg/database"
 	"time"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 type PostMessage struct {
@@ -14,7 +16,10 @@ type PostMessage struct {
 
 func (m PostMessage) Handle(s *socket) error {
 	for _, post := range m.Posts {
-		CreatePost(post)
+		// fmt.Println(post)
+		if err := CreatePost(post); err != nil {
+			return err
+		}
 	}
 	return m.Broadcast(s)
 }
@@ -45,12 +50,20 @@ func OnPostsConnect(s *socket) error {
 }
 
 func CreatePost(post database.Post) error {
-	fmt.Println(post)
-	stmt, err := database.DB.Prepare("INSERT INTO posts (postID, username, title, categories, body) VALUES (uuid.NewV4(), ?, ?, ?, ?);")
+	stmt, err := database.DB.Prepare("INSERT INTO posts (postID, username, title, categories, body) VALUES (?, ?, ?, ?, ?);")
 	defer stmt.Close()
 	if err != nil {
 		return fmt.Errorf("CreatePost DB Prepare error: %+v\n", err)
 	}
+	if post.PostID == "" {
+		post.PostID = uuid.NewV4().String()
+	}
+
+	// Add placeholder username - remove once login/sessions are working
+	if post.Username == "" {
+		post.Username = "Cassidy"
+	}
+	
 	_, err = stmt.Exec(post.PostID, post.Username, post.Title, post.Body, post.Categories)
 	if err != nil {
 		return fmt.Errorf("CreatePost Exec error: %+v\n", err)
