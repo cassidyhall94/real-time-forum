@@ -52,7 +52,7 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 	_, errPosts := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "posts" (
 			"postID"	TEXT UNIQUE,
-			"username"		
+			"username"		TEXT,
 			"categories"	TEXT,
 			"title" TEXT,
 			"body" TEXT

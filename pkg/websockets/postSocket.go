@@ -63,8 +63,8 @@ func CreatePost(post database.Post) error {
 	if post.Username == "" {
 		post.Username = "Cassidy"
 	}
-	
-	_, err = stmt.Exec(post.PostID, post.Username, post.Title, post.Body, post.Categories)
+
+	_, err = stmt.Exec(post.PostID, post.Username, post.Title, post.Categories, post.Body)
 	if err != nil {
 		return fmt.Errorf("CreatePost Exec error: %+v\n", err)
 	}
