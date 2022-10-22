@@ -18,26 +18,29 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 		if err != nil {
 			log.Fatal(err.Error())
 		}
+		fmt.Println(insertPlaceholders)
 		if insertPlaceholders {
 			defer insertPlaceholdersInDB()
 		}
 		file.Close()
 	}
-	//Open the database SQLite file and create the database table
+	// Open the database SQLite file and create the database table
 	sqliteDatabase, err1 := sql.Open("sqlite3", path)
 	if err1 != nil {
 		log.Fatal(err1.Error())
 	}
-	//Defer the close
+	// Defer the close
 	// defer sqliteDatabase.Close()
-	//Create the database for each user
+	// Create the database for each user
 	_, errTbl := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "users" (
-			"ID"	TEXT,
+			"ID"	TEXT UNIQUE,
 			"email" 	TEXT UNIQUE,
 			"username"	TEXT UNIQUE,
-			"password"	TEXT,
-			"nickname" TEXT
+			"password"	TEXT UNIQUE,
+			"nickname" TEXT,
+			"gender" TEXT,
+			"age" TEXT
 		);
 	`)
 	if errTbl != nil {
@@ -45,21 +48,21 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 		log.Fatal(errTbl.Error())
 	}
 
-	//Create the posts table
+	// Create the posts table
 	_, errPosts := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "posts" (
-			"postID"	TEXT,
-			"userName"	TEXT NOT NULL,
-			"category"	TEXT ,
+			"postID"	TEXT UNIQUE,
+			"username"		TEXT,
+			"categories"	TEXT,
 			"title" TEXT,
-			"postContent" TEXT
+			"body" TEXT
 		);
 	`)
 	if errPosts != nil {
 		fmt.Println("POST ERROR")
 		log.Fatal(errPosts.Error())
 	}
-	//Create the cookies table
+	// Create the cookies table
 	_, errCookie := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "cookies" (
 			"name"	TEXT,
@@ -71,7 +74,7 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 		log.Fatal(errTbl.Error())
 	}
 
-	//Create the table for each user
+	// Create the table for each user
 	_, errComments := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "comments" (
 			"commentID" TEXT,
@@ -84,7 +87,7 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 		fmt.Println("USER ERROR")
 		log.Fatal(errTbl.Error())
 	}
-	//Create the database for each user
+	// Create the database for each user
 	_, errCategories := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "categories" (
 			"postID"	TEXT,
@@ -97,7 +100,7 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 		log.Fatal(errCategories.Error())
 	}
 
-	//Create the database for each user
+	// Create the database for each user
 	_, errChats := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "chats" (
 			"chatID"	TEXT,
@@ -115,8 +118,13 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 
 func insertPlaceholdersInDB() {
 	queries := map[string]string{
-		"fake user 1": fmt.Sprintf(`INSERT INTO users values ("%s", "foo@bar.com", "foo", "s0fj489fhjsof", "bar")`, uuid.NewV4()),
-		"fake user 2": fmt.Sprintf(`INSERT INTO users values ("%s", "bar@foo.com", "bar", "03444f89fsof", "foobar")`, uuid.NewV4()),
+		"fake user 1": fmt.Sprintf(`INSERT INTO users values ("%s", "foo@bar.com", "foo", "s0fj489fhjsof", "bar", "female", "22")`, uuid.NewV4()),
+
+		"fake user 2": fmt.Sprintf(`INSERT INTO users values ("%s", "bar@foo.com", "bar", "03444f89fsof", "foobar", "male", "30")`, uuid.NewV4()),
+
+		"fake post 1": fmt.Sprintf(`INSERT INTO posts values ("%s", "bar", "golang", "Best Coding Language ever", "Golang is really the best!")`, uuid.NewV4()),
+
+		"fake post 2": fmt.Sprintf(`INSERT INTO posts values ("%s", "foo", "javascript", "I love Javascript!", "JS is really neat!")`, uuid.NewV4()),
 	}
 
 	for purpose, q := range queries {

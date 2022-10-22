@@ -18,16 +18,6 @@ class MySocket {
     div.after(msgContainer)
   }
 
-  postHandler(text, myself) {
-    let post = document.createElement("div");
-    let postContainer = document.getElementById('postIPT')
-    post.innerHTML = text;
-    var cself = (myself) ? "self" : "";
-    post.className = "post " + cself;
-    document.getElementById("postcontainer").appendChild(post);
-    post.after(postContainer)
-  }
-
   contentHandler(text) {
     const c = JSON.parse(text)
     document.getElementById("content").innerHTML = c.body;
@@ -39,7 +29,7 @@ class MySocket {
       let user = document.createElement("button");
       user.addEventListener('click', function (event) {
         event.target.id = "presence"
-        contentSocket.requestContent(event)
+        contentSocket.sendContentRequest(event)
       });
       user.innerHTML = p.username
       user.className = "presence " + p.username
@@ -47,8 +37,40 @@ class MySocket {
     }
   }
 
-  requestContent(e) {
-    console.log(e.target.id)
+  postHandler(text) {
+    const m = JSON.parse(text)
+    for (let p of m.posts) {
+      console.log(p.postID)
+      let post = document.createElement("div");
+      post.className = "submittedpost"
+      post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "Username: " + p.username + "<br>" + "Category/Categories: " + p.categories + "<br>" + p.body;
+      document.getElementById("submittedposts").appendChild(post)
+    }
+  }
+
+  sendPostRequest(e) {
+    let m = {
+      type: 'post',
+      timestamp: "time",
+      posts: [
+        {
+          postid: e.target.postid,
+          username: e.target.username,
+          title: document.getElementById('posttitle').value,
+          categories: document.getElementById('category').value,
+          body: document.getElementById('postbody').value,
+          // comments: document.getElementById(),
+
+        }
+      ]
+    }
+    this.mysocket.send(JSON.stringify(m));
+    document.getElementById('posttitle').value = ""
+    document.getElementById('category').value = ""
+    document.getElementById('postbody').value = ""
+  }
+
+  sendContentRequest(e) {
     this.mysocket.send(JSON.stringify({
       type: "content",
       username: "?",
@@ -67,33 +89,18 @@ class MySocket {
     document.getElementById("chatIPT").value = ""
   }
 
-  requestPost() {
-    let txt = document.getElementById("postIPT").value;
-    let line = "<b>" + time + " </b>" + "<br>" + "<b>You:</b> " + txt
-    this.postHandler(line, true);
-    this.mysocket.send(txt);
-    document.getElementById("postIPT").value = ""
-  }
-
   keypress(e) {
     if (e.keyCode == 13) {
       this.wsType = e.target.id.slice(0, -3)
       switch (this.wsType) {
-        case 'post':
-          this.requestPost()
-          break;
         case 'chat':
           this.requestChat()
           break;
-        case 'comment':
-          this.requestComment()
-          break;
-          default:
+        default:
           console.log("keypress registered for unknown wsType")
           break;
       }
     }
-
   }
 
   connectSocket(URI, handler) {
@@ -132,7 +139,7 @@ class MySocket {
       console.log("socket closed");
     };
   }
-  
+
   getRegistrationDetails() {
     //AJAX html request
     httpRequest = new XMLHttpRequest();

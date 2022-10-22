@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"real-time-forum/pkg/database"
 	"sort"
+	"time"
 )
 
-// PresenceMessage contains some meta data about PresenceMessages and contains a []Presence (ID is contained in the database users table)
 type PresenceMessage struct {
 	Type      messageType `json:"type"`
 	Timestamp string      `json:"timestamp"`
@@ -45,7 +45,6 @@ func GetPresences() ([]Presence, error) {
 	sort.SliceStable(users[:], func(i, j int) bool {
 		return users[i].Username < users[j].Username
 	})
-	fmt.Println(users)
 	for _, user := range users {
 		presences = append(presences, Presence{
 			ID:       user.ID,
@@ -58,6 +57,7 @@ func GetPresences() ([]Presence, error) {
 }
 
 func OnPresenceConnect(s *socket) error {
+	time.Sleep(1 * time.Second)
 	presences, err := GetPresences()
 	if err != nil {
 		return fmt.Errorf("OnPresenceConnect (GetPresences) error: %+v\n", err)
@@ -66,26 +66,6 @@ func OnPresenceConnect(s *socket) error {
 		Type:      presence,
 		Timestamp: "",
 		Presences: presences,
-		// Presences: []Presence{
-		// {
-		// 	ID:                "id1",
-		// 	Username:          "user1",
-		// 	Online:            true,
-		// 	LastContactedTime: "213243532",
-		// },
-		// {
-		// 	ID:                "id2",
-		// 	Username:          "user2",
-		// 	Online:            true,
-		// 	LastContactedTime: "2132432",
-		// },
-		// {
-		// 	ID:                "id3",
-		// 	Username:          "user3",
-		// 	Online:            false,
-		// 	LastContactedTime: "2133532",
-		// },
-		// },
 	}
 	return c.Broadcast(s)
 }

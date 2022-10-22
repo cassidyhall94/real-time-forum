@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"text/template"
+	"time"
 )
 
 type ContentMessage struct {
@@ -26,6 +27,7 @@ func (m *ContentMessage) Broadcast(s *socket) error {
 }
 
 func OnContentConnect(s *socket) error {
+	time.Sleep(1 * time.Second)
 	tpl, err := template.ParseGlob("templates/*")
 	if err != nil {
 		return err
