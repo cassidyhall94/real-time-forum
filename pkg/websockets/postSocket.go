@@ -11,10 +11,11 @@ import (
 type PostMessage struct {
 	Type      messageType     `json:"type,omitempty"`
 	Timestamp string          `json:"timestamp,omitempty"`
-	Return    string          `json:"return,omitempty"` // Return field for number of posts displayed/sent
+	Return    string          `json:"return,omitempty"`
 	Posts     []database.Post `json:"posts,omitempty"`
 }
 
+// TODO: add code for handling comments and attaching to post
 func (m PostMessage) Handle(s *socket) error {
 	if m.Return == "all posts" {
 		if err := OnPostsConnect(s); err != nil {
@@ -41,6 +42,7 @@ func (m *PostMessage) Broadcast(s *socket) error {
 	return nil
 }
 
+// TODO: add timestamp
 func OnPostsConnect(s *socket) error {
 	time.Sleep(1 * time.Second)
 	posts, err := database.GetPosts()
@@ -74,6 +76,28 @@ func CreatePost(post database.Post) error {
 	_, err = stmt.Exec(post.PostID, post.Username, post.Title, post.Categories, post.Body)
 	if err != nil {
 		return fmt.Errorf("CreatePost Exec error: %+v\n", err)
+	}
+	return nil
+}
+
+func CreateComment(comment database.Comment) error {
+	stmt, err := database.DB.Prepare("INSERT INTO comments (commentID, postID, username, commentText) VALUES (?, ?, ?, ?);")
+	defer stmt.Close()
+	if err != nil {
+		return fmt.Errorf("CreateComment DB Prepare error: %+v\n", err)
+	}
+	if comment.CommentID == "" {
+		comment.CommentID = uuid.NewV4().String()
+	}
+
+	// TODO: remove placeholder username once login/sessions are working
+	if comment.Username == "" {
+		comment.Username = "Cassidy"
+	}
+
+	_, err = stmt.Exec(comment.CommentID, comment.PostID, comment.Username, comment.Body)
+	if err != nil {
+		return fmt.Errorf("CreateComment Exec error: %+v\n", err)
 	}
 	return nil
 }

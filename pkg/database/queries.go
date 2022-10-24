@@ -13,12 +13,12 @@ type User struct {
 }
 
 type Post struct {
-	PostID     string `json:"post_id,omitempty"`
-	Username   string `json:"username,omitempty"`
-	Title      string `json:"title,omitempty"`
-	Categories string `json:"categories,omitempty"`
-	Body       string `json:"body,omitempty"`
-	// Comments   []Comment `json:"comments,omitempty"`
+	PostID     string    `json:"post_id,omitempty"`
+	Username   string    `json:"username,omitempty"`
+	Title      string    `json:"title,omitempty"`
+	Categories string    `json:"categories,omitempty"`
+	Body       string    `json:"body,omitempty"`
+	Comments   []Comment `json:"comments,omitempty"`
 }
 
 type Comment struct {
@@ -94,4 +94,34 @@ func GetPosts() ([]Post, error) {
 		return posts, err
 	}
 	return posts, nil
+}
+
+func GetComments() ([]Comment, error) {
+	comments := []Comment{}
+	rows, err := DB.Query(`SELECT * FROM comments`)
+	if err != nil {
+		return comments, fmt.Errorf("GetComments DB Query error: %+v\n", err)
+	}
+	var postid string
+	var commentid string
+	var username string
+	var commentcontent string
+
+	for rows.Next() {
+		err := rows.Scan(&postid, &commentid, &username, &commentcontent)
+		if err != nil {
+			return comments, fmt.Errorf("GetComments rows.Scan error: %+v\n", err)
+		}
+		comments = append(comments, Comment{
+			CommentID: commentid,
+			PostID:    postid,
+			Username:  username,
+			Body:      commentcontent,
+		})
+	}
+	err = rows.Err()
+	if err != nil {
+		return comments, err
+	}
+	return comments, nil
 }
