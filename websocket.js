@@ -40,7 +40,6 @@ class MySocket {
   postHandler(text) {
     const m = JSON.parse(text)
     for (let p of m.posts) {
-      console.log(p.postID)
       let post = document.createElement("div");
       post.className = "submittedpost"
       post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "Username: " + p.username + "<br>" + "Category/Categories: " + p.categories + "<br>" + p.body;
@@ -48,7 +47,7 @@ class MySocket {
     }
   }
 
-  sendPostRequest(e) {
+  sendNewPostRequest(e) {
     let m = {
       type: 'post',
       timestamp: "time",
@@ -60,7 +59,6 @@ class MySocket {
           categories: document.getElementById('category').value,
           body: document.getElementById('postbody').value,
           // comments: document.getElementById(),
-
         }
       ]
     }
@@ -70,6 +68,14 @@ class MySocket {
     document.getElementById('postbody').value = ""
   }
 
+  sendSubmittedPostsRequest(e) {
+    this.mysocket.send(JSON.stringify({
+      type: "post",
+      return: "all posts",
+    }));
+  }
+
+  // TODO: insert username variable
   sendContentRequest(e) {
     this.mysocket.send(JSON.stringify({
       type: "content",

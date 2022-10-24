@@ -11,14 +11,20 @@ import (
 type PostMessage struct {
 	Type      messageType     `json:"type,omitempty"`
 	Timestamp string          `json:"timestamp,omitempty"`
+	Return    string          `json:"return,omitempty"` // Return field for number of posts displayed/sent
 	Posts     []database.Post `json:"posts,omitempty"`
 }
 
 func (m PostMessage) Handle(s *socket) error {
-	for _, post := range m.Posts {
-		// fmt.Println(post)
-		if err := CreatePost(post); err != nil {
+	if m.Return == "all posts" {
+		if err := OnPostsConnect(s); err != nil {
 			return err
+		}
+	} else {
+		for _, post := range m.Posts {
+			if err := CreatePost(post); err != nil {
+				return err
+			}
 		}
 	}
 	return m.Broadcast(s)
@@ -44,6 +50,7 @@ func OnPostsConnect(s *socket) error {
 	c := &PostMessage{
 		Type:      post,
 		Timestamp: "",
+		Return:    "all posts",
 		Posts:     posts,
 	}
 	return c.Broadcast(s)
@@ -59,7 +66,7 @@ func CreatePost(post database.Post) error {
 		post.PostID = uuid.NewV4().String()
 	}
 
-	// Add placeholder username - remove once login/sessions are working
+	// TODO: remove placeholder username once login/sessions are working
 	if post.Username == "" {
 		post.Username = "Cassidy"
 	}

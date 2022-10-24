@@ -31,7 +31,7 @@
         </div>
 
         <button id="postButton" style="margin-top: 10px; margin-bottom: 10px"
-            onclick="postSocket.sendPostRequest(event)">Submit</button>
+            onclick="postSocket.sendNewPostRequest(event)">Submit</button>
 
     </form>
 </div>
