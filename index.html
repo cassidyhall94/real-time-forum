@@ -14,15 +14,50 @@
 
 <body>
     <article>
-
-        <div id="content">
-
+        <div id="postcontainer">
+            <style>
+                form {
+                    text-align: center;
+                    background-color: #A39C95;
+                    margin-top: 10px;
+                    margin-bottom: 10px;
+                    margin-left: 10px;
+                    margin-right: 10px;
+                    border: 2px solid rgb(0, 0, 0);
+                }
+            </style>
+        
+            <form id="postform" onsubmit="return false">
+        
+                <h3>SUBMIT A POST</h3>
+        
+                <div class="titleField">
+                    <input type="text" style="width: 200px; text-align: center" id="posttitle" name="title"
+                        placeholder="Enter your Title" required />
+                </div>
+        
+                <div class="categoryField">
+                    <input type="text" style="width: 200px; text-align: center" id="category" name="category"
+                        placeholder="Enter your Category" required />
+                </div>
+        
+                <div class="postBodyField">
+                    <input type="text" style="width: 200px; height: 200px; text-align: center" id="postbody" name="postbody"
+                        placeholder="Enter your Post Body" required />
+                </div>
+        
+                <button id="postButton" style="margin-top: 10px; margin-bottom: 10px"
+                    onclick="postSocket.sendNewPostRequest(event)">Submit</button>
+        
+            </form>
         </div>
 
     </article>
 
     <section>
-        <div id="submittedposts"> </div>
+        <div id="content">
+
+        </div>
     </section>
 
     <aside>
