@@ -40,7 +40,6 @@ class MySocket {
   postHandler(text) {
     const m = JSON.parse(text)
     for (let p of m.posts) {
-      // console.log(p)
       let post = document.createElement("div");
       post.className = "submittedpost " + p.post_id
       post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "Username: " + p.username + "<br>" + "Category/Categories: " + p.categories + "<br>" + p.body + "<br>";
@@ -49,6 +48,7 @@ class MySocket {
       button.innerHTML = "Comments"
       button.setAttribute("data-postid", p.post_id)
       button.addEventListener('click', function (event) {
+        // if post has comment/comments than call commentHandler
         event.target.id = "comment"
         contentSocket.sendContentRequest(event)
         postSocket.sendSubmittedCommentsRequest(p.post_id)
@@ -59,14 +59,12 @@ class MySocket {
   }
 
   commentHandler(text) {
-    console.log(text)
     const m = JSON.parse(text)
-
-        let comment = document.createElement("div");
-        comment.className = "submittedcomment" + m.commentid
-        comment.innerHTML = "Username: " + m.username + "<br>" + m.body;
-        let id = document.getElementById("data-postid")
-        document.getElementById("submittedpost" + id).appendChild(comment)
+    console.log(m)
+    let comment = document.createElement("div");
+    comment.className = "submittedcomment" + m.commentid
+    comment.innerHTML = "Username: " + m.username + "<br>" + m.body;
+    document.getElementById("submittedpost " + m.postid).appendChild(comment)
   }
 
   // TODO: add timestamp
@@ -86,16 +84,17 @@ class MySocket {
               commentid: "",
               postid: e.target.post_id,
               username: "",
-              body: document.getElementById('commentbody'.value,)
+              body: document.getElementById('commentbody').value,
             }
           ]
         }
       ]
     }
     this.mysocket.send(JSON.stringify(m));
-    document.getElementById('bodycomment').value = ""
+    document.getElementById('commentbody').value = ""
   }
 
+  // makes a call to the backend for comments saved in the database
   sendSubmittedCommentsRequest(postid) {
     this.mysocket.send(JSON.stringify({
       type: "post",

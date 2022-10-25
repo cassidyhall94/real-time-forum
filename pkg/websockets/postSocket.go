@@ -17,21 +17,24 @@ type PostMessage struct {
 
 // TODO: add code for handling comments and attaching to post
 func (m PostMessage) Handle(s *socket) error {
+	fmt.Println(m.Return)
 	if m.Return == "all posts" {
 		if err := OnPostsConnect(s); err != nil {
 			return err
 		}
+		m.Return = ""
 	} else {
-		for i, post := range m.Posts {
-			if m.Return == post[i].postID {
-				if err := CreatePost(post[i]); err != nil {
+		for _, post := range m.Posts {
+			if m.Return == post.PostID {
+				if err := OnCommentsConnect(s); err != nil {
+					return err
+				}
+				m.Return = ""
+			} else {
+				if err := CreatePost(post); err != nil {
 					return err
 				}
 			}
-			return m.Broadcast(s)
-		}
-		if err := CreatePost(post); err != nil {
-			return err
 		}
 		return m.Broadcast(s)
 	}
@@ -50,6 +53,38 @@ func (m *PostMessage) Broadcast(s *socket) error {
 }
 
 // TODO: add timestamp
+func OnCommentsConnect(s *socket) error {
+	posts, err := database.GetPosts()
+	if err != nil {
+		return fmt.Errorf("OnPostsConnect (GetPosts) error: %+v\n", err)
+	}
+
+	for _, pts := range posts {
+		comments, err := database.GetComments()
+		if err != nil {
+			return fmt.Errorf("OnCommentsConnect (GetComments) error: %+v\n", err)
+		}
+		c := &PostMessage{
+			Type:      post,
+			Timestamp: "",
+			Return:    "all posts",
+			Posts: []database.Post{
+				{
+					PostID:     pts.PostID,
+					Username:   pts.Username,
+					Title:      pts.Title,
+					Categories: pts.Categories,
+					Body:       pts.Body,
+					Comments:   comments,
+				},
+			},
+		}
+		c.Broadcast(s)
+	}
+	return nil
+}
+
+// TODO: add timestamp
 func OnPostsConnect(s *socket) error {
 	time.Sleep(1 * time.Second)
 	posts, err := database.GetPosts()
@@ -61,27 +96,6 @@ func OnPostsConnect(s *socket) error {
 		Timestamp: "",
 		Return:    "all posts",
 		Posts:     posts,
-	}
-	return c.Broadcast(s)
-}
-
-// TODO: add timestamp
-func OnCommentsConnect(s *socket) error {
-	posts, err := database.GetPosts()
-	if err != nil {
-		return fmt.Errorf("OnPostsConnect (GetPosts) error: %+v\n", err)
-	}
-	comments, err := database.GetComments()
-	if err != nil {
-		return fmt.Errorf("OnCommentsConnect (GetComments) error: %+v\n", err)
-	}
-	c := &PostMessage{
-		Type:      post,
-		Timestamp: "",
-		Return:    "all posts",
-		Posts: posts{
-			Comments: comments,
-		},
 	}
 	return c.Broadcast(s)
 }
@@ -105,7 +119,6 @@ func CreatePost(post database.Post) error {
 	if err != nil {
 		return fmt.Errorf("CreatePost Exec error: %+v\n", err)
 	}
-	fmt.Println(post)
 	return nil
 }
 
