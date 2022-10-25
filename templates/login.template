@@ -7,24 +7,10 @@
 
 <h1 style="text-align: center;">REGISTRATION FORM</h1>
 <form name="RegForm" onsubmit="return GEEKFORGEEKS()" method="post">
-
-    <p>First Name: <input type="text" size="65" name="Name" /></p>
-    <br /> 
-    
-    <p>Last Name: <input type="text" size="65" name="Telephone" /></p>
-
-    <br />
-
     <p>Nickname: <input type="text" size="65" name="Name" /></p>
     <br />
 
     <p>Age: <input type="text" size="65" name="Address" /></p>
-    <br />
-
-    <p>Email: <input type="text" size="65" name="Email" /></p>
-    <br />
-
-    <p>Password: <input type="text" size="65" name="Password" /></p>
     <br />
 
     <p>
@@ -39,6 +25,20 @@
     </p>
 
     <br />
+
+    <p>First Name: <input type="text" size="65" name="Name" /></p>
+    <br /> 
+    
+    <p>Last Name: <input type="text" size="65" name="Telephone" /></p>
+    <br />
+
+    <p>Email: <input type="text" size="65" name="Email" /></p>
+    <br />
+
+    <p>Password: <input type="text" size="65" name="Password" /></p>
+    <br />
+
+    
     <br />
 
     <p>

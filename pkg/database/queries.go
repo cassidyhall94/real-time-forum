@@ -4,17 +4,18 @@ import "fmt"
 
 type User struct {
 	ID       string `json:"id,omitempty"`
-	Email    string `json:"email,omitempty"`
-	Username string `json:"username,omitempty"`
-	Password string `json:"password,omitempty"`
 	Nickname string `json:"nickname,omitempty"`
-	Gender   string `json:"gender,omitempty"`
 	Age      string `json:"age,omitempty"`
+	Gender   string `json:"gender,omitempty"`
+	FirstName string `json:"firstname,omitempty"`
+	LastName string `json:"lastname,omitempty"`
+	Email    string `json:"email,omitempty"`
+	Password string `json:"password,omitempty"`	
 }
 
 type Post struct {
 	PostID     string    `json:"post_id,omitempty"`
-	Username   string    `json:"username,omitempty"`
+	Nickname   string    `json:"nickname,omitempty"`
 	Title      string    `json:"title,omitempty"`
 	Categories string    `json:"categories,omitempty"`
 	Body       string    `json:"body,omitempty"`
@@ -24,7 +25,7 @@ type Post struct {
 type Comment struct {
 	CommentID string `json:"comment_id,omitempty"`
 	PostID    string `json:"post_id,omitempty"`
-	Username  string `json:"username,omitempty"`
+	Nickname  string `json:"nickname,omitempty"`
 	Body      string `json:"body,omitempty"`
 }
 
@@ -35,26 +36,29 @@ func GetUsers() ([]User, error) {
 		return users, fmt.Errorf("GetUsers DB Query error: %+v\n", err)
 	}
 	var id string
-	var email string
-	var username string
-	var password string
 	var nickname string
-	var gender string
 	var age string
+	var gender string
+	var firstname string
+	var lastname string
+	var email string
+	var password string
+	
 
 	for rows.Next() {
-		err := rows.Scan(&id, &email, &username, &password, &nickname, &gender, &age)
+		err := rows.Scan(&id, &nickname, &age, &gender, &firstname, &lastname, &email,  &password)
 		if err != nil {
 			return users, fmt.Errorf("GetUsers rows.Scan error: %+v\n", err)
 		}
 		users = append(users, User{
 			ID:       id,
-			Email:    email,
-			Username: username,
-			Password: password,
 			Nickname: nickname,
-			Gender:   gender,
 			Age:      age,
+			Gender:   gender,
+			FirstName: firstname,
+			LastName: lastname,
+			Email:    email,
+			Password: password,
 		})
 	}
 	err = rows.Err()
@@ -71,19 +75,19 @@ func GetPosts() ([]Post, error) {
 		return posts, fmt.Errorf("GetPosts DB Query error: %+v\n", err)
 	}
 	var postid string
-	var username string
+	var nickname string
 	var category string
 	var title string
 	var postcontent string
 
 	for rows.Next() {
-		err := rows.Scan(&postid, &username, &category, &title, &postcontent)
+		err := rows.Scan(&postid, &nickname, &category, &title, &postcontent)
 		if err != nil {
 			return posts, fmt.Errorf("GetPosts rows.Scan error: %+v\n", err)
 		}
 		posts = append(posts, Post{
 			PostID:     postid,
-			Username:   username,
+			Nickname:   nickname,
 			Categories: category,
 			Title:      title,
 			Body:       postcontent,
@@ -104,18 +108,18 @@ func GetComments() ([]Comment, error) {
 	}
 	var postid string
 	var commentid string
-	var username string
+	var nickname string
 	var commentcontent string
 
 	for rows.Next() {
-		err := rows.Scan(&postid, &commentid, &username, &commentcontent)
+		err := rows.Scan(&postid, &commentid, &nickname, &commentcontent)
 		if err != nil {
 			return comments, fmt.Errorf("GetComments rows.Scan error: %+v\n", err)
 		}
 		comments = append(comments, Comment{
 			CommentID: commentid,
 			PostID:    postid,
-			Username:  username,
+			Nickname:  nickname,
 			Body:      commentcontent,
 		})
 	}

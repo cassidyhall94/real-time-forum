@@ -59,7 +59,7 @@ func OnPostsConnect(s *socket) error {
 }
 
 func CreatePost(post database.Post) error {
-	stmt, err := database.DB.Prepare("INSERT INTO posts (postID, username, title, categories, body) VALUES (?, ?, ?, ?, ?);")
+	stmt, err := database.DB.Prepare("INSERT INTO posts (postID, nickname, title, categories, body) VALUES (?, ?, ?, ?, ?);")
 	defer stmt.Close()
 	if err != nil {
 		return fmt.Errorf("CreatePost DB Prepare error: %+v\n", err)
@@ -69,11 +69,11 @@ func CreatePost(post database.Post) error {
 	}
 
 	// TODO: remove placeholder username once login/sessions are working
-	if post.Username == "" {
-		post.Username = "Cassidy"
+	if post.Nickname == "" {
+		post.Nickname = "Cassidy"
 	}
 
-	_, err = stmt.Exec(post.PostID, post.Username, post.Title, post.Categories, post.Body)
+	_, err = stmt.Exec(post.PostID, post.Nickname, post.Title, post.Categories, post.Body)
 	if err != nil {
 		return fmt.Errorf("CreatePost Exec error: %+v\n", err)
 	}
@@ -81,7 +81,7 @@ func CreatePost(post database.Post) error {
 }
 
 func CreateComment(comment database.Comment) error {
-	stmt, err := database.DB.Prepare("INSERT INTO comments (commentID, postID, username, commentText) VALUES (?, ?, ?, ?);")
+	stmt, err := database.DB.Prepare("INSERT INTO comments (commentID, postID, nickname, commentText) VALUES (?, ?, ?, ?);")
 	defer stmt.Close()
 	if err != nil {
 		return fmt.Errorf("CreateComment DB Prepare error: %+v\n", err)
@@ -91,11 +91,11 @@ func CreateComment(comment database.Comment) error {
 	}
 
 	// TODO: remove placeholder username once login/sessions are working
-	if comment.Username == "" {
-		comment.Username = "Cassidy"
+	if comment.Nickname == "" {
+		comment.Nickname = "Cassidy"
 	}
 
-	_, err = stmt.Exec(comment.CommentID, comment.PostID, comment.Username, comment.Body)
+	_, err = stmt.Exec(comment.CommentID, comment.PostID, comment.Nickname, comment.Body)
 	if err != nil {
 		return fmt.Errorf("CreateComment Exec error: %+v\n", err)
 	}
