@@ -1,13 +1,27 @@
-<form>
-        <div class="input">
-            <div class="input-top">
-                <input required type="text" id="name" placeholder="Name">
-                <input required type="email" id="email" placeholder="Email">
-            </div>
-            <textarea required placeholder="Your Comment" id="comment" cols="30" rows="10"></textarea>
-            <button id="button" type="submit" onclick="myFunction();">Post a Comment</button>
+<div id="commentcontainer">
+    <style>
+        form {
+            text-align: center;
+            background-color: #A39C95;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            margin-left: 10px;
+            margin-right: 10px;
+            border: 2px solid rgb(0, 0, 0);
+        }
+    </style>
+
+    <form id="commentform" onsubmit="return false">
+
+        <h3>SUBMIT A COMMENT</h3>
+
+        <div class="commentBodyField">
+            <input type="text" style="width: 200px; height: 200px; text-align: center" id="commentbody"
+                name="commentbody" placeholder="Enter your Comment Body" required />
+        </div>
+
+        <button id="commentButton" style="margin-top: 10px; margin-bottom: 10px"
+            onclick="postSocket.sendNewCommentRequest(event)">Submit</button>
+
     </form>
-    <ul id="comment-list">
-    <!-- data are comes from local storage -->
-    </ul>
-    </div>
+</div>

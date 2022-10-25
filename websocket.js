@@ -42,24 +42,31 @@ class MySocket {
     for (let p of m.posts) {
       let post = document.createElement("div");
       post.className = "submittedpost " + p.postid 
-      post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "Username: " + p.username + "<br>" + "Category/Categories: " + p.categories + "<br>" + p.body;
+      post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "Username: " + p.username + "<br>" + "Category/Categories: " + p.categories + "<br>" + p.body + "<br>";
       let button = document.createElement("button")
+      button.classname = "addcomment"
+      button.innerHTML = "Add a Comment"
+      button.addEventListener('click', function (event) {
+        event.target.id = "comment"
+        contentSocket.sendContentRequest(event)
+      });
+      post.appendChild(button)
       document.getElementById("submittedposts").appendChild(post)
     }
   }
 
-  // commentHandler(text) {
-  //   const m = JSON.parse(text)
-  //   for (let p of m.posts) {
-  //     for (let c of p.comments) {
+  commentHandler(text) {
+    const m = JSON.parse(text)
+    for (let p of m.posts) {
+      for (let c of p.comments) {
 
-  //     }
-  //     let comment = document.createElement("div");
-  //     comment.className = "submittedcomment" + c.commentid
-  //     comment.innerHTML = "Username: " + c.username + "<br>" + c.body;
-  //     document.getElementById("").appendChild(comment)
-  //   }
-  // }
+      }
+      let comment = document.createElement("div");
+      comment.className = "submittedcomment" + c.commentid
+      comment.innerHTML = "Username: " + c.username + "<br>" + c.body;
+      document.getElementById("").appendChild(comment)
+    }
+  }
 
   // TODO: add timestamp
   sendNewPostRequest(e) {

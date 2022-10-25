@@ -71,6 +71,10 @@ func (m *ContentMessage) Handle(s *socket) error {
 		if err := tpl.ExecuteTemplate(sb, "presence.template", nil); err != nil {
 			return fmt.Errorf("Presence ExecuteTemplate error: %+v\n", err)
 		}
+	case "comment":
+		if err := tpl.ExecuteTemplate(sb, "comment.template", nil); err != nil {
+			return fmt.Errorf("Comment ExecuteTemplate error: %+v\n", err)
+		}
 	default:
 		return fmt.Errorf("template %s not found", m.Resource)
 	}
