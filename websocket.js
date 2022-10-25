@@ -40,15 +40,36 @@ class MySocket {
   postHandler(text) {
     const m = JSON.parse(text)
     for (let p of m.posts) {
-      console.log(p.postID)
       let post = document.createElement("div");
-      post.className = "submittedpost"
-      post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "Username: " + p.username + "<br>" + "Category/Categories: " + p.categories + "<br>" + p.body;
+      post.className = "submittedpost " + p.postid 
+      post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "Username: " + p.username + "<br>" + "Category/Categories: " + p.categories + "<br>" + p.body + "<br>";
+      let button = document.createElement("button")
+      button.classname = "addcomment"
+      button.innerHTML = "Add a Comment"
+      button.addEventListener('click', function (event) {
+        event.target.id = "comment"
+        contentSocket.sendContentRequest(event)
+      });
+      post.appendChild(button)
       document.getElementById("submittedposts").appendChild(post)
     }
   }
 
-  sendPostRequest(e) {
+  commentHandler(text) {
+    const m = JSON.parse(text)
+    for (let p of m.posts) {
+      for (let c of p.comments) {
+
+      }
+      let comment = document.createElement("div");
+      comment.className = "submittedcomment" + c.commentid
+      comment.innerHTML = "Username: " + c.username + "<br>" + c.body;
+      document.getElementById("").appendChild(comment)
+    }
+  }
+
+  // TODO: add timestamp
+  sendNewPostRequest(e) {
     let m = {
       type: 'post',
       timestamp: "time",
@@ -59,8 +80,6 @@ class MySocket {
           title: document.getElementById('posttitle').value,
           categories: document.getElementById('category').value,
           body: document.getElementById('postbody').value,
-          // comments: document.getElementById(),
-
         }
       ]
     }
@@ -70,6 +89,14 @@ class MySocket {
     document.getElementById('postbody').value = ""
   }
 
+  sendSubmittedPostsRequest() {
+    this.mysocket.send(JSON.stringify({
+      type: "post",
+      return: "all posts",
+    }));
+  }
+
+  // TODO: insert username variable
   sendContentRequest(e) {
     this.mysocket.send(JSON.stringify({
       type: "content",
@@ -78,6 +105,7 @@ class MySocket {
     }));
   }
 
+  // TODO: insert username variable
   requestChat() {
     let m = {
       type: 'chat',
@@ -140,32 +168,32 @@ class MySocket {
     };
   }
 
-  getRegistrationDetails() {
-    //AJAX html request
-    httpRequest = new XMLHttpRequest();
-    if (!httpRequest) {
-      console.log("Giving up :( Cannot create an XMLHTTP instance'");
-    }
-    url = "ws://localhost:8080/";
-    httpRequest.onreadystatechange = sendContents;
-    httpRequest.open("POST", url);
-    httpRequest.setRequestHeader(
-      "Content-type",
-      "application/x-www-form-urlencoded"
-    );
-    var fd = new FormData();
-    fd.set("username", document.getElementById("reg-username").value);
-    fd.set("email", document.getElementById("reg-email").value);
-    fd.set("password", document.getElementsByClassName("reg-password").value);
+  // getRegistrationDetails() {
+  //   //AJAX html request
+  //   httpRequest = new XMLHttpRequest();
+  //   if (!httpRequest) {
+  //     console.log("Giving up :( Cannot create an XMLHTTP instance'");
+  //   }
+  //   url = "ws://localhost:8080/";
+  //   httpRequest.onreadystatechange = sendContents;
+  //   httpRequest.open("POST", url);
+  //   httpRequest.setRequestHeader(
+  //     "Content-type",
+  //     "application/x-www-form-urlencoded"
+  //   );
+  //   var fd = new FormData();
+  //   fd.set("username", document.getElementById("reg-username").value);
+  //   fd.set("email", document.getElementById("reg-email").value);
+  //   fd.set("password", document.getElementsByClassName("reg-password").value);
 
-    httpRequest.send(fd);
+  //   httpRequest.send(fd);
 
-    function sendContents() {
-      if (httpRequest.readyState === 4) {
-        if (httpRequest.Status === 200) {
-          alert(httpRequest.responseText);
-        }
-      }
-    }
-  }
+  //   function sendContents() {
+  //     if (httpRequest.readyState === 4) {
+  //       if (httpRequest.Status === 200) {
+  //         alert(httpRequest.responseText);
+  //       }
+  //     }
+  //   }
+  // }
 }

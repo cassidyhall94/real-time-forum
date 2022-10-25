@@ -79,8 +79,8 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 		CREATE TABLE IF NOT EXISTS "comments" (
 			"commentID" TEXT,
 			"postID"	TEXT,
-			"username"	TEXT ,
-			"commentText"	TEXT
+			"username"	TEXT,
+			"body"	TEXT
 		);
 	`)
 	if errComments != nil {
@@ -125,6 +125,8 @@ func insertPlaceholdersInDB() {
 		"fake post 1": fmt.Sprintf(`INSERT INTO posts values ("%s", "bar", "golang", "Best Coding Language ever", "Golang is really the best!")`, uuid.NewV4()),
 
 		"fake post 2": fmt.Sprintf(`INSERT INTO posts values ("%s", "foo", "javascript", "I love Javascript!", "JS is really neat!")`, uuid.NewV4()),
+
+		"fake comment 1": fmt.Sprintf(`INSERT INTO comments values ("%s", "d4aa5a8a-d6ed-478e-a15e-87afb796ef09", "Cassidy", "I like it too!")`, uuid.NewV4()),
 	}
 
 	for purpose, q := range queries {
