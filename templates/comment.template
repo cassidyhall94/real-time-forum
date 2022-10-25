@@ -1,3 +1,7 @@
+
+<div id="commentonpost"> </div>
+
+
 <div id="commentcontainer">
     <style>
         form {

@@ -27,6 +27,7 @@ func (m PostMessage) Handle(s *socket) error {
 				return err
 			}
 		}
+		return m.Broadcast(s)
 	}
 	return m.Broadcast(s)
 }
@@ -77,6 +78,7 @@ func CreatePost(post database.Post) error {
 	if err != nil {
 		return fmt.Errorf("CreatePost Exec error: %+v\n", err)
 	}
+	fmt.Println(post)
 	return nil
 }
 
