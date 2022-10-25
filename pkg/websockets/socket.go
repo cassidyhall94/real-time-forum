@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	auth "real-time-forum/pkg/authentication"
+	"runtime/debug"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -69,6 +70,11 @@ func SocketCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	case "/post":
 		ptrSocket.t = post
+		// loads the saved posts on window load
+		if err := OnPostsConnect(ptrSocket); err != nil {
+			fmt.Println(err)
+			return
+		}
 	case "/chat":
 		ptrSocket.t = chat
 	case "/presence":
@@ -98,7 +104,7 @@ func (s *socket) pollSocket() {
 		defer func() {
 			err := recover()
 			if err != nil {
-				fmt.Printf("recovered panic in %s socket: %+v\n", s.t.String(), err)
+				fmt.Printf("recovered panic in %s socket: %+v\n%s\n", s.t.String(), err, string(debug.Stack()))
 			}
 			fmt.Println(s.t.String() + " socket closed")
 		}()

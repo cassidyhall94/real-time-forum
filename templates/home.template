@@ -1,20 +1,5 @@
-<div id="postcontainer">
-    <div style="overflow: hidden;">
-        <input id="postIPT" onkeypress="postSocket.keypress(event)" type="text" />
+
+<div id="submittedposts"> </div>
 
 
-        <h1 style="text-align: center;">POSTS FORM</h1>
-        <form name="PostForm"onsubmit="return false" method="post">
-            <p>Title: <input type="text" size="65" name="Title" /></p>
-            <br />
 
-            <p>Category: <input type="text" size="65" name="Category" /></p>
-            <br />
-            <p>Contents: <input type="text" size="65" name="Contents" /></p>
-            <br />
-
-            <br />
-            <p>
-                 <button id="post" onclick="postSocket.postHandler(event)">Submit</button>
-            </p>   
- </div>

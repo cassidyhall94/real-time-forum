@@ -18,17 +18,6 @@ class MySocket {
     div.after(msgContainer)
   }
 
-  postHandler(text, myself) {
-    console.log(JSON.stringify(text))
-    let post = document.createElement("div");
-    let postContainer = document.getElementById('postIPT')
-    post.innerHTML = text;
-    var cself = (myself) ? "self" : "";
-    post.className = "post " + cself;
-    document.getElementById("postcontainer").appendChild(post);
-    post.after(postContainer)
-  }
-
   contentHandler(text) {
     const c = JSON.parse(text)
     document.getElementById("content").innerHTML = c.body;
@@ -40,7 +29,7 @@ class MySocket {
       let user = document.createElement("button");
       user.addEventListener('click', function (event) {
         event.target.id = "presence"
-        contentSocket.requestContent(event)
+        contentSocket.sendContentRequest(event)
       });
       user.innerHTML = p.username
       user.className = "presence " + p.username
@@ -48,8 +37,67 @@ class MySocket {
     }
   }
 
-  requestContent(e) {
-    console.log(e.target.id)
+  postHandler(text) {
+    const m = JSON.parse(text)
+    for (let p of m.posts) {
+      let post = document.createElement("div");
+      post.className = "submittedpost " + p.postid 
+      post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "Username: " + p.username + "<br>" + "Category/Categories: " + p.categories + "<br>" + p.body + "<br>";
+      let button = document.createElement("button")
+      button.classname = "addcomment"
+      button.innerHTML = "Add a Comment"
+      button.addEventListener('click', function (event) {
+        event.target.id = "comment"
+        contentSocket.sendContentRequest(event)
+      });
+      post.appendChild(button)
+      document.getElementById("submittedposts").appendChild(post)
+    }
+  }
+
+  commentHandler(text) {
+    const m = JSON.parse(text)
+    for (let p of m.posts) {
+      for (let c of p.comments) {
+
+      }
+      let comment = document.createElement("div");
+      comment.className = "submittedcomment" + c.commentid
+      comment.innerHTML = "Username: " + c.username + "<br>" + c.body;
+      document.getElementById("").appendChild(comment)
+    }
+  }
+
+  // TODO: add timestamp
+  sendNewPostRequest(e) {
+    let m = {
+      type: 'post',
+      timestamp: "time",
+      posts: [
+        {
+          postid: e.target.postid,
+          username: e.target.username,
+          title: document.getElementById('posttitle').value,
+          categories: document.getElementById('category').value,
+          body: document.getElementById('postbody').value,
+        }
+      ]
+    }
+    this.mysocket.send(JSON.stringify(m));
+    document.getElementById('posttitle').value = ""
+    document.getElementById('category').value = ""
+    document.getElementById('postbody').value = ""
+  }
+
+  sendSubmittedPostsRequest() {
+    this.mysocket.send(JSON.stringify({
+      type: "post",
+      return: "all posts",
+    }));
+  }
+
+  // TODO: insert username variable
+  sendContentRequest(e) {
     this.mysocket.send(JSON.stringify({
       type: "content",
       username: "?",
@@ -57,6 +105,7 @@ class MySocket {
     }));
   }
 
+  // TODO: insert username variable
   requestChat() {
     let m = {
       type: 'chat',
@@ -68,33 +117,18 @@ class MySocket {
     document.getElementById("chatIPT").value = ""
   }
 
-  requestPost() {
-    let txt = document.getElementById("postIPT").value;
-    let line = "<b>" + time + " </b>" + "<br>" + "<b>You:</b> " + txt
-    this.postHandler(line, true);
-    this.mysocket.send(txt);
-    document.getElementById("postIPT").value = ""
-  }
-
   keypress(e) {
     if (e.keyCode == 13) {
       this.wsType = e.target.id.slice(0, -3)
       switch (this.wsType) {
-        case 'post':
-          this.requestPost()
-          break;
         case 'chat':
           this.requestChat()
           break;
-        case 'comment':
-          this.requestComment()
-          break;
-          default:
+        default:
           console.log("keypress registered for unknown wsType")
           break;
       }
     }
-
   }
 
   connectSocket(URI, handler) {
@@ -133,33 +167,33 @@ class MySocket {
       console.log("socket closed");
     };
   }
-  
-  getRegistrationDetails() {
-    //AJAX html request
-    httpRequest = new XMLHttpRequest();
-    if (!httpRequest) {
-      console.log("Giving up :( Cannot create an XMLHTTP instance'");
-    }
-    url = "ws://localhost:8080/";
-    httpRequest.onreadystatechange = sendContents;
-    httpRequest.open("POST", url);
-    httpRequest.setRequestHeader(
-      "Content-type",
-      "application/x-www-form-urlencoded"
-    );
-    var fd = new FormData();
-    fd.set("username", document.getElementById("reg-username").value);
-    fd.set("email", document.getElementById("reg-email").value);
-    fd.set("password", document.getElementsByClassName("reg-password").value);
 
-    httpRequest.send(fd);
+  // getRegistrationDetails() {
+  //   //AJAX html request
+  //   httpRequest = new XMLHttpRequest();
+  //   if (!httpRequest) {
+  //     console.log("Giving up :( Cannot create an XMLHTTP instance'");
+  //   }
+  //   url = "ws://localhost:8080/";
+  //   httpRequest.onreadystatechange = sendContents;
+  //   httpRequest.open("POST", url);
+  //   httpRequest.setRequestHeader(
+  //     "Content-type",
+  //     "application/x-www-form-urlencoded"
+  //   );
+  //   var fd = new FormData();
+  //   fd.set("username", document.getElementById("reg-username").value);
+  //   fd.set("email", document.getElementById("reg-email").value);
+  //   fd.set("password", document.getElementsByClassName("reg-password").value);
 
-    function sendContents() {
-      if (httpRequest.readyState === 4) {
-        if (httpRequest.Status === 200) {
-          alert(httpRequest.responseText);
-        }
-      }
-    }
-  }
+  //   httpRequest.send(fd);
+
+  //   function sendContents() {
+  //     if (httpRequest.readyState === 4) {
+  //       if (httpRequest.Status === 200) {
+  //         alert(httpRequest.responseText);
+  //       }
+  //     }
+  //   }
+  // }
 }

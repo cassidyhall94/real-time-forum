@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"text/template"
+	"time"
 )
 
 type ContentMessage struct {
@@ -26,6 +27,7 @@ func (m *ContentMessage) Broadcast(s *socket) error {
 }
 
 func OnContentConnect(s *socket) error {
+	time.Sleep(1 * time.Second)
 	tpl, err := template.ParseGlob("templates/*")
 	if err != nil {
 		return err
@@ -68,6 +70,10 @@ func (m *ContentMessage) Handle(s *socket) error {
 	case "presence":
 		if err := tpl.ExecuteTemplate(sb, "presence.template", nil); err != nil {
 			return fmt.Errorf("Presence ExecuteTemplate error: %+v\n", err)
+		}
+	case "comment":
+		if err := tpl.ExecuteTemplate(sb, "comment.template", nil); err != nil {
+			return fmt.Errorf("Comment ExecuteTemplate error: %+v\n", err)
 		}
 	default:
 		return fmt.Errorf("template %s not found", m.Resource)
