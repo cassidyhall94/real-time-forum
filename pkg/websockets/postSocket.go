@@ -22,10 +22,16 @@ func (m PostMessage) Handle(s *socket) error {
 			return err
 		}
 	} else {
-		for _, post := range m.Posts {
-			if err := CreatePost(post); err != nil {
-				return err
+		for i, post := range m.Posts {
+			if m.Return == post[i].postID {
+				if err := CreatePost(post[i]); err != nil {
+					return err
+				}
 			}
+			return m.Broadcast(s)
+		}
+		if err := CreatePost(post); err != nil {
+			return err
 		}
 		return m.Broadcast(s)
 	}
@@ -59,6 +65,27 @@ func OnPostsConnect(s *socket) error {
 	return c.Broadcast(s)
 }
 
+// TODO: add timestamp
+func OnCommentsConnect(s *socket) error {
+	posts, err := database.GetPosts()
+	if err != nil {
+		return fmt.Errorf("OnPostsConnect (GetPosts) error: %+v\n", err)
+	}
+	comments, err := database.GetComments()
+	if err != nil {
+		return fmt.Errorf("OnCommentsConnect (GetComments) error: %+v\n", err)
+	}
+	c := &PostMessage{
+		Type:      post,
+		Timestamp: "",
+		Return:    "all posts",
+		Posts: posts{
+			Comments: comments,
+		},
+	}
+	return c.Broadcast(s)
+}
+
 func CreatePost(post database.Post) error {
 	stmt, err := database.DB.Prepare("INSERT INTO posts (postID, username, title, categories, body) VALUES (?, ?, ?, ?, ?);")
 	defer stmt.Close()
@@ -83,7 +110,7 @@ func CreatePost(post database.Post) error {
 }
 
 func CreateComment(comment database.Comment) error {
-	stmt, err := database.DB.Prepare("INSERT INTO comments (commentID, postID, username, commentText) VALUES (?, ?, ?, ?);")
+	stmt, err := database.DB.Prepare("INSERT INTO comments (commentID, postID, username, body) VALUES (?, ?, ?, ?);")
 	defer stmt.Close()
 	if err != nil {
 		return fmt.Errorf("CreateComment DB Prepare error: %+v\n", err)

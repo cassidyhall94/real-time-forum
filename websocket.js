@@ -40,15 +40,18 @@ class MySocket {
   postHandler(text) {
     const m = JSON.parse(text)
     for (let p of m.posts) {
+      // console.log(p)
       let post = document.createElement("div");
-      post.className = "submittedpost " + p.post_id 
+      post.className = "submittedpost " + p.post_id
       post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "Username: " + p.username + "<br>" + "Category/Categories: " + p.categories + "<br>" + p.body + "<br>";
       let button = document.createElement("button")
       button.classname = "addcomment"
-      button.innerHTML = "Add a Comment"
+      button.innerHTML = "Comments"
+      button.setAttribute("data-postid", p.post_id)
       button.addEventListener('click', function (event) {
         event.target.id = "comment"
         contentSocket.sendContentRequest(event)
+        postSocket.sendSubmittedCommentsRequest(p.post_id)
       });
       post.appendChild(button)
       document.getElementById("submittedposts").appendChild(post)
@@ -56,15 +59,48 @@ class MySocket {
   }
 
   commentHandler(text) {
+    console.log(text)
     const m = JSON.parse(text)
-    for (let p of m.posts) {
-      for (let c of p.comments) {
+
         let comment = document.createElement("div");
-        comment.className = "submittedcomment" + c.commentid
-        comment.innerHTML = "Username: " + c.username + "<br>" + c.body;
-        document.getElementById("").appendChild(comment)
-      }
+        comment.className = "submittedcomment" + m.commentid
+        comment.innerHTML = "Username: " + m.username + "<br>" + m.body;
+        let id = document.getElementById("data-postid")
+        document.getElementById("submittedpost" + id).appendChild(comment)
+  }
+
+  // TODO: add timestamp
+  sendNewCommentRequest(e) {
+    let m = {
+      type: 'post',
+      timestamp: "",
+      posts: [
+        {
+          postid: e.target.post_id,
+          username: e.target.username,
+          title: document.getElementById('posttitle').value,
+          categories: document.getElementById('category').value,
+          body: document.getElementById('postbody').value,
+          comments: [
+            {
+              commentid: "",
+              postid: e.target.post_id,
+              username: "",
+              body: document.getElementById('commentbody'.value,)
+            }
+          ]
+        }
+      ]
     }
+    this.mysocket.send(JSON.stringify(m));
+    document.getElementById('bodycomment').value = ""
+  }
+
+  sendSubmittedCommentsRequest(postid) {
+    this.mysocket.send(JSON.stringify({
+      type: "post",
+      return: postid,
+    }));
   }
 
   // TODO: add timestamp
@@ -105,30 +141,30 @@ class MySocket {
   }
 
   // TODO: insert username variable
-  requestChat() {
-    let m = {
-      type: 'chat',
-      text: document.getElementById("chatIPT").value,
-      timestamp: time(),
-      username: "?",
-    }
-    this.mysocket.send(JSON.stringify(m));
-    document.getElementById("chatIPT").value = ""
-  }
+  // requestChat() {
+  //   let m = {
+  //     type: 'chat',
+  //     text: document.getElementById("chatIPT").value,
+  //     timestamp: time(),
+  //     username: "?",
+  //   }
+  //   this.mysocket.send(JSON.stringify(m));
+  //   document.getElementById("chatIPT").value = ""
+  // }
 
-  keypress(e) {
-    if (e.keyCode == 13) {
-      this.wsType = e.target.id.slice(0, -3)
-      switch (this.wsType) {
-        case 'chat':
-          this.requestChat()
-          break;
-        default:
-          console.log("keypress registered for unknown wsType")
-          break;
-      }
-    }
-  }
+  // keypress(e) {
+  //   if (e.keyCode == 13) {
+  //     this.wsType = e.target.id.slice(0, -3)
+  //     switch (this.wsType) {
+  //       case 'chat':
+  //         this.requestChat()
+  //         break;
+  //       default:
+  //         console.log("keypress registered for unknown wsType")
+  //         break;
+  //     }
+  //   }
+  // }
 
   connectSocket(URI, handler) {
     if (URI === 'chat') {
