@@ -11,7 +11,7 @@ class MySocket {
     const m = JSON.parse(text)
     let div = document.createElement("div");
     let msgContainer = document.getElementById('chatIPT')
-    div.innerHTML = "<b>" + m.timestamp + " </b>" + "<br>" + "<b>" + m.username + ":</b> " + m.text;
+    div.innerHTML = "<b>" + m.timestamp + " </b>" + "<br>" + "<b>" + m.nickname + ":</b> " + m.text;
     let cself = (myself) ? "self" : "";
     div.className = "msg " + cself;
     document.getElementById("msgcontainer").appendChild(div);
@@ -31,8 +31,8 @@ class MySocket {
         event.target.id = "presence"
         contentSocket.sendContentRequest(event)
       });
-      user.innerHTML = p.username
-      user.className = "presence " + p.username
+      user.innerHTML = p.nickname
+      user.className = "presence " + p.nickname
       document.getElementById("presencecontainer").appendChild(user)
     }
   }
@@ -42,7 +42,7 @@ class MySocket {
     for (let p of m.posts) {
       let post = document.createElement("div");
       post.className = "submittedpost " + p.postid 
-      post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "Username: " + p.username + "<br>" + "Category/Categories: " + p.categories + "<br>" + p.body + "<br>";
+      post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "Nickname: " + p.nickname + "<br>" + "Category/Categories: " + p.categories + "<br>" + p.body + "<br>";
       let button = document.createElement("button")
       button.classname = "addcomment"
       button.innerHTML = "Add a Comment"
@@ -63,7 +63,7 @@ class MySocket {
       }
       let comment = document.createElement("div");
       comment.className = "submittedcomment" + c.commentid
-      comment.innerHTML = "Username: " + c.username + "<br>" + c.body;
+      comment.innerHTML = "Nickname: " + c.nickname + "<br>" + c.body;
       document.getElementById("").appendChild(comment)
     }
   }
@@ -76,7 +76,7 @@ class MySocket {
       posts: [
         {
           postid: e.target.postid,
-          username: e.target.username,
+          username: e.target.nickname,
           title: document.getElementById('posttitle').value,
           categories: document.getElementById('category').value,
           body: document.getElementById('postbody').value,
@@ -100,7 +100,7 @@ class MySocket {
   sendContentRequest(e) {
     this.mysocket.send(JSON.stringify({
       type: "content",
-      username: "?",
+      nickname: "?",
       resource: e.target.id,
     }));
   }
@@ -111,7 +111,7 @@ class MySocket {
       type: 'chat',
       text: document.getElementById("chatIPT").value,
       timestamp: time(),
-      username: "?",
+      nickname: "?",
     }
     this.mysocket.send(JSON.stringify(m));
     document.getElementById("chatIPT").value = ""

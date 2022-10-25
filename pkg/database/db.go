@@ -39,7 +39,7 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 			"age" TEXT,
 			"gender" TEXT,
 			"firstname" TEXT,
-			"lastname" TEXT
+			"lastname" TEXT,
 			"email" 	TEXT UNIQUE,
 			"password"	TEXT UNIQUE
 		);

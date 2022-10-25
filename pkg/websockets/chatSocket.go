@@ -6,7 +6,7 @@ type ChatMessage struct {
 	Type      messageType `json:"type,omitempty"`
 	Text      string      `json:"text,omitempty"`
 	Timestamp string      `json:"timestamp,omitempty"`
-	Username  string      `json:"username,omitempty"`
+	Nickname  string      `json:"nickname,omitempty"`
 }
 
 func (m *ChatMessage) Broadcast() error {
