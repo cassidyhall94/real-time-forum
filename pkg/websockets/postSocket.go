@@ -53,10 +53,12 @@ func (m *PostMessage) Broadcast(s *socket) error {
 // TODO: add timestamp
 func OnPostsConnect(s *socket) error {
 	time.Sleep(1 * time.Second)
+	
 	posts, err := database.GetPosts()
 	if err != nil {
 		return fmt.Errorf("OnPostsConnect (GetPosts) error: %+v\n", err)
 	}
+
 	populatedPosts, err := populateCommentsForPosts(posts)
 	if err != nil {
 		return fmt.Errorf("OnPostsConnect (populateCommentsForPosts) error: %+v\n", err)
@@ -68,7 +70,6 @@ func OnPostsConnect(s *socket) error {
 		Return:    "",
 		Posts:     populatedPosts,
 	}
-
 	return c.Broadcast(s)
 }
 
@@ -81,9 +82,7 @@ func populateCommentsForPosts(posts []*database.Post) ([]*database.Post, error) 
 	for _, pts := range posts {
 		newPost := pts
 		for _, cmts := range comments {
-			fmt.Println(pts.PostID, cmts.PostID)
 			if pts.PostID == cmts.PostID {
-				fmt.Println("foo")
 				newPost.Comments = append(newPost.Comments, cmts)
 			}
 		}
