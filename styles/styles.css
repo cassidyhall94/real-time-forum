@@ -145,3 +145,11 @@ aside {
         margin-right: 10px;
         border: 2px solid rgb(0, 0, 0);
     }
+
+.profile {
+    width: 377px;
+    height: 377px;
+    display: flex !important;
+    align-items: center;
+    flex-direction: column;
+}
