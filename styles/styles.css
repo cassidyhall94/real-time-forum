@@ -30,6 +30,7 @@ article {
 
 section {
     display: grid;
+    justify-content: center;
     grid-column: 2 / 3;
     gap: 1rem;
     background: #FFBB00;

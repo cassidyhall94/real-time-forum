@@ -68,8 +68,8 @@ func GetUsers() ([]User, error) {
 	return users, nil
 }
 
-func GetPosts() ([]Post, error) {
-	posts := []Post{}
+func GetPosts() ([]*Post, error) {
+	posts := []*Post{}
 	rows, err := DB.Query(`SELECT * FROM posts`)
 	if err != nil {
 		return posts, fmt.Errorf("GetPosts DB Query error: %+v\n", err)
@@ -85,7 +85,7 @@ func GetPosts() ([]Post, error) {
 		if err != nil {
 			return posts, fmt.Errorf("GetPosts rows.Scan error: %+v\n", err)
 		}
-		posts = append(posts, Post{
+		posts = append(posts, &Post{
 			PostID:     postid,
 			Nickname:   nickname,
 			Categories: category,
@@ -112,7 +112,7 @@ func GetComments() ([]Comment, error) {
 	var commentcontent string
 
 	for rows.Next() {
-		err := rows.Scan(&postid, &commentid, &nickname, &commentcontent)
+		err := rows.Scan(&commentid, &postid, &nickname, &commentcontent)
 		if err != nil {
 			return comments, fmt.Errorf("GetComments rows.Scan error: %+v\n", err)
 		}

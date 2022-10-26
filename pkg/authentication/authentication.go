@@ -55,7 +55,7 @@ func Register(nickname string, email string, password string, db *sql.DB) {
 	for rows.Next() {
 		count++
 	}
-	rows2, err2 := db.Query("SELECT username FROM users WHERE username = ?", nickname)
+	rows2, err2 := db.Query("SELECT nickname FROM users WHERE nickname = ?", nickname)
 	if err2 != nil {
 		fmt.Println("Registration Error - selecting email from database")
 	}

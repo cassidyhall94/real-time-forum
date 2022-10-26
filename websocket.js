@@ -45,28 +45,72 @@ class MySocket {
       post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "Nickname: " + p.nickname + "<br>" + "Category/Categories: " + p.categories + "<br>" + p.body + "<br>";
       let button = document.createElement("button")
       button.classname = "addcomment"
-      button.innerHTML = "Add a Comment"
+      button.innerHTML = "Comments"
+      button.setAttribute("data-postid", p.post_id)
       button.addEventListener('click', function (event) {
         event.target.id = "comment"
         contentSocket.sendContentRequest(event)
+        for (let c of p.Comments) {
+          let comment = document.createElement("div");
+          comment.className = "submittedcomment" + c.commentid
+          comment.innerHTML = "Nickname: " + c.nickname + "<br>" + c.body;
+          document.getElementById("submittedpost " + c.postid).appendChild(comment)
+        }
+        if ((p.Comments).length > 0) {
+          event.target.id = "post"
+          postSocket.sendSubmittedCommentsRequest(p.post_id)
+        }
       });
       post.appendChild(button)
       document.getElementById("submittedposts").appendChild(post)
     }
   }
 
-  commentHandler(text) {
-    const m = JSON.parse(text)
-    for (let p of m.posts) {
-      for (let c of p.comments) {
-
-      }
-      let comment = document.createElement("div");
-      comment.className = "submittedcomment" + c.commentid
-      comment.innerHTML = "Nickname: " + c.nickname + "<br>" + c.body;
-      document.getElementById("").appendChild(comment)
+  sendNewCommentRequest(e) {
+    let m = {
+      type: 'post',
+      timestamp: "",
+      posts: [
+        {
+          postid: e.target.post_id,
+          username: e.target.username,
+          title: document.getElementById('posttitle').value,
+          categories: document.getElementById('category').value,
+          body: document.getElementById('postbody').value,
+          comments: [
+            {
+              commentid: "",
+              postid: e.target.post_id,
+              username: "",
+              body: document.getElementById('commentbody').value,
+            }
+          ]
+        }
+      ]
     }
+    this.mysocket.send(JSON.stringify(m));
+    document.getElementById('commentbody').value = ""
   }
+
+  // makes a call to the backend for comments saved in the database
+  sendSubmittedCommentsRequest(postid) {
+    this.mysocket.send(JSON.stringify({
+      type: "post",
+      return: postid,
+    }));
+  }
+  //commentHandler(text) {
+  //  const m = JSON.parse(text)
+    //for (let p of m.posts) {
+      //for (let c of p.comments) {
+
+      //}
+      //let comment = document.createElement("div");
+      //comment.className = "submittedcomment" + c.commentid
+      //comment.innerHTML = "Nickname: " + c.nickname + "<br>" + c.body;
+      //document.getElementById("").appendChild(comment)
+    //}
+  //}
 
   // TODO: add timestamp
   sendNewPostRequest(e) {
@@ -106,30 +150,30 @@ class MySocket {
   }
 
   // TODO: insert username variable
-  requestChat() {
-    let m = {
-      type: 'chat',
-      text: document.getElementById("chatIPT").value,
-      timestamp: time(),
-      nickname: "?",
-    }
-    this.mysocket.send(JSON.stringify(m));
-    document.getElementById("chatIPT").value = ""
-  }
+  // requestChat() {
+  //   let m = {
+  //     type: 'chat',
+  //     text: document.getElementById("chatIPT").value,
+  //     timestamp: time(),
+  //     nickname: "?",
+  //   }
+  //   this.mysocket.send(JSON.stringify(m));
+  //   document.getElementById("chatIPT").value = ""
+  // }
 
-  keypress(e) {
-    if (e.keyCode == 13) {
-      this.wsType = e.target.id.slice(0, -3)
-      switch (this.wsType) {
-        case 'chat':
-          this.requestChat()
-          break;
-        default:
-          console.log("keypress registered for unknown wsType")
-          break;
-      }
-    }
-  }
+  // keypress(e) {
+  //   if (e.keyCode == 13) {
+  //     this.wsType = e.target.id.slice(0, -3)
+  //     switch (this.wsType) {
+  //       case 'chat':
+  //         this.requestChat()
+  //         break;
+  //       default:
+  //         console.log("keypress registered for unknown wsType")
+  //         break;
+  //     }
+  //   }
+  // }
 
   connectSocket(URI, handler) {
     if (URI === 'chat') {
@@ -148,11 +192,7 @@ class MySocket {
       this.wsType = 'presence'
       console.log("Presence Websocket Connected");
     }
-    if (URI === 'comment') {
-      this.wsType = 'comment'
-      console.log("comment Websocket Connected");
-    }
-
+    
     var socket = new WebSocket("ws://localhost:8080/" + URI);
     this.mysocket = socket;
 
