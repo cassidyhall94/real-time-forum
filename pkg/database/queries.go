@@ -96,6 +96,38 @@ func GetPosts() ([]*Post, error) {
 	return posts, nil
 }
 
+func GetPopulatedPosts() ([]*Post, error) {
+	posts, err := GetPosts()
+	if err != nil {
+		return nil, fmt.Errorf("OnPostsConnect (GetPosts) error: %+v\n", err)
+	}
+
+	populatedPosts, err := populateCommentsForPosts(posts)
+	if err != nil {
+		return nil, fmt.Errorf("OnPostsConnect (populateCommentsForPosts) error: %+v\n", err)
+	}
+
+    return populatedPosts, nil
+}
+
+func populateCommentsForPosts(posts []*Post) ([]*Post, error) {
+	comments, err := GetComments()
+	if err != nil {
+		return nil, fmt.Errorf("populatedCommentsForPosts (GetComments) error: %+v\n", err)
+	}
+	outPost := []*Post{}
+	for _, pts := range posts {
+		newPost := pts
+		for _, cmts := range comments {
+			if pts.PostID == cmts.PostID {
+				newPost.Comments = append(newPost.Comments, cmts)
+			}
+		}
+		outPost = append(outPost, newPost)
+	}
+	return outPost, nil
+}
+
 func GetComments() ([]Comment, error) {
 	comments := []Comment{}
 	rows, err := DB.Query(`SELECT * FROM comments`)

@@ -41,6 +41,7 @@ class MySocket {
     const m = JSON.parse(text)
     // console.log("POST HANDLER: ", m)
     for (let p of m.posts) {
+      const consp = p
       let post = document.createElement("div");
       post.className = "submittedpost " + p.post_id
       post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "Username: " + p.username + "<br>" + "Category/Categories: " + p.categories + "<br>" + p.body + "<br>";
@@ -48,41 +49,42 @@ class MySocket {
       button.classname = "addcomment"
       button.innerHTML = "Comments"
       button.setAttribute("data-postid", p.post_id)
-      button.addEventListener('click', function (event) {
-        event.target.id = "comment"
-        contentSocket.sendContentRequest(event)
-        event.target.id = "post"
-        // postSocket.sendSubmittedCommentsRequest(p.post_id)
+      button.addEventListener('click', function (event, post = consp) {
+        console.log(post)
       });
       post.appendChild(button)
       document.getElementById("submittedposts").appendChild(post)
     }
   }
 
-  // sendNewCommentRequest(e) {
-  //   let m = {
-  //     type: 'post',
-  //     timestamp: "",
-  //     posts: [
-  //       {
-  //         comments: [
-  //           {
-  //             commentid: "",
-  //             postid: postid,
-  //             username: "",
-  //             body: document.getElementById('commentbody').value,
-  //           }
-  //         ]
-  //       }
-  //     ]
-  //   }
-  //   this.mysocket.send(JSON.stringify(m));
-  //   console.log(m)
-  //   document.getElementById('commentbody').value = ""
-  // }
+  sendNewCommentRequest(e) {
+    // TODO:
+    // get post ID by creating singlepost box and then inspecting the children of postcontainerforcomments
+    // fill in the post information, just the post id should work, more is better
+    let m = {
+      type: 'post',
+      timestamp: "",
+      posts: [
+        {
+          post_id: "see todo",
+          comments: [
+            {
+              post_id: postid,
+              username: "",
+              body: document.getElementById('commentbody').value,
+            }
+          ]
+        }
+      ]
+    }
+    this.mysocket.send(JSON.stringify(m));
+    console.log(m)
+    document.getElementById('commentbody').value = ""
+  }
 
   // TODO: figure out where to add commentHandler
   commentHandler(text) {
+    //TODO: redo this function so that is called with post (see: consp) on line 53
     const m = JSON.parse(text)
     for (let p of m.posts) {
       console.log("POSTS P: ", p)
@@ -149,7 +151,6 @@ class MySocket {
       timestamp: "time",
       posts: [
         {
-          postid: "",
           username: e.target.username,
           title: document.getElementById('posttitle').value,
           categories: document.getElementById('category').value,
@@ -163,10 +164,9 @@ class MySocket {
     document.getElementById('postbody').value = ""
   }
 
-  sendSubmittedPostsRequest() {
+  sendSubmittedPostsRequest(req) {
     this.mysocket.send(JSON.stringify({
       type: "post",
-      return: "all posts",
     }));
   }
 
