@@ -60,7 +60,6 @@
 
     let postSocket = new MySocket()
     postSocket.connectSocket("post", postSocket.postHandler);
-    postSocket.connectSocket("post", postSocket.commentHandler);
 
     let chatSocket = new MySocket()
     chatSocket.connectSocket("chat", chatSocket.chatHandler);

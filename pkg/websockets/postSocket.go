@@ -12,21 +12,19 @@ type PostMessage struct {
 	Type      messageType     `json:"type,omitempty"`
 	Timestamp string          `json:"timestamp,omitempty"`
 	Return    string          `json:"return,omitempty"`
-	Posts     []database.Post `json:"posts,omitempty"`
+	Posts     []*database.Post `json:"posts,omitempty"`
 }
 
 // TODO: add code for handling comments and attaching to post
 func (m PostMessage) Handle(s *socket) error {
-	fmt.Println(m.Return)
 	if m.Return == "all posts" {
 		if err := OnPostsConnect(s); err != nil {
 			return err
 		}
-		m.Return = ""
 	} else {
 		for _, post := range m.Posts {
 			if m.Return == post.PostID {
-				if err := OnCommentsConnect(s); err != nil {
+				if err := OnPostsConnect(s); err != nil {
 					return err
 				}
 				m.Return = ""
@@ -53,54 +51,48 @@ func (m *PostMessage) Broadcast(s *socket) error {
 }
 
 // TODO: add timestamp
-func OnCommentsConnect(s *socket) error {
-	posts, err := database.GetPosts()
-	if err != nil {
-		return fmt.Errorf("OnPostsConnect (GetPosts) error: %+v\n", err)
-	}
-
-	for _, pts := range posts {
-		comments, err := database.GetComments()
-		if err != nil {
-			return fmt.Errorf("OnCommentsConnect (GetComments) error: %+v\n", err)
-		}
-		c := &PostMessage{
-			Type:      post,
-			Timestamp: "",
-			Return:    "all posts",
-			Posts: []database.Post{
-				{
-					PostID:     pts.PostID,
-					Username:   pts.Username,
-					Title:      pts.Title,
-					Categories: pts.Categories,
-					Body:       pts.Body,
-					Comments:   comments,
-				},
-			},
-		}
-		c.Broadcast(s)
-	}
-	return nil
-}
-
-// TODO: add timestamp
 func OnPostsConnect(s *socket) error {
 	time.Sleep(1 * time.Second)
 	posts, err := database.GetPosts()
 	if err != nil {
 		return fmt.Errorf("OnPostsConnect (GetPosts) error: %+v\n", err)
 	}
+	populatedPosts, err := populateCommentsForPosts(posts)
+	if err != nil {
+		return fmt.Errorf("OnPostsConnect (populateCommentsForPosts) error: %+v\n", err)
+	}
+
 	c := &PostMessage{
 		Type:      post,
 		Timestamp: "",
-		Return:    "all posts",
-		Posts:     posts,
+		Return:    "",
+		Posts:     populatedPosts,
 	}
+
 	return c.Broadcast(s)
 }
 
-func CreatePost(post database.Post) error {
+func populateCommentsForPosts(posts []*database.Post) ([]*database.Post, error) {
+	comments, err := database.GetComments()
+	if err != nil {
+		return nil, fmt.Errorf("populatedCommentsForPosts (GetComments) error: %+v\n", err)
+	}
+	outPost := []*database.Post{}
+	for _, pts := range posts {
+		newPost := pts
+		for _, cmts := range comments {
+			fmt.Println(pts.PostID, cmts.PostID)
+			if pts.PostID == cmts.PostID {
+				fmt.Println("foo")
+				newPost.Comments = append(newPost.Comments, cmts)
+			}
+		}
+		outPost = append(outPost, newPost)
+	}
+	return outPost, nil
+}
+
+func CreatePost(post *database.Post) error {
 	stmt, err := database.DB.Prepare("INSERT INTO posts (postID, username, title, categories, body) VALUES (?, ?, ?, ?, ?);")
 	defer stmt.Close()
 	if err != nil {

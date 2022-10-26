@@ -39,6 +39,7 @@ class MySocket {
 
   postHandler(text) {
     const m = JSON.parse(text)
+    console.log(m)
     for (let p of m.posts) {
       let post = document.createElement("div");
       post.className = "submittedpost " + p.post_id
@@ -48,24 +49,55 @@ class MySocket {
       button.innerHTML = "Comments"
       button.setAttribute("data-postid", p.post_id)
       button.addEventListener('click', function (event) {
-        // if post has comment/comments than call commentHandler
         event.target.id = "comment"
         contentSocket.sendContentRequest(event)
-        postSocket.sendSubmittedCommentsRequest(p.post_id)
+        for (let c of p.Comments) {
+          let comment = document.createElement("div");
+          comment.className = "submittedcomment" + c.commentid
+          comment.innerHTML = "Username: " + c.username + "<br>" + c.body;
+          document.getElementById("submittedpost " + c.postid).appendChild(comment)
+        }
+        if ((p.Comments).length > 0) {
+          event.target.id = "post"
+          postSocket.sendSubmittedCommentsRequest(p.post_id)
+        }
       });
       post.appendChild(button)
       document.getElementById("submittedposts").appendChild(post)
     }
   }
 
-  commentHandler(text) {
-    const m = JSON.parse(text)
-    console.log(m)
-    let comment = document.createElement("div");
-    comment.className = "submittedcomment" + m.commentid
-    comment.innerHTML = "Username: " + m.username + "<br>" + m.body;
-    document.getElementById("submittedpost " + m.postid).appendChild(comment)
-  }
+  // sendNewCommentRequest(e) {
+  //   let m = {
+  //     type: 'post',
+  //     timestamp: "",
+  //     posts: [
+  //       {
+  //         comments: [
+  //           {
+  //             commentid: "",
+  //             postid: postid,
+  //             username: "",
+  //             body: document.getElementById('commentbody').value,
+  //           }
+  //         ]
+  //       }
+  //     ]
+  //   }
+  //   this.mysocket.send(JSON.stringify(m));
+  //   console.log(m)
+  //   document.getElementById('commentbody').value = ""
+  // }
+
+  // TODO: figure out where to add commentHandler
+  // commentHandler(text) {
+  //   const m = JSON.parse(text)
+  //   console.log(m)
+  //   let comment = document.createElement("div");
+  //   comment.className = "submittedcomment" + m.commentid
+  //   comment.innerHTML = "Username: " + m.username + "<br>" + m.body;
+  //   document.getElementById("submittedpost " + m.postid).appendChild(comment)
+  // }
 
   // TODO: add timestamp
   sendNewCommentRequest(e) {
