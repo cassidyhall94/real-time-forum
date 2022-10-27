@@ -16,13 +16,40 @@ type PostMessage struct {
 
 // TODO: add code for handling comments and attaching to post
 func (m PostMessage) Handle(s *socket) error {
-	// create new post
-	// if any posts in m.Posts is id == "" then make a new post
-	// create new comment for post
-	// if a post contains a comment with id == "" then create a comment for that post
 	// if len(posts) == 0 then return all posts
-	// else range over posts, get comments for post and override post.comments then return m
-	return m.Broadcast(s)
+	if len(m.Posts) == 0 {
+		p, err := database.GetPopulatedPosts()
+		if err != nil {
+			return err
+		}
+
+		c := &PostMessage{
+			Type:  post,
+			Posts: p,
+		}
+
+		return c.Broadcast(s)
+	}
+		// create new post
+		// if any posts in m.Posts is id == "" then make a new post
+		// else range over posts, get comments for post and override post.comments then return m
+		for _, post := range m.Posts {
+			if post.PostID == "" {
+				if err := CreatePost(post); err != nil {
+					return fmt.Errorf("PostSocket Handle (CreatePost) error: %w", err)
+				}
+			}
+			// create new comment for post
+			// if a post contains a comment with id == "" then create a comment for that post
+			for _, comment := range post.Comments {
+				if comment.CommentID == "" {
+					if err := CreateComment(comment); err != nil {
+						return fmt.Errorf("PostSocket Handle (CreateComment) error: %w", err)
+					}
+				}
+			}
+		}
+	return nil
 }
 
 func (m *PostMessage) Broadcast(s *socket) error {
@@ -46,7 +73,7 @@ func OnPostsConnect(s *socket) error {
 	}
 
 	c := &PostMessage{
-		Type: post,
+		Type:  post,
 		Posts: p,
 	}
 

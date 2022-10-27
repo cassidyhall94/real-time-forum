@@ -48,9 +48,10 @@ class MySocket {
       let button = document.createElement("button")
       button.classname = "addcomment"
       button.innerHTML = "Comments"
-      button.setAttribute("data-postid", p.post_id)
+      // button.setAttribute("data-postid", p.post_id)
       button.addEventListener('click', function (event, post = consp) {
-        console.log(post)
+        event.target.id = "comment"
+        contentSocket.sendContentRequest(event, post.post_id)
       });
       post.appendChild(button)
       document.getElementById("submittedposts").appendChild(post)
@@ -78,35 +79,7 @@ class MySocket {
       ]
     }
     this.mysocket.send(JSON.stringify(m));
-    console.log(m)
     document.getElementById('commentbody').value = ""
-  }
-
-  // TODO: figure out where to add commentHandler
-  commentHandler(text) {
-    //TODO: redo this function so that is called with post (see: consp) on line 53
-    const m = JSON.parse(text)
-    for (let p of m.posts) {
-      console.log("POSTS P: ", p)
-
-      for (let c of p.comments) {
-        console.log("COMMENTS C: ", c)
-
-        let pst = document.createElement("div");
-        console.log("posts: ", p, "comments: ", c)
-
-        pst.className = "singlepostforcomments"
-        pst.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "Username: " + p.username + "<br>" + "Category/Categories: " + p.categories + "<br>" + p.body + "<br>";
-        console.log(pst)
-
-        let comment = document.createElement("div");
-        comment.className = "submittedcomment " + c.comment_id
-        comment.innerHTML = "Username: " + c.username + "<br>" + c.body + "<br>";
-        console.log(document.getElementById("submittedcomments"))
-        document.getElementById("submittedcomments").appendChild(comment)
-        document.getElementById("postcontainerforcomments").appendChild(pst)
-      }
-    }
   }
 
   // TODO: add timestamp
@@ -164,18 +137,17 @@ class MySocket {
     document.getElementById('postbody').value = ""
   }
 
-  sendSubmittedPostsRequest(req) {
+  sendSubmittedPostsRequest() {
     this.mysocket.send(JSON.stringify({
       type: "post",
     }));
   }
 
-  // TODO: insert username variable
-  sendContentRequest(e) {
+  sendContentRequest(e, post_id = "") {
     this.mysocket.send(JSON.stringify({
       type: "content",
-      username: "?",
       resource: e.target.id,
+      post_id: post_id,
     }));
   }
 

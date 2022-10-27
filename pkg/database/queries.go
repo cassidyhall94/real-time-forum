@@ -1,6 +1,8 @@
 package database
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type User struct {
 	ID       string `json:"id,omitempty"`
@@ -96,6 +98,19 @@ func GetPosts() ([]*Post, error) {
 	return posts, nil
 }
 
+func GetPostForComment(c Comment) (Post, error) {
+	posts, err := GetPosts()
+	if err != nil {
+		return Post{}, err
+	}
+	for _, p := range posts {
+		if p.PostID == c.PostID {
+			return *p, nil
+		}
+	}
+	return Post{}, fmt.Errorf("no matching post found for id: %s", c.PostID)
+}
+
 func GetPopulatedPosts() ([]*Post, error) {
 	posts, err := GetPosts()
 	if err != nil {
@@ -107,7 +122,7 @@ func GetPopulatedPosts() ([]*Post, error) {
 		return nil, fmt.Errorf("OnPostsConnect (populateCommentsForPosts) error: %+v\n", err)
 	}
 
-    return populatedPosts, nil
+	return populatedPosts, nil
 }
 
 func populateCommentsForPosts(posts []*Post) ([]*Post, error) {
@@ -156,4 +171,14 @@ func GetComments() ([]Comment, error) {
 		return comments, err
 	}
 	return comments, nil
+}
+
+func FilterCommentsForPost(postID string, comments []Comment) []Comment {
+	out := []Comment{}
+	for _, c := range comments {
+		if postID == c.PostID {
+			out = append(out, c)
+		}
+	}
+	return out
 }

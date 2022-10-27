@@ -1,4 +1,13 @@
-<div id="postcontainerforcomments"></div>
+<div id="postcontainerforcomments">
+    <b>Title: {{.Post.Title}} </b>
+    <br>
+    Username: {{.Post.Username}}
+    <br>
+    Category/Categories: {{.Post.Categories}}
+    <br>
+    {{.Post.Body}}
+    <br>
+</div>
 
 <button id="commentsButton" style="margin-top: 10px; margin-bottom: 10px; margin-left: 10px; margin-right: 10px;"
     onclick="document.getElementById('commentform').style.display='block';">Add a Comment</button>
@@ -6,7 +15,7 @@
 
 <div id="commentcontainer">
     <style>
-        #commentform #submittedcomments {
+        #commentform {
             text-align: center;
             background-color: #A39C95;
             margin-top: 10px;
@@ -14,6 +23,28 @@
             margin-left: 10px;
             margin-right: 10px;
             border: 2px solid rgb(0, 0, 0);
+        }
+
+        #submittedcomments {
+            background-color: #A39C95;
+            padding: 15px;
+            margin-bottom: 10px;
+            margin-left: 10px;
+            margin-right: 10px;
+            margin-top: 10px;
+            border: 2px solid rgb(0, 0, 0);
+            justify-self: right;
+        }
+
+        #postcontainerforcomments {
+            background-color: #A39C95;
+            padding: 15px;
+            margin-bottom: 10px;
+            margin-left: 10px;
+            margin-right: 10px;
+            margin-top: 10px;
+            border: 2px solid rgb(0, 0, 0);
+            justify-self: right;
         }
 
         #commentform {
@@ -35,5 +66,12 @@
 
     <br>
 
-    <div id="submittedcomments"></div>
+    <div id="submittedcomments">
+        {{ range .Comments }}
+        Username: {{.Username}}
+        <br>
+        {{.Body}}
+        <br>
+        {{ end }}
+    </div>
 </div>
