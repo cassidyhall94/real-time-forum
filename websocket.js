@@ -39,16 +39,14 @@ class MySocket {
 
   postHandler(text) {
     const m = JSON.parse(text)
-    // console.log("POST HANDLER: ", m)
     for (let p of m.posts) {
       const consp = p
       let post = document.createElement("div");
       post.className = "submittedpost " + p.post_id
-      post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "Username: " + p.username + "<br>" + "Category/Categories: " + p.categories + "<br>" + p.body + "<br>";
+      post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "<b>Username: " + "</b>" + p.username + "<br>" + "<b>Category/Categories: " + "</b>" + p.categories + "<br>" + p.body + "<br>";
       let button = document.createElement("button")
       button.classname = "addcomment"
       button.innerHTML = "Comments"
-      // button.setAttribute("data-postid", p.post_id)
       button.addEventListener('click', function (event, post = consp) {
         event.target.id = "comment"
         contentSocket.sendContentRequest(event, post.post_id)

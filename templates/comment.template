@@ -3,75 +3,76 @@
     <br>
     Username: {{.Post.Username}}
     <br>
-    Category/Categories: {{.Post.Categories}}
+    Category: {{.Post.Categories}}
     <br>
     {{.Post.Body}}
     <br>
-</div>
-
-<button id="commentsButton" style="margin-top: 10px; margin-bottom: 10px; margin-left: 10px; margin-right: 10px;"
-    onclick="document.getElementById('commentform').style.display='block';">Add a Comment</button>
-<br>
-
-<div id="commentcontainer">
-    <style>
-        #commentform {
-            text-align: center;
-            background-color: #A39C95;
-            margin-top: 10px;
-            margin-bottom: 10px;
-            margin-left: 10px;
-            margin-right: 10px;
-            border: 2px solid rgb(0, 0, 0);
-        }
-
-        #submittedcomments {
-            background-color: #A39C95;
-            padding: 15px;
-            margin-bottom: 10px;
-            margin-left: 10px;
-            margin-right: 10px;
-            margin-top: 10px;
-            border: 2px solid rgb(0, 0, 0);
-            justify-self: right;
-        }
-
-        #postcontainerforcomments {
-            background-color: #A39C95;
-            padding: 15px;
-            margin-bottom: 10px;
-            margin-left: 10px;
-            margin-right: 10px;
-            margin-top: 10px;
-            border: 2px solid rgb(0, 0, 0);
-            justify-self: right;
-        }
-
-        #commentform {
-            display: none;
-        }
-    </style>
-
-    <form id="commentform" onsubmit="return false">
-
-        <div class="commentBodyField">
-            <input type="text" style="width: 200px; height: 200px; text-align: center" id="commentbody"
-                name="commentbody" placeholder="Enter your Comment Body" required />
-        </div>
-
-        <button id="addCommentButton" style="margin-top: 10px; margin-bottom: 10px"
-            onclick="postSocket.sendNewCommentRequest(event); ">Submit</button>
-
-    </form>
+    <button id="commentsButton" style="margin-top: 10px; margin-bottom: 10px; margin-left: 10px; margin-right: 10px;"
+        onclick="document.getElementById('commentform').style.display='block';">Add a Comment</button>
 
     <br>
 
-    <div id="submittedcomments">
-        {{ range .Comments }}
-        Username: {{.Username}}
-        <br>
-        {{.Body}}
-        <br>
-        {{ end }}
+    <div id="commentcontainer">
+        <style>
+            #commentform {
+                text-align: center;
+                background-color: #000000;
+                margin-top: 10px;
+                margin-bottom: 10px;
+                margin-left: 10px;
+                margin-right: 10px;
+                border: 2px solid rgb(0, 0, 0);
+            }
+
+            #submittedcomments {
+                background-color: #000000;
+                padding: 15px;
+                margin-bottom: 10px;
+                margin-left: 10px;
+                margin-right: 10px;
+                margin-top: 10px;
+                border: 2px solid rgb(0, 0, 0);
+                justify-self: right;
+            }
+
+            #postcontainerforcomments {
+                background-color: #000000;
+                padding: 15px;
+                margin-bottom: 10px;
+                margin-left: 10px;
+                margin-right: 10px;
+                margin-top: 10px;
+                border: 2px solid rgb(0, 0, 0);
+                justify-self: right;
+            }
+
+            #commentform {
+                display: none;
+            }
+        </style>
+
+        <form id="commentform" onsubmit="return false">
+
+            <div class="commentBodyField">
+                <input type="text" style="width: 200px; height: 200px; text-align: center" id="commentbody"
+                    name="commentbody" placeholder="Enter your Comment Body" required />
+            </div>
+
+            <button id="addCommentButton" style="margin-top: 10px; margin-bottom: 10px"
+                onclick="postSocket.sendNewCommentRequest(event); ">Submit</button>
+
+        </form>
+
     </div>
+    <br>
+</div>
+
+
+<div id="submittedcomments">
+    {{ range .Comments }}
+    Username: {{.Username}}
+    <br>
+    {{.Body}}
+    <br>
+    {{ end }}
 </div>
