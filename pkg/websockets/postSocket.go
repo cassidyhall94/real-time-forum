@@ -112,7 +112,7 @@ func CreateComment(comment database.Comment) error {
 		comment.CommentID = uuid.NewV4().String()
 	}
 
-	// TODO: remove placeholder username once login/sessions are working
+	// TODO: remove placeholder nickname once login/sessions are working
 	if comment.Nickname == "" {
 		comment.Nickname = "Cassidy"
 	}

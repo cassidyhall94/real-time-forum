@@ -91,7 +91,7 @@ func OnPresenceConnect(s *socket) error {
 // 		}
 // 		session = append(session, Session{
 // 			SessionID: session_token,
-// 			Username:  uName,
+// 			Nickname:  uName,
 // 			Expiry:    convTime,
 // 		})
 // 	}

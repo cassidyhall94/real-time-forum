@@ -43,7 +43,7 @@ WebSockets in backend/frontend
         - reloads the last 10 messages and when user scrolls up, 10 more messages should be shown (without spamming the scroll event)
             - look at [throttle](https://css-tricks.com/debouncing-throttling-explained-examples/#throttle)/debounce for not spamming the scroll event to see messages
     - message format
-        - date and username shown
+        - date and nickname shown
 
 Bonus
 - user profiles

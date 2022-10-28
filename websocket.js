@@ -117,7 +117,7 @@ class MySocket {
     }));
   }
 
-  // TODO: insert username variable
+  // TODO: insert nickname variable
   // requestChat() {
   //   let m = {
   //     type: 'chat',
@@ -189,7 +189,7 @@ class MySocket {
   //     "application/x-www-form-urlencoded"
   //   );
   //   var fd = new FormData();
-  //   fd.set("username", document.getElementById("reg-username").value);
+  //   fd.set("nickname", document.getElementById("reg-nickname").value);
   //   fd.set("email", document.getElementById("reg-email").value);
   //   fd.set("password", document.getElementsByClassName("reg-password").value);
 
