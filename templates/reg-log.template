@@ -1,6 +1,6 @@
 <h1>Login</h1>
 <form action="/reglog" method="POST">
-  <p>Username/Email</p>
+  <p> Nickname/Email</p>
   <input type="text" id="login-name" name="login-name" class="loginForm" />
   <p>Password</p>
   <input
@@ -14,21 +14,15 @@
 
 <h1>Registration</h1>
 <form action="/reglog" method="POST">
-  <p>First Name</p>
+  <p>Nickname</p>
   <input
     type="text"
-    id="reg-fname"
-    name="reg-fname"
-    class="registrationForm"
+    id="reg-nickname"
+    name="reg-nickname"
     required
-  />
-  <p>Last Name</p>
-  <input
-    type="text"
-    id="reg-lname"
-    name="reg-lname"
+    pattern=".*\S+.*"
+    minlength="3"
     class="registrationForm"
-    required
   />
   <p>Age</p>
   <input
@@ -46,15 +40,21 @@
     class="registrationForm"
     required
   />
-  <p>Username</p>
+  <p>First Name</p>
   <input
     type="text"
-    id="reg-username"
-    name="reg-username"
-    required
-    pattern=".*\S+.*"
-    minlength="3"
+    id="reg-fname"
+    name="reg-fname"
     class="registrationForm"
+    required
+  />
+  <p>Last Name</p>
+  <input
+    type="text"
+    id="reg-lname"
+    name="reg-lname"
+    class="registrationForm"
+    required
   />
   <p>Email</p>
   <input

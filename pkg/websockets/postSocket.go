@@ -81,7 +81,7 @@ func OnPostsConnect(s *socket) error {
 }
 
 func CreatePost(post *database.Post) error {
-	stmt, err := database.DB.Prepare("INSERT INTO posts (postID, username, title, categories, body) VALUES (?, ?, ?, ?, ?);")
+	stmt, err := database.DB.Prepare("INSERT INTO posts (postID, nickname, title, categories, body) VALUES (?, ?, ?, ?, ?);")
 	defer stmt.Close()
 	if err != nil {
 		return fmt.Errorf("CreatePost DB Prepare error: %+v\n", err)
@@ -90,12 +90,12 @@ func CreatePost(post *database.Post) error {
 		post.PostID = uuid.NewV4().String()
 	}
 
-	// TODO: remove placeholder username once login/sessions are working
-	if post.Username == "" {
-		post.Username = "Cassidy"
+	// TODO: remove placeholder nickname once login/sessions are working
+	if post.Nickname == "" {
+		post.Nickname = "Cassidy"
 	}
 
-	_, err = stmt.Exec(post.PostID, post.Username, post.Title, post.Categories, post.Body)
+	_, err = stmt.Exec(post.PostID, post.Nickname, post.Title, post.Categories, post.Body)
 	if err != nil {
 		return fmt.Errorf("CreatePost Exec error: %+v\n", err)
 	}
@@ -103,7 +103,7 @@ func CreatePost(post *database.Post) error {
 }
 
 func CreateComment(comment database.Comment) error {
-	stmt, err := database.DB.Prepare("INSERT INTO comments (commentID, postID, username, body) VALUES (?, ?, ?, ?);")
+	stmt, err := database.DB.Prepare("INSERT INTO comments (commentID, postID, nickname, body) VALUES (?, ?, ?, ?);")
 	defer stmt.Close()
 	if err != nil {
 		return fmt.Errorf("CreateComment DB Prepare error: %+v\n", err)
@@ -112,12 +112,12 @@ func CreateComment(comment database.Comment) error {
 		comment.CommentID = uuid.NewV4().String()
 	}
 
-	// TODO: remove placeholder username once login/sessions are working
-	if comment.Username == "" {
-		comment.Username = "Cassidy"
+	// TODO: remove placeholder nickname once login/sessions are working
+	if comment.Nickname == "" {
+		comment.Nickname = "Cassidy"
 	}
 
-	_, err = stmt.Exec(comment.CommentID, comment.PostID, comment.Username, comment.Body)
+	_, err = stmt.Exec(comment.CommentID, comment.PostID, comment.Nickname, comment.Body)
 	if err != nil {
 		return fmt.Errorf("CreateComment Exec error: %+v\n", err)
 	}

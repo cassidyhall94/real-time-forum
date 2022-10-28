@@ -2,7 +2,7 @@
     <div id="{{.Post.PostID}}" class="postForComments">
         <b>Title: {{.Post.Title}} </b>
         <br>
-        Username: {{.Post.Username}}
+        Nickname: {{.Post.Nickname}}
         <br>
         Category: {{.Post.Categories}}
         <br>
@@ -25,7 +25,6 @@
                 margin-right: 10px;
                 border: 2px solid rgb(0, 0, 0);
             }
-
             #submittedcomments {
                 background-color: #000000;
                 padding: 15px;
@@ -36,7 +35,6 @@
                 border: 2px solid rgb(0, 0, 0);
                 justify-self: right;
             }
-
             #postcontainerforcomments {
                 background-color: #000000;
                 padding: 15px;
@@ -47,7 +45,6 @@
                 border: 2px solid rgb(0, 0, 0);
                 justify-self: right;
             }
-
             #commentform {
                 display: none;
             }
@@ -74,7 +71,7 @@
     {{ range .Comments }}
     <div id="submittedcomments">
         <br>
-        Username: {{.Username}}
+        Nickname: {{.Nickname}}
         <br>
         {{.Body}}
         <br>

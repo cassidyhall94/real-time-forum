@@ -15,7 +15,7 @@ type PresenceMessage struct {
 
 type Presence struct {
 	ID                string `json:"id"`
-	Username          string `json:"username"`
+	Nickname          string `json:"nickname"`
 	Online            bool   `json:"online"`
 	LastContactedTime string `json:"last_contacted_time"`
 }
@@ -43,12 +43,12 @@ func GetPresences() ([]Presence, error) {
 		return nil, fmt.Errorf("GetUsers (getPresences) error: %+v\n", err)
 	}
 	sort.SliceStable(users[:], func(i, j int) bool {
-		return users[i].Username < users[j].Username
+		return users[i].Nickname < users[j].Nickname
 	})
 	for _, user := range users {
 		presences = append(presences, Presence{
 			ID:       user.ID,
-			Username: user.Username,
+			Nickname: user.Nickname,
 			// Online:            bool,
 			// LastContactedTime: created,
 		})
@@ -91,7 +91,7 @@ func OnPresenceConnect(s *socket) error {
 // 		}
 // 		session = append(session, Session{
 // 			SessionID: session_token,
-// 			Username:  uName,
+// 			Nickname:  uName,
 // 			Expiry:    convTime,
 // 		})
 // 	}
