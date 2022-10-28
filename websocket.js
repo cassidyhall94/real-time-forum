@@ -32,6 +32,7 @@ class MySocket {
         contentSocket.sendContentRequest(event)
       });
       user.innerHTML = p.nickname
+      user.style.color = 'white'
       user.className = "presence " + p.nickname
       document.getElementById("presencecontainer").appendChild(user)
     }
@@ -82,42 +83,6 @@ class MySocket {
       }
     }
   }
-
-  // TODO: add timestamp
-  // sendNewCommentRequest(e) {
-  //   let m = {
-  //     type: 'post',
-  //     timestamp: "",
-  //     posts: [
-  //       {
-  //         postid: e.target.post_id,
-  //         username: e.target.username,
-  //         title: document.getElementById('posttitle').value,
-  //         categories: document.getElementById('category').value,
-  //         body: document.getElementById('postbody').value,
-  //         comments: [
-  //           {
-  //             commentid: "",
-  //             postid: e.target.post_id,
-  //             username: "",
-  //             body: document.getElementById('commentbody').value,
-  //           }
-  //         ]
-  //       }
-  //     ]
-  //   }
-  //   this.mysocket.send(JSON.stringify(m));
-  //   document.getElementById('commentbody').value = ""
-  // }
-
-  // makes a call to the backend for comments saved in the database
-  // sendSubmittedCommentsRequest(postid) {
-  //   this.mysocket.send(JSON.stringify({
-  //     type: "post",
-  //     return: postid,
-  //   }));
-  // }
-
   // TODO: add timestamp
   sendNewPostRequest(e) {
     let m = {
