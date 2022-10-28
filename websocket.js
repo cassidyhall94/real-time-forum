@@ -40,26 +40,17 @@ class MySocket {
   postHandler(text) {
     const m = JSON.parse(text)
     for (let p of m.posts) {
+      const consp = p
       let post = document.createElement("div");
-      post.className = "submittedpost " + p.postid 
+      post.className = "submittedpost " + p.postid
+      post.id = p.post_id 
       post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "Nickname: " + p.nickname + "<br>" + "Category/Categories: " + p.categories + "<br>" + p.body + "<br>";
       let button = document.createElement("button")
       button.classname = "addcomment"
       button.innerHTML = "Comments"
-      button.setAttribute("data-postid", p.post_id)
-      button.addEventListener('click', function (event) {
+      button.addEventListener('click', function (event, post = consp) {
         event.target.id = "comment"
-        contentSocket.sendContentRequest(event)
-        for (let c of p.Comments) {
-          let comment = document.createElement("div");
-          comment.className = "submittedcomment" + c.commentid
-          comment.innerHTML = "Nickname: " + c.nickname + "<br>" + c.body;
-          document.getElementById("submittedpost " + c.postid).appendChild(comment)
-        }
-        if ((p.Comments).length > 0) {
-          event.target.id = "post"
-          postSocket.sendSubmittedCommentsRequest(p.post_id)
-        }
+        contentSocket.sendContentRequest(event, post,post_id)
       });
       post.appendChild(button)
       document.getElementById("submittedposts").appendChild(post)
@@ -67,60 +58,74 @@ class MySocket {
   }
 
   sendNewCommentRequest(e) {
-    let m = {
-      type: 'post',
-      timestamp: "",
-      posts: [
-        {
-          postid: e.target.post_id,
-          username: e.target.username,
-          title: document.getElementById('posttitle').value,
-          categories: document.getElementById('category').value,
-          body: document.getElementById('postbody').value,
-          comments: [
+    // TODO : timestamp
+    let post = document.getElementById('postcontainerforcomments')
+    for (const child of post.children) {
+      if (containsNumber(child.id)) {
+        let m = {
+          type: 'post',
+          timestamp: "",
+          posts: [
             {
-              commentid: "",
-              postid: e.target.post_id,
-              username: "",
-              body: document.getElementById('commentbody').value,
+              post_id: child.id,
+              comments: [
+                {
+                  post_id: child.id,
+                  body: document.getElementById('commentbody').value,
+                }
+              ]
             }
           ]
         }
-      ]
+        this.mysocket.send(JSON.stringify(m));
+        document.getElementById('commentbody').value = ""
+      }
     }
-    this.mysocket.send(JSON.stringify(m));
-    document.getElementById('commentbody').value = ""
   }
-
-  // makes a call to the backend for comments saved in the database
-  sendSubmittedCommentsRequest(postid) {
-    this.mysocket.send(JSON.stringify({
-      type: "post",
-      return: postid,
-    }));
-  }
-  //commentHandler(text) {
-  //  const m = JSON.parse(text)
-    //for (let p of m.posts) {
-      //for (let c of p.comments) {
-
-      //}
-      //let comment = document.createElement("div");
-      //comment.className = "submittedcomment" + c.commentid
-      //comment.innerHTML = "Nickname: " + c.nickname + "<br>" + c.body;
-      //document.getElementById("").appendChild(comment)
-    //}
-  //}
 
   // TODO: add timestamp
+  // sendNewCommentRequest(e) {
+  //   let m = {
+  //     type: 'post',
+  //     timestamp: "",
+  //     posts: [
+  //       {
+  //         postid: e.target.post_id,
+  //         username: e.target.username,
+  //         title: document.getElementById('posttitle').value,
+  //         categories: document.getElementById('category').value,
+  //         body: document.getElementById('postbody').value,
+  //         comments: [
+  //           {
+  //             commentid: "",
+  //             postid: e.target.post_id,
+  //             username: "",
+  //             body: document.getElementById('commentbody').value,
+  //           }
+  //         ]
+  //       }
+  //     ]
+  //   }
+  //   this.mysocket.send(JSON.stringify(m));
+  //   document.getElementById('commentbody').value = ""
+  // }
+
+  // makes a call to the backend for comments saved in the database
+  // sendSubmittedCommentsRequest(postid) {
+  //   this.mysocket.send(JSON.stringify({
+  //     type: "post",
+  //     return: postid,
+  //   }));
+  // }
+
+  //TODO: add timestamp
   sendNewPostRequest(e) {
     let m = {
       type: 'post',
       timestamp: "time",
       posts: [
         {
-          postid: e.target.postid,
-          username: e.target.nickname,
+          nickname: e.target.nickname,
           title: document.getElementById('posttitle').value,
           categories: document.getElementById('category').value,
           body: document.getElementById('postbody').value,
@@ -136,16 +141,14 @@ class MySocket {
   sendSubmittedPostsRequest() {
     this.mysocket.send(JSON.stringify({
       type: "post",
-      return: "all posts",
     }));
   }
 
-  // TODO: insert username variable
   sendContentRequest(e) {
     this.mysocket.send(JSON.stringify({
       type: "content",
-      nickname: "?",
       resource: e.target.id,
+      post_id: post_id,
     }));
   }
 
@@ -197,14 +200,14 @@ class MySocket {
     this.mysocket = socket;
 
     socket.onmessage = (e) => {
-      console.log("socket message")
+      //console.log("socket message")
       handler(e.data, false);
     };
     socket.onopen = () => {
-      console.log("socket opened");
+      //console.log("socket opened");
     };
     socket.onclose = () => {
-      console.log("socket closed");
+      //console.log("socket closed");
     };
   }
 
@@ -236,4 +239,8 @@ class MySocket {
   //     }
   //   }
   // }
+}
+
+function containsNumber(str) {
+  return /[0-9]/.test(str);
 }
