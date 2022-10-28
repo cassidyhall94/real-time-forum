@@ -43,6 +43,7 @@ class MySocket {
       const consp = p
       let post = document.createElement("div");
       post.className = "submittedpost " + p.post_id
+      post.id = p.post_id
       post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "<b>Username: " + "</b>" + p.username + "<br>" + "<b>Category/Categories: " + "</b>" + p.categories + "<br>" + p.body + "<br>";
       let button = document.createElement("button")
       button.classname = "addcomment"
@@ -57,27 +58,29 @@ class MySocket {
   }
 
   sendNewCommentRequest(e) {
-    // TODO:
-    // get post ID by creating singlepost box and then inspecting the children of postcontainerforcomments
-    // fill in the post information, just the post id should work, more is better
-    let m = {
-      type: 'post',
-      timestamp: "",
-      posts: [
-        {
-          post_id: "see todo",
-          comments: [
+    // TODO: timestamp
+    let post = document.getElementById('postcontainerforcomments')
+    for (const child of post.children) {
+      if (containsNumber(child.id)) {
+        let m = {
+          type: 'post',
+          timestamp: "",
+          posts: [
             {
-              post_id: postid,
-              username: "",
-              body: document.getElementById('commentbody').value,
+              post_id: child.id,
+              comments: [
+                {
+                  post_id: child.id,
+                  body: document.getElementById('commentbody').value,
+                }
+              ]
             }
           ]
         }
-      ]
+        this.mysocket.send(JSON.stringify(m));
+        document.getElementById('commentbody').value = ""
+      }
     }
-    this.mysocket.send(JSON.stringify(m));
-    document.getElementById('commentbody').value = ""
   }
 
   // TODO: add timestamp
@@ -236,4 +239,8 @@ class MySocket {
   //     }
   //   }
   // }
+}
+
+function containsNumber(str) {
+  return /[0-9]/.test(str);
 }
