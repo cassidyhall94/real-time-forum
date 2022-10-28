@@ -17,8 +17,8 @@
   <p>Nickname</p>
   <input
     type="text"
-    id="reg-username"
-    name="reg-username"
+    id="reg-nickname"
+    name="reg-nickname"
     required
     pattern=".*\S+.*"
     minlength="3"

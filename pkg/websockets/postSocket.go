@@ -90,7 +90,7 @@ func CreatePost(post *database.Post) error {
 		post.PostID = uuid.NewV4().String()
 	}
 
-	// TODO: remove placeholder username once login/sessions are working
+	// TODO: remove placeholder nickname once login/sessions are working
 	if post.Nickname == "" {
 		post.Nickname = "Cassidy"
 	}

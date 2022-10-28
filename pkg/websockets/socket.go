@@ -18,7 +18,7 @@ type SocketMessage struct {
 
 type socket struct {
 	con      *websocket.Conn
-	username string
+	nickname string
 	t        messageType
 	uuid     uuid.UUID
 }
