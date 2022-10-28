@@ -42,15 +42,15 @@ class MySocket {
     for (let p of m.posts) {
       const consp = p
       let post = document.createElement("div");
-      post.className = "submittedpost " + p.postid
-      post.id = p.post_id 
-      post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "Nickname: " + p.nickname + "<br>" + "Category/Categories: " + p.categories + "<br>" + p.body + "<br>";
+      post.className = "submittedpost " + p.post_id
+      post.id = p.post_id
+      post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "<b>Nickname: " + "</b>" + p.nickname + "<br>" + "<b>Category/Categories: " + "</b>" + p.categories + "<br>" + p.body + "<br>";
       let button = document.createElement("button")
       button.classname = "addcomment"
       button.innerHTML = "Comments"
       button.addEventListener('click', function (event, post = consp) {
         event.target.id = "comment"
-        contentSocket.sendContentRequest(event, post,post_id)
+        contentSocket.sendContentRequest(event, post.post_id)
       });
       post.appendChild(button)
       document.getElementById("submittedposts").appendChild(post)
@@ -58,7 +58,7 @@ class MySocket {
   }
 
   sendNewCommentRequest(e) {
-    // TODO : timestamp
+    // TODO: timestamp
     let post = document.getElementById('postcontainerforcomments')
     for (const child of post.children) {
       if (containsNumber(child.id)) {
@@ -118,7 +118,7 @@ class MySocket {
   //   }));
   // }
 
-  //TODO: add timestamp
+  // TODO: add timestamp
   sendNewPostRequest(e) {
     let m = {
       type: 'post',
@@ -144,7 +144,7 @@ class MySocket {
     }));
   }
 
-  sendContentRequest(e) {
+  sendContentRequest(e, post_id = "") {
     this.mysocket.send(JSON.stringify({
       type: "content",
       resource: e.target.id,
@@ -195,19 +195,18 @@ class MySocket {
       this.wsType = 'presence'
       console.log("Presence Websocket Connected");
     }
-    
     var socket = new WebSocket("ws://localhost:8080/" + URI);
     this.mysocket = socket;
 
     socket.onmessage = (e) => {
-      //console.log("socket message")
+      // console.log("socket message")
       handler(e.data, false);
     };
     socket.onopen = () => {
-      //console.log("socket opened");
+      // console.log("socket opened");
     };
     socket.onclose = () => {
-      //console.log("socket closed");
+      // console.log("socket closed");
     };
   }
 

@@ -9,34 +9,47 @@ import (
 )
 
 type PostMessage struct {
-	Type      messageType     `json:"type,omitempty"`
-	Timestamp string          `json:"timestamp,omitempty"`
-	Return    string          `json:"return,omitempty"`
-	Posts     []*database.Post `json:"posts,omitempty"`
+	Type      messageType      `json:"type,omitempty"`
+	Timestamp string           `json:"timestamp,omitempty"`
+	Posts     []*database.Post `json:"posts"`
 }
 
 // TODO: add code for handling comments and attaching to post
 func (m PostMessage) Handle(s *socket) error {
-	if m.Return == "all posts" {
-		if err := OnPostsConnect(s); err != nil {
+	// if len(posts) == 0 then return all posts
+	if len(m.Posts) == 0 {
+		p, err := database.GetPopulatedPosts()
+		if err != nil {
 			return err
 		}
-	} else {
+
+		c := &PostMessage{
+			Type:  post,
+			Posts: p,
+		}
+
+		return c.Broadcast(s)
+	}
+		// create new post
+		// if any posts in m.Posts is id == "" then make a new post
+		// else range over posts, get comments for post and override post.comments then return m
 		for _, post := range m.Posts {
-			if m.Return == post.PostID {
-				if err := OnPostsConnect(s); err != nil {
-					return err
+			if post.PostID == "" {
+				if err := CreatePost(post); err != nil {
+					return fmt.Errorf("PostSocket Handle (CreatePost) error: %w", err)
 				}
-				m.Return = ""
-			} else {
-				     if err := CreatePost(post); err != nil {
-					  return err
+			}
+			// create new comment for post
+			// if a post contains a comment with id == "" then create a comment for that post
+			for _, comment := range post.Comments {
+				if comment.CommentID == "" {
+					if err := CreateComment(comment); err != nil {
+						return fmt.Errorf("PostSocket Handle (CreateComment) error: %w", err)
+					}
 				}
 			}
 		}
-		return m.Broadcast(s)
-	}
-	return m.Broadcast(s)
+	return nil
 }
 
 func (m *PostMessage) Broadcast(s *socket) error {
@@ -53,41 +66,18 @@ func (m *PostMessage) Broadcast(s *socket) error {
 // TODO: add timestamp
 func OnPostsConnect(s *socket) error {
 	time.Sleep(1 * time.Second)
-	posts, err := database.GetPosts()
-	if err != nil {
-		return fmt.Errorf("OnPostsConnect (GetPosts) error: %+v\n", err)
-	}
-	populatedPosts, err := populateCommentsForPosts(posts)
-	if err != nil {
-		return fmt.Errorf("OnPostsConnect (populateCommentsForPosts) error: %+v\n", err)
-	}
-	c := &PostMessage{
-		Type:      post,
-		Timestamp: "",
-		Return:    "",
-		Posts:     populatedPosts,
-	}
-	return c.Broadcast(s)
-}
 
-func populateCommentsForPosts(posts []*database.Post) ([]*database.Post, error) {
-	comments, err := database.GetComments()
+	p, err := database.GetPopulatedPosts()
 	if err != nil {
-		return nil, fmt.Errorf("populatedCommentsForPosts (GetComments) error: %+v\n", err)
+		return err
 	}
-	outPost := []*database.Post{}
-	for _, pts := range posts {
-		newPost := pts
-		for _, cmts := range comments {
-			fmt.Println(pts.PostID, cmts.PostID)
-			if pts.PostID == cmts.PostID {
-				fmt.Println("foo")
-				newPost.Comments = append(newPost.Comments, cmts)
-			}
-		}
-		outPost = append(outPost, newPost)
+
+	c := &PostMessage{
+		Type:  post,
+		Posts: p,
 	}
-	return outPost, nil
+
+	return c.Broadcast(s)
 }
 
 func CreatePost(post *database.Post) error {

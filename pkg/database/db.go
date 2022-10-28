@@ -123,9 +123,9 @@ func insertPlaceholdersInDB() {
 
 		"fake user 2": fmt.Sprintf(`INSERT INTO users values ("%s", "foo", "30", "male", "barry", "fool", "bar@foo.com", "03444f89fsof")`, uuid.NewV4()),
 
-		"fake post 1": fmt.Sprintf(`INSERT INTO posts values ("%s", "bar", "golang", "Best Coding Language ever", "Golang is really the best!")`, uuid.NewV4()),
+		"fake post 1": fmt.Sprintf(`INSERT INTO posts values ("9b4bc963-ecb2-4767-a79b-b09cd102ce4a", "bar", "golang", "Best Coding Language ever", "Golang is really the best!")`),
 
-		"fake post 2": fmt.Sprintf(`INSERT INTO posts values ("%s", "foo", "javascript", "I love Javascript!", "JS is really neat!")`, uuid.NewV4()),
+		"fake post 2": fmt.Sprintf(`INSERT INTO posts values ("16f94e48-82bc-4884-96b3-c847d37f069c", "foo", "javascript", "I love Javascript!", "JS is really neat!")`),
 
 		"fake comment 1": fmt.Sprintf(`INSERT INTO comments values ("49f89e2f-4d7d-4b03-beb6-8def55652d4a", "9b4bc963-ecb2-4767-a79b-b09cd102ce4a", "Cassidy", "I like it too!")`),
 		
