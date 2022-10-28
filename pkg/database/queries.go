@@ -5,19 +5,19 @@ import (
 )
 
 type User struct {
-	ID       string `json:"id,omitempty"`
-	Nickname string `json:"nickname,omitempty"`
-	Age      string `json:"age,omitempty"`
-	Gender   string `json:"gender,omitempty"`
+	ID        string `json:"id,omitempty"`
+	Nickname  string `json:"nickname,omitempty"`
+	Age       string `json:"age,omitempty"`
+	Gender    string `json:"gender,omitempty"`
 	FirstName string `json:"firstname,omitempty"`
-	LastName string `json:"lastname,omitempty"`
-	Email    string `json:"email,omitempty"`
-	Password string `json:"password,omitempty"`	
+	LastName  string `json:"lastname,omitempty"`
+	Email     string `json:"email,omitempty"`
+	Password  string `json:"password,omitempty"`
 }
 
 type Post struct {
 	PostID     string    `json:"post_id,omitempty"`
-	Nickname   string    `json:"nickname,omitempty"`
+	Nickname   string    `json:"nickname"`
 	Title      string    `json:"title,omitempty"`
 	Categories string    `json:"categories,omitempty"`
 	Body       string    `json:"body,omitempty"`
@@ -27,7 +27,7 @@ type Post struct {
 type Comment struct {
 	CommentID string `json:"comment_id,omitempty"`
 	PostID    string `json:"post_id,omitempty"`
-	Nickname  string `json:"nickname,omitempty"`
+	Nickname  string `json:"nickname"`
 	Body      string `json:"body,omitempty"`
 }
 
@@ -45,22 +45,21 @@ func GetUsers() ([]User, error) {
 	var lastname string
 	var email string
 	var password string
-	
 
 	for rows.Next() {
-		err := rows.Scan(&id, &nickname, &age, &gender, &firstname, &lastname, &email,  &password)
+		err := rows.Scan(&id, &nickname, &age, &gender, &firstname, &lastname, &email, &password)
 		if err != nil {
 			return users, fmt.Errorf("GetUsers rows.Scan error: %+v\n", err)
 		}
 		users = append(users, User{
-			ID:       id,
-			Nickname: nickname,
-			Age:      age,
-			Gender:   gender,
+			ID:        id,
+			Nickname:  nickname,
+			Age:       age,
+			Gender:    gender,
 			FirstName: firstname,
-			LastName: lastname,
-			Email:    email,
-			Password: password,
+			LastName:  lastname,
+			Email:     email,
+			Password:  password,
 		})
 	}
 	err = rows.Err()

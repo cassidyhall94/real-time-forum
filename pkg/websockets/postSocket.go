@@ -103,7 +103,7 @@ func CreatePost(post *database.Post) error {
 }
 
 func CreateComment(comment database.Comment) error {
-	stmt, err := database.DB.Prepare("INSERT INTO comments (commentID, postID, nickname, commentText) VALUES (?, ?, ?, ?);")
+	stmt, err := database.DB.Prepare("INSERT INTO comments (commentID, postID, nickname, body) VALUES (?, ?, ?, ?);")
 	defer stmt.Close()
 	if err != nil {
 		return fmt.Errorf("CreateComment DB Prepare error: %+v\n", err)

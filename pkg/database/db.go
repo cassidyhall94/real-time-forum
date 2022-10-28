@@ -54,8 +54,8 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 		CREATE TABLE IF NOT EXISTS "posts" (
 			"postID"	TEXT UNIQUE,
 			"nickname"		TEXT,
-			"categories"	TEXT,
 			"title" TEXT,
+			"categories"	TEXT,
 			"body" TEXT
 		);
 	`)
@@ -128,7 +128,7 @@ func insertPlaceholdersInDB() {
 		"fake post 2": fmt.Sprintf(`INSERT INTO posts values ("16f94e48-82bc-4884-96b3-c847d37f069c", "foo", "javascript", "I love Javascript!", "JS is really neat!")`),
 
 		"fake comment 1": fmt.Sprintf(`INSERT INTO comments values ("49f89e2f-4d7d-4b03-beb6-8def55652d4a", "9b4bc963-ecb2-4767-a79b-b09cd102ce4a", "Cassidy", "I like it too!")`),
-		
+
 		"fake comment 2": fmt.Sprintf(`INSERT INTO comments values ("fbbd419a-e40f-49d5-867a-afa328127cbb", "16f94e48-82bc-4884-96b3-c847d37f069c", "Jeff", "Thanks for this post!")`),
 	}
 
