@@ -7,6 +7,27 @@ class MySocket {
     this.mysocket = null;
   }
 
+  // TODO: insert username variable
+  requestChat() {
+    let m = {
+      type: 'chat',
+      text: document.getElementById("chatIPT").value,
+      timestamp: time(),
+      username: "?",
+    }
+    this.mysocket.send(JSON.stringify(m));
+    document.getElementById("chatIPT").value = ""
+  }
+
+  keypress(e) {
+    if (e.keyCode == 13) {
+      this.wsType = e.target.id.slice(0, -3)
+      if (this.wsType = 'chat') {
+        this.requestChat()
+      }
+    }
+  }
+  
   chatHandler(text, myself) {
     const m = JSON.parse(text)
     let div = document.createElement("div");
@@ -32,6 +53,7 @@ class MySocket {
         contentSocket.sendContentRequest(event)
       });
       user.innerHTML = p.username
+      user.style.color = 'white'
       user.className = "presence " + p.username
       document.getElementById("presencecontainer").appendChild(user)
     }
@@ -84,41 +106,6 @@ class MySocket {
   }
 
   // TODO: add timestamp
-  // sendNewCommentRequest(e) {
-  //   let m = {
-  //     type: 'post',
-  //     timestamp: "",
-  //     posts: [
-  //       {
-  //         postid: e.target.post_id,
-  //         username: e.target.username,
-  //         title: document.getElementById('posttitle').value,
-  //         categories: document.getElementById('category').value,
-  //         body: document.getElementById('postbody').value,
-  //         comments: [
-  //           {
-  //             commentid: "",
-  //             postid: e.target.post_id,
-  //             username: "",
-  //             body: document.getElementById('commentbody').value,
-  //           }
-  //         ]
-  //       }
-  //     ]
-  //   }
-  //   this.mysocket.send(JSON.stringify(m));
-  //   document.getElementById('commentbody').value = ""
-  // }
-
-  // makes a call to the backend for comments saved in the database
-  // sendSubmittedCommentsRequest(postid) {
-  //   this.mysocket.send(JSON.stringify({
-  //     type: "post",
-  //     return: postid,
-  //   }));
-  // }
-
-  // TODO: add timestamp
   sendNewPostRequest(e) {
     let m = {
       type: 'post',
@@ -151,32 +138,6 @@ class MySocket {
       post_id: post_id,
     }));
   }
-
-  // TODO: insert username variable
-  // requestChat() {
-  //   let m = {
-  //     type: 'chat',
-  //     text: document.getElementById("chatIPT").value,
-  //     timestamp: time(),
-  //     username: "?",
-  //   }
-  //   this.mysocket.send(JSON.stringify(m));
-  //   document.getElementById("chatIPT").value = ""
-  // }
-
-  // keypress(e) {
-  //   if (e.keyCode == 13) {
-  //     this.wsType = e.target.id.slice(0, -3)
-  //     switch (this.wsType) {
-  //       case 'chat':
-  //         this.requestChat()
-  //         break;
-  //       default:
-  //         console.log("keypress registered for unknown wsType")
-  //         break;
-  //     }
-  //   }
-  // }
 
   connectSocket(URI, handler) {
     if (URI === 'chat') {
