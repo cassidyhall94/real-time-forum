@@ -13,7 +13,7 @@ class MySocket {
       type: 'chat',
       text: document.getElementById("chatIPT").value,
       timestamp: time(),
-      username: "?",
+      nickname: "",
     }
     this.mysocket.send(JSON.stringify(m));
     document.getElementById("chatIPT").value = ""
@@ -32,7 +32,7 @@ class MySocket {
     const m = JSON.parse(text)
     let div = document.createElement("div");
     let msgContainer = document.getElementById('chatIPT')
-    div.innerHTML = "<b>" + m.timestamp + " </b>" + "<br>" + "<b>" + m.username + ":</b> " + m.text;
+    div.innerHTML = "<b>" + m.timestamp + " </b>" + "<br>" + "<b>" + m.nickname + ":</b> " + m.text;
     let cself = (myself) ? "self" : "";
     div.className = "msg " + cself;
     document.getElementById("msgcontainer").appendChild(div);
@@ -52,9 +52,9 @@ class MySocket {
         event.target.id = "presence"
         contentSocket.sendContentRequest(event)
       });
-      user.innerHTML = p.username
+      user.innerHTML = p.nickname
       user.style.color = 'white'
-      user.className = "presence " + p.username
+      user.className = "presence " + p.nickname
       document.getElementById("presencecontainer").appendChild(user)
     }
   }
@@ -66,7 +66,7 @@ class MySocket {
       let post = document.createElement("div");
       post.className = "submittedpost " + p.post_id
       post.id = p.post_id
-      post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "<b>Username: " + "</b>" + p.username + "<br>" + "<b>Category/Categories: " + "</b>" + p.categories + "<br>" + p.body + "<br>";
+      post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "<b>Nickname: " + "</b>" + p.nickname + "<br>" + "<b>Category/Categories: " + "</b>" + p.categories + "<br>" + p.body + "<br>";
       let button = document.createElement("button")
       button.classname = "addcomment"
       button.innerHTML = "Comments"
@@ -104,7 +104,7 @@ class MySocket {
       }
     }
   }
-
+  
   // TODO: add timestamp
   sendNewPostRequest(e) {
     let m = {
@@ -112,7 +112,7 @@ class MySocket {
       timestamp: "time",
       posts: [
         {
-          username: e.target.username,
+          nickname: e.target.nickname,
           title: document.getElementById('posttitle').value,
           categories: document.getElementById('category').value,
           body: document.getElementById('postbody').value,
@@ -156,7 +156,6 @@ class MySocket {
       this.wsType = 'presence'
       console.log("Presence Websocket Connected");
     }
-
     var socket = new WebSocket("ws://localhost:8080/" + URI);
     this.mysocket = socket;
 
@@ -186,7 +185,7 @@ class MySocket {
   //     "application/x-www-form-urlencoded"
   //   );
   //   var fd = new FormData();
-  //   fd.set("username", document.getElementById("reg-username").value);
+  //   fd.set("nickname", document.getElementById("reg-nickname").value);
   //   fd.set("email", document.getElementById("reg-email").value);
   //   fd.set("password", document.getElementsByClassName("reg-password").value);
 

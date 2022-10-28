@@ -12,7 +12,7 @@ type ContentMessage struct {
 	Type      messageType `json:"type,omitempty"`
 	Body      string      `json:"body,omitempty"`
 	Timestamp string      `json:"timestamp,omitempty"`
-	Username  string      `json:"username,omitempty"`
+	Nickname  string      `json:"nickname,omitempty"`
 	Resource  string      `json:"resource,omitempty"`
 	PostID    string      `json:"post_id,omitempty"`
 }
