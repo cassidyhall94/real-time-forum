@@ -1,6 +1,8 @@
 package database
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type User struct {
 	ID       string `json:"id,omitempty"`
@@ -64,8 +66,8 @@ func GetUsers() ([]User, error) {
 	return users, nil
 }
 
-func GetPosts() ([]Post, error) {
-	posts := []Post{}
+func GetPosts() ([]*Post, error) {
+	posts := []*Post{}
 	rows, err := DB.Query(`SELECT * FROM posts`)
 	if err != nil {
 		return posts, fmt.Errorf("GetPosts DB Query error: %+v\n", err)
@@ -81,7 +83,7 @@ func GetPosts() ([]Post, error) {
 		if err != nil {
 			return posts, fmt.Errorf("GetPosts rows.Scan error: %+v\n", err)
 		}
-		posts = append(posts, Post{
+		posts = append(posts, &Post{
 			PostID:     postid,
 			Username:   username,
 			Categories: category,
@@ -96,6 +98,51 @@ func GetPosts() ([]Post, error) {
 	return posts, nil
 }
 
+func GetPostForComment(c Comment) (Post, error) {
+	posts, err := GetPosts()
+	if err != nil {
+		return Post{}, err
+	}
+	for _, p := range posts {
+		if p.PostID == c.PostID {
+			return *p, nil
+		}
+	}
+	return Post{}, fmt.Errorf("no matching post found for id: %s", c.PostID)
+}
+
+func GetPopulatedPosts() ([]*Post, error) {
+	posts, err := GetPosts()
+	if err != nil {
+		return nil, fmt.Errorf("OnPostsConnect (GetPosts) error: %+v\n", err)
+	}
+
+	populatedPosts, err := populateCommentsForPosts(posts)
+	if err != nil {
+		return nil, fmt.Errorf("OnPostsConnect (populateCommentsForPosts) error: %+v\n", err)
+	}
+
+	return populatedPosts, nil
+}
+
+func populateCommentsForPosts(posts []*Post) ([]*Post, error) {
+	comments, err := GetComments()
+	if err != nil {
+		return nil, fmt.Errorf("populatedCommentsForPosts (GetComments) error: %+v\n", err)
+	}
+	outPost := []*Post{}
+	for _, pts := range posts {
+		newPost := pts
+		for _, cmts := range comments {
+			if pts.PostID == cmts.PostID {
+				newPost.Comments = append(newPost.Comments, cmts)
+			}
+		}
+		outPost = append(outPost, newPost)
+	}
+	return outPost, nil
+}
+
 func GetComments() ([]Comment, error) {
 	comments := []Comment{}
 	rows, err := DB.Query(`SELECT * FROM comments`)
@@ -108,7 +155,7 @@ func GetComments() ([]Comment, error) {
 	var commentcontent string
 
 	for rows.Next() {
-		err := rows.Scan(&postid, &commentid, &username, &commentcontent)
+		err := rows.Scan(&commentid, &postid, &username, &commentcontent)
 		if err != nil {
 			return comments, fmt.Errorf("GetComments rows.Scan error: %+v\n", err)
 		}
@@ -124,4 +171,14 @@ func GetComments() ([]Comment, error) {
 		return comments, err
 	}
 	return comments, nil
+}
+
+func FilterCommentsForPost(postID string, comments []Comment) []Comment {
+	out := []Comment{}
+	for _, c := range comments {
+		if postID == c.PostID {
+			out = append(out, c)
+		}
+	}
+	return out
 }

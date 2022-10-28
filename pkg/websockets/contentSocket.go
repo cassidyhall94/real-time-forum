@@ -2,6 +2,7 @@ package websockets
 
 import (
 	"fmt"
+	"real-time-forum/pkg/database"
 	"strings"
 	"text/template"
 	"time"
@@ -13,6 +14,7 @@ type ContentMessage struct {
 	Timestamp string      `json:"timestamp,omitempty"`
 	Username  string      `json:"username,omitempty"`
 	Resource  string      `json:"resource,omitempty"`
+	PostID    string      `json:"post_id,omitempty"`
 }
 
 func (m *ContentMessage) Broadcast(s *socket) error {
@@ -72,7 +74,28 @@ func (m *ContentMessage) Handle(s *socket) error {
 			return fmt.Errorf("Presence ExecuteTemplate error: %+v\n", err)
 		}
 	case "comment":
-		if err := tpl.ExecuteTemplate(sb, "comment.template", nil); err != nil {
+		if m.PostID == "" {
+			return fmt.Errorf("Empty post ID when requesting comments")
+		}
+		comments, err := database.GetComments()
+		if err != nil {
+			return fmt.Errorf("Unable to get comments for comment template: %w", err)
+		}
+		comments = database.FilterCommentsForPost(m.PostID, comments)
+		post, err := database.GetPostForComment(comments[0])
+		if err != nil {
+			return fmt.Errorf("Unable to get post for comments: %w", err)
+		}
+
+		commentTemplateData := struct {
+			Post     database.Post
+			Comments []database.Comment
+		}{
+			Post: post,
+			Comments: comments,
+		}
+
+		if err := tpl.ExecuteTemplate(sb, "comment.template", commentTemplateData); err != nil {
 			return fmt.Errorf("Comment ExecuteTemplate error: %+v\n", err)
 		}
 	default:

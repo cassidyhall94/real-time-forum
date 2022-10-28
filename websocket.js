@@ -40,33 +40,83 @@ class MySocket {
   postHandler(text) {
     const m = JSON.parse(text)
     for (let p of m.posts) {
+      const consp = p
       let post = document.createElement("div");
-      post.className = "submittedpost " + p.postid 
-      post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "Username: " + p.username + "<br>" + "Category/Categories: " + p.categories + "<br>" + p.body + "<br>";
+      post.className = "submittedpost " + p.post_id
+      post.id = p.post_id
+      post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "<b>Username: " + "</b>" + p.username + "<br>" + "<b>Category/Categories: " + "</b>" + p.categories + "<br>" + p.body + "<br>";
       let button = document.createElement("button")
       button.classname = "addcomment"
-      button.innerHTML = "Add a Comment"
-      button.addEventListener('click', function (event) {
+      button.innerHTML = "Comments"
+      button.addEventListener('click', function (event, post = consp) {
         event.target.id = "comment"
-        contentSocket.sendContentRequest(event)
+        contentSocket.sendContentRequest(event, post.post_id)
       });
       post.appendChild(button)
       document.getElementById("submittedposts").appendChild(post)
     }
   }
 
-  commentHandler(text) {
-    const m = JSON.parse(text)
-    for (let p of m.posts) {
-      for (let c of p.comments) {
-
+  sendNewCommentRequest(e) {
+    // TODO: timestamp
+    let post = document.getElementById('postcontainerforcomments')
+    for (const child of post.children) {
+      if (containsNumber(child.id)) {
+        let m = {
+          type: 'post',
+          timestamp: "",
+          posts: [
+            {
+              post_id: child.id,
+              comments: [
+                {
+                  post_id: child.id,
+                  body: document.getElementById('commentbody').value,
+                }
+              ]
+            }
+          ]
+        }
+        this.mysocket.send(JSON.stringify(m));
+        document.getElementById('commentbody').value = ""
       }
-      let comment = document.createElement("div");
-      comment.className = "submittedcomment" + c.commentid
-      comment.innerHTML = "Username: " + c.username + "<br>" + c.body;
-      document.getElementById("").appendChild(comment)
     }
   }
+
+  // TODO: add timestamp
+  // sendNewCommentRequest(e) {
+  //   let m = {
+  //     type: 'post',
+  //     timestamp: "",
+  //     posts: [
+  //       {
+  //         postid: e.target.post_id,
+  //         username: e.target.username,
+  //         title: document.getElementById('posttitle').value,
+  //         categories: document.getElementById('category').value,
+  //         body: document.getElementById('postbody').value,
+  //         comments: [
+  //           {
+  //             commentid: "",
+  //             postid: e.target.post_id,
+  //             username: "",
+  //             body: document.getElementById('commentbody').value,
+  //           }
+  //         ]
+  //       }
+  //     ]
+  //   }
+  //   this.mysocket.send(JSON.stringify(m));
+  //   document.getElementById('commentbody').value = ""
+  // }
+
+  // makes a call to the backend for comments saved in the database
+  // sendSubmittedCommentsRequest(postid) {
+  //   this.mysocket.send(JSON.stringify({
+  //     type: "post",
+  //     return: postid,
+  //   }));
+  // }
 
   // TODO: add timestamp
   sendNewPostRequest(e) {
@@ -75,7 +125,6 @@ class MySocket {
       timestamp: "time",
       posts: [
         {
-          postid: e.target.postid,
           username: e.target.username,
           title: document.getElementById('posttitle').value,
           categories: document.getElementById('category').value,
@@ -92,44 +141,42 @@ class MySocket {
   sendSubmittedPostsRequest() {
     this.mysocket.send(JSON.stringify({
       type: "post",
-      return: "all posts",
     }));
   }
 
-  // TODO: insert username variable
-  sendContentRequest(e) {
+  sendContentRequest(e, post_id = "") {
     this.mysocket.send(JSON.stringify({
       type: "content",
-      username: "?",
       resource: e.target.id,
+      post_id: post_id,
     }));
   }
 
   // TODO: insert username variable
-  requestChat() {
-    let m = {
-      type: 'chat',
-      text: document.getElementById("chatIPT").value,
-      timestamp: time(),
-      username: "?",
-    }
-    this.mysocket.send(JSON.stringify(m));
-    document.getElementById("chatIPT").value = ""
-  }
+  // requestChat() {
+  //   let m = {
+  //     type: 'chat',
+  //     text: document.getElementById("chatIPT").value,
+  //     timestamp: time(),
+  //     username: "?",
+  //   }
+  //   this.mysocket.send(JSON.stringify(m));
+  //   document.getElementById("chatIPT").value = ""
+  // }
 
-  keypress(e) {
-    if (e.keyCode == 13) {
-      this.wsType = e.target.id.slice(0, -3)
-      switch (this.wsType) {
-        case 'chat':
-          this.requestChat()
-          break;
-        default:
-          console.log("keypress registered for unknown wsType")
-          break;
-      }
-    }
-  }
+  // keypress(e) {
+  //   if (e.keyCode == 13) {
+  //     this.wsType = e.target.id.slice(0, -3)
+  //     switch (this.wsType) {
+  //       case 'chat':
+  //         this.requestChat()
+  //         break;
+  //       default:
+  //         console.log("keypress registered for unknown wsType")
+  //         break;
+  //     }
+  //   }
+  // }
 
   connectSocket(URI, handler) {
     if (URI === 'chat') {
@@ -148,23 +195,19 @@ class MySocket {
       this.wsType = 'presence'
       console.log("Presence Websocket Connected");
     }
-    if (URI === 'comment') {
-      this.wsType = 'comment'
-      console.log("comment Websocket Connected");
-    }
 
     var socket = new WebSocket("ws://localhost:8080/" + URI);
     this.mysocket = socket;
 
     socket.onmessage = (e) => {
-      console.log("socket message")
+      // console.log("socket message")
       handler(e.data, false);
     };
     socket.onopen = () => {
-      console.log("socket opened");
+      // console.log("socket opened");
     };
     socket.onclose = () => {
-      console.log("socket closed");
+      // console.log("socket closed");
     };
   }
 
@@ -196,4 +239,8 @@ class MySocket {
   //     }
   //   }
   // }
+}
+
+function containsNumber(str) {
+  return /[0-9]/.test(str);
 }

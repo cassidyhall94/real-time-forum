@@ -7,44 +7,42 @@
 </head>
 <header>01 Founders
     <button id="post"
-        onclick="contentSocket.sendContentRequest(event); postSocket.sendSubmittedPostsRequest() ">Home</button>
+        onclick="contentSocket.sendContentRequest(event); postSocket.sendSubmittedPostsRequest()">Home</button>
     <button id="login" onclick="contentSocket.sendContentRequest(event)">Login/Register</button>
     <button id="profile" onclick="contentSocket.sendContentRequest(event)">Profile</button>
 </header>
 
 <body>
     <article>
-        <div id="postcontainer">       
+        <div id="postcontainer">
             <form id="postform" onsubmit="return false">
-        
+
                 <h3>SUBMIT A POST</h3>
-        
+
                 <div class="titleField">
                     <input type="text" style="width: 200px; text-align: center" id="posttitle" name="title"
                         placeholder="Enter your Title" required />
                 </div>
-        
+
                 <div class="categoryField">
                     <input type="text" style="width: 200px; text-align: center" id="category" name="category"
                         placeholder="Enter your Category" required />
                 </div>
-        
+
                 <div class="postBodyField">
-                    <input type="text" style="width: 200px; height: 200px; text-align: center" id="postbody" name="postbody"
-                        placeholder="Enter your Post Body" required />
+                    <input type="text" style="width: 200px; height: 200px; text-align: center" id="postbody"
+                        name="postbody" placeholder="Enter your Post Body" required />
                 </div>
-        
+
                 <button id="postButton" style="margin-top: 10px; margin-bottom: 10px"
                     onclick="postSocket.sendNewPostRequest(event)">Submit</button>
-        
+
             </form>
         </div>
-
     </article>
 
     <section>
         <div id="content">
-
         </div>
     </section>
 
@@ -52,8 +50,9 @@
         <div id="presencecontainer">
         </div>
     </aside>
+
 </body>
-<footer>Footer</footer>
+<footer></footer>
 <script src="websocket.js"></script>
 <script>
     let contentSocket = new MySocket()
