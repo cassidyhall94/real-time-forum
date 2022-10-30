@@ -35,7 +35,7 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 	_, errTbl := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "users" (
 			"ID"	TEXT UNIQUE,
-			"nickname" TEXT,
+			"nickname" TEXT UNIQUE,
 			"age" TEXT,
 			"gender" TEXT,
 			"firstname" TEXT,
@@ -72,21 +72,21 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 	`)
 	if errCookie != nil {
 		fmt.Println("TABLE ERROR")
-		log.Fatal(errTbl.Error())
+		log.Fatal(errCookie.Error())
 	}
 
 	// Create the table for each user
 	_, errComments := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "comments" (
-			"commentID" TEXT,
-			"postID"	TEXT,
+			"commentID" TEXT UNIQUE,
+			"postID"	TEXT UNIQUE,
 			"nickname"	TEXT,
 			"body"	TEXT
 		);
 	`)
 	if errComments != nil {
 		fmt.Println("USER ERROR")
-		log.Fatal(errTbl.Error())
+		log.Fatal(errComments.Error())
 	}
 	// Create the database for each user
 	_, errCategories := sqliteDatabase.Exec(`
@@ -105,13 +105,26 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 	_, errChats := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "chats" (
 			"chatID"	TEXT,
-			"userID"	TEXT,
-			"messageContent"	TEXT,
-			"date"	INTEGER	);
+			"participants"	TEXT
+			);
 	`)
 	if errChats != nil {
+		fmt.Println("CHATS TABLE ERROR")
+		log.Fatal(errChats.Error())
+	}
+
+	_, errChat := sqliteDatabase.Exec(`
+		CREATE TABLE IF NOT EXISTS "chat" (
+			"chatID"	TEXT,
+			"sender"	TEXT,
+			"receiver"	TEXT,
+			"date"	TEXT,
+			"body" TEXT
+			);
+	`)
+	if errChat != nil {
 		fmt.Println("CHAT TABLE ERROR")
-		log.Fatal(errCategories.Error())
+		log.Fatal(errChat.Error())
 	}
 
 	DB = sqliteDatabase
@@ -130,6 +143,14 @@ func insertPlaceholdersInDB() {
 		"fake comment 1": fmt.Sprintf(`INSERT INTO comments values ("49f89e2f-4d7d-4b03-beb6-8def55652d4a", "9b4bc963-ecb2-4767-a79b-b09cd102ce4a", "Cassidy", "I like it too!")`),
 
 		"fake comment 2": fmt.Sprintf(`INSERT INTO comments values ("fbbd419a-e40f-49d5-867a-afa328127cbb", "16f94e48-82bc-4884-96b3-c847d37f069c", "Jeff", "Thanks for this post!")`),
+
+		"fake chats 1": fmt.Sprintf(`INSERT INTO chats values ("d5327a90-e76a-46ef-8b09-531875a534c8", "'foo', 'bar'")`),
+		
+		"fake chats 2": fmt.Sprintf(`INSERT INTO chats values ("d5327a90-e76a-46ef-8b09-531875a534c8", "'foo', 'bar'")`),
+
+		"fake chat 1": fmt.Sprintf(`INSERT INTO chat values ("d5327a90-e76a-46ef-8b09-531875a534c8", "bar", "foo", "TIME", "Hey! How are you?")`),
+
+		"fake chat 2": fmt.Sprintf(`INSERT INTO chat values ("d5327a90-e76a-46ef-8b09-531875a534c8", "foo", "bar", "TIME", "Good! And you?")`),
 	}
 
 	for purpose, q := range queries {

@@ -25,6 +25,7 @@
                 margin-right: 10px;
                 border: 2px solid rgb(0, 0, 0);
             }
+
             #submittedcomments {
                 background-color: #000000;
                 padding: 15px;
@@ -35,6 +36,7 @@
                 border: 2px solid rgb(0, 0, 0);
                 justify-self: right;
             }
+
             #postcontainerforcomments {
                 background-color: #000000;
                 padding: 15px;
@@ -45,6 +47,7 @@
                 border: 2px solid rgb(0, 0, 0);
                 justify-self: right;
             }
+
             #commentform {
                 display: none;
             }

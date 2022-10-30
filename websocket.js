@@ -8,7 +8,7 @@ class MySocket {
   }
 
   // TODO: insert username variable
-  requestChat() {
+  sendNewChatRequest() {
     let m = {
       type: 'chat',
       text: document.getElementById("chatIPT").value,
@@ -23,20 +23,21 @@ class MySocket {
     if (e.keyCode == 13) {
       this.wsType = e.target.id.slice(0, -3)
       if (this.wsType = 'chat') {
-        this.requestChat()
+        this.sendNewChatRequest
       }
     }
   }
-  
-  chatHandler(text, myself) {
+
+  chatHandler(text) {
     const m = JSON.parse(text)
-    let div = document.createElement("div");
-    let msgContainer = document.getElementById('chatIPT')
-    div.innerHTML = "<b>" + m.timestamp + " </b>" + "<br>" + "<b>" + m.nickname + ":</b> " + m.text;
-    let cself = (myself) ? "self" : "";
-    div.className = "msg " + cself;
-    document.getElementById("msgcontainer").appendChild(div);
-    div.after(msgContainer)
+    console.log(m)
+    for (let c of m.chats) {
+      let chat = document.createElement("div");
+      chat.className = "chat " + c.chat_id
+      chat.id = c.chat_id
+      chat.innerHTML = "<b>Nickname: " + c.nickname + "</b>" + "<br>" + "<b>Date: " + "</b>" + c.time_message_sent + "<br>" + c.body + "<br>";
+      document.getElementById("chatcontainer").appendChild(chat)
+    }
   }
 
   contentHandler(text) {
@@ -46,6 +47,7 @@ class MySocket {
 
   presenceHandler(text) {
     const m = JSON.parse(text)
+    console.log("Presence M: ", m)
     for (let p of m.presences) {
       let user = document.createElement("button");
       user.addEventListener('click', function (event) {
@@ -104,7 +106,7 @@ class MySocket {
       }
     }
   }
-  
+
   // TODO: add timestamp
   sendNewPostRequest(e) {
     let m = {

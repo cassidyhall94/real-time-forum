@@ -1,17 +1,54 @@
+<div id="chatcontainer">
+    <div>
+        {{ range .Chats }}
+        <div id="submittedchats">
+            <br>
+            Nickname: {{.Nickname}}
+            <br>
+            {{.Body}}
+            <br>
+        </div>
+        {{ end }}
+        <br>
+    </div>
 
-<div id="msgcontainer">
+    <br>
+
     <style>
-        .msgcontainer {
-        text-align: center;
-        background-color: #000000;
-        margin-top: 10px;
-        margin-bottom: 10px;
-        margin-left: 10px;
-        margin-right: 10px;
-        border: 2px solid rgb(255, 255, 255);
-    }
+        #chatIPT {
+            text-align: center;
+            background-color: #f7e96b;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            margin-left: 10px;
+            margin-right: 10px;
+            border: 2px solid rgb(255, 255, 255);
+        }
+
+        #submittedchats {
+            background-color: #000000;
+            padding: 15px;
+            margin-bottom: 10px;
+            margin-left: 10px;
+            margin-right: 10px;
+            margin-top: 10px;
+            border: 2px solid rgb(255, 255, 255);
+            justify-self: right;
+        }
+
+        #chatcontainer {
+            background-color: #000000;
+            padding: 15px;
+            margin-bottom: 10px;
+            margin-left: 10px;
+            margin-right: 10px;
+            margin-top: 10px;
+            border: 2px solid rgb(255, 255, 255);
+            justify-self: right;
+        }
     </style>
-    CHAT
-    <div style="overflow: hidden;">
-        <input id="chatIPT" onkeypress="chatSocket.keypress(event)" type="text" />
+
+        <input id="chatIPT" style="margin-top: 10px; margin-bottom: 10px;"
+            onkeypress="chatSocket.keypress(event)" type="text"/>
+    <br>
 </div>

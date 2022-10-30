@@ -31,6 +31,20 @@ type Comment struct {
 	Body      string `json:"body,omitempty"`
 }
 
+type Chats struct {
+	ChatID       string   `json:"chat_id,omitempty"`
+	Participants []string `json:"participants"`
+	Chats        []Chat   `json:"chats,omitempty"`
+}
+
+type Chat struct {
+	ChatID   string `json:"chat_id`
+	Sender   string `json:"sender"`
+	Receiver string `json:"receiver"`
+	Date     string `json:"date,omitempty"`
+	Body     string `json:"body,omitempty"`
+}
+
 func GetUsers() ([]User, error) {
 	users := []User{}
 	rows, err := DB.Query(`SELECT * FROM users`)
@@ -117,12 +131,12 @@ func GetPostForComment(c Comment) (Post, error) {
 func GetPopulatedPosts() ([]*Post, error) {
 	posts, err := GetPosts()
 	if err != nil {
-		return nil, fmt.Errorf("OnPostsConnect (GetPosts) error: %+v\n", err)
+		return nil, fmt.Errorf("GetPopulatedPosts (GetPosts) error: %+v\n", err)
 	}
 
 	populatedPosts, err := populateCommentsForPosts(posts)
 	if err != nil {
-		return nil, fmt.Errorf("OnPostsConnect (populateCommentsForPosts) error: %+v\n", err)
+		return nil, fmt.Errorf("GetPopulatedPosts (populateCommentsForPosts) error: %+v\n", err)
 	}
 
 	return populatedPosts, nil
@@ -131,7 +145,7 @@ func GetPopulatedPosts() ([]*Post, error) {
 func populateCommentsForPosts(posts []*Post) ([]*Post, error) {
 	comments, err := GetComments()
 	if err != nil {
-		return nil, fmt.Errorf("populatedCommentsForPosts (GetComments) error: %+v\n", err)
+		return nil, fmt.Errorf("populateCommentsForPosts (GetComments) error: %+v\n", err)
 	}
 	outPost := []*Post{}
 	for _, pts := range posts {
@@ -184,4 +198,97 @@ func FilterCommentsForPost(postID string, comments []Comment) []Comment {
 		}
 	}
 	return out
+}
+
+func GetChats() ([]*Chats, error) {
+	chats := []*Chats{}
+	rows, err := DB.Query(`SELECT * FROM chats`)
+	if err != nil {
+		return chats, fmt.Errorf("GetChats DB Query error: %+v\n", err)
+	}
+	var chatid string
+	var participants []string
+
+	for rows.Next() {
+		err := rows.Scan(&chatid, &participants)
+		if err != nil {
+			return chats, fmt.Errorf("GetChats rows.Scan error: %+v\n", err)
+		}
+		chats = append(chats, &Chats{
+			ChatID:       chatid,
+			Participants: participants,
+		})
+	}
+	err = rows.Err()
+	if err != nil {
+		return chats, err
+	}
+	return chats, nil
+}
+
+func GetChat() ([]*Chat, error) {
+	chat := []*Chat{}
+	rows, err := DB.Query(`SELECT * FROM chat`)
+	if err != nil {
+		return chat, fmt.Errorf("GetChat DB Query error: %+v\n", err)
+	}
+	var chatid string
+	var sender string
+	var receiver string
+	var date string
+	var body string
+
+	for rows.Next() {
+		err := rows.Scan(&chatid, &sender, &receiver, &date, &body)
+		if err != nil {
+			return chat, fmt.Errorf("GetChat rows.Scan error: %+v\n", err)
+		}
+		chat = append(chat, &Chat{
+			ChatID:   chatid,
+			Sender:   sender,
+			Receiver: receiver,
+			Date:     date,
+			Body:     body,
+		})
+	}
+	err = rows.Err()
+	if err != nil {
+		return chat, err
+	}
+	return chat, nil
+}
+
+func populateChatForChats(chats []*Chats) ([]*Chats, error) {
+	chat, err := GetChat()
+	if err != nil {
+		return nil, fmt.Errorf("populateChatForChats (GetChat) error: %+v\n", err)
+	}
+	outChat := []*Chats{}
+	outParticipants := []string{}
+	for _, cts := range chats {
+		newChat := cts
+		for _, cht := range chat {
+			if cts.ChatID == cht.ChatID {
+				outParticipants = append(outParticipants, cht.Receiver)
+				outParticipants = append(outParticipants, cht.Sender)
+				newChat.Participants = append(newChat.Participants, outParticipants...)
+			}
+		}
+		outChat = append(outChat, newChat)
+	}
+	return outChat, nil
+}
+
+func GetPopulatedChats() ([]*Chats, error) {
+	chats, err := GetChats()
+	if err != nil {
+		return nil, fmt.Errorf("GetPopulatedChats (GetChats) error: %+v\n", err)
+	}
+
+	populatedChats, err := populateChatForChats(chats)
+	if err != nil {
+		return nil, fmt.Errorf("GetPopulatedChats (populateChatForChats) error: %+v\n", err)
+	}
+
+	return populatedChats, nil
 }
