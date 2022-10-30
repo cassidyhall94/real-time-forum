@@ -31,14 +31,14 @@ type Comment struct {
 	Body      string `json:"body,omitempty"`
 }
 
-type Chats struct {
+type Conversation struct {
 	ChatID       string   `json:"chat_id,omitempty"`
 	Participants []string `json:"participants"`
 	Chats        []Chat   `json:"chats,omitempty"`
 }
 
 type Chat struct {
-	ChatID   string `json:"chat_id`
+	ChatID   string `json:"chat_id"`
 	Sender   string `json:"sender"`
 	Receiver string `json:"receiver"`
 	Date     string `json:"date,omitempty"`
@@ -200,30 +200,30 @@ func FilterCommentsForPost(postID string, comments []Comment) []Comment {
 	return out
 }
 
-func GetChats() ([]*Chats, error) {
-	chats := []*Chats{}
-	rows, err := DB.Query(`SELECT * FROM chats`)
+func GetConversations() ([]*Conversation, error) {
+	conversations := []*Conversation{}
+	rows, err := DB.Query(`SELECT * FROM conversations`)
 	if err != nil {
-		return chats, fmt.Errorf("GetChats DB Query error: %+v\n", err)
+		return conversations, fmt.Errorf("GetConversations DB Query error: %+v\n", err)
 	}
 	var chatid string
-	var participants []string
+	participants := []string{}
 
 	for rows.Next() {
 		err := rows.Scan(&chatid, &participants)
 		if err != nil {
-			return chats, fmt.Errorf("GetChats rows.Scan error: %+v\n", err)
+			return conversations, fmt.Errorf("GetConversations rows.Scan error: %+v\n", err)
 		}
-		chats = append(chats, &Chats{
+		conversations = append(conversations, &Conversation{
 			ChatID:       chatid,
 			Participants: participants,
 		})
 	}
 	err = rows.Err()
 	if err != nil {
-		return chats, err
+		return conversations, err
 	}
-	return chats, nil
+	return conversations, nil
 }
 
 func GetChat() ([]*Chat, error) {
@@ -258,12 +258,12 @@ func GetChat() ([]*Chat, error) {
 	return chat, nil
 }
 
-func populateChatForChats(chats []*Chats) ([]*Chats, error) {
+func populateChatForConversation(chats []*Conversation) ([]*Conversation, error) {
 	chat, err := GetChat()
 	if err != nil {
 		return nil, fmt.Errorf("populateChatForChats (GetChat) error: %+v\n", err)
 	}
-	outChat := []*Chats{}
+	outChat := []*Conversation{}
 	outParticipants := []string{}
 	for _, cts := range chats {
 		newChat := cts
@@ -279,16 +279,16 @@ func populateChatForChats(chats []*Chats) ([]*Chats, error) {
 	return outChat, nil
 }
 
-func GetPopulatedChats() ([]*Chats, error) {
-	chats, err := GetChats()
+func GetPopulatedConversations() ([]*Conversation, error) {
+	conversations, err := GetConversations()
 	if err != nil {
-		return nil, fmt.Errorf("GetPopulatedChats (GetChats) error: %+v\n", err)
+		return nil, fmt.Errorf("GetPopulatedConversation (GetConversations) error: %+v\n", err)
 	}
 
-	populatedChats, err := populateChatForChats(chats)
+	populatedConversations, err := populateChatForConversation(conversations)
 	if err != nil {
-		return nil, fmt.Errorf("GetPopulatedChats (populateChatForChats) error: %+v\n", err)
+		return nil, fmt.Errorf("GetPopulatedConversation (populateChatForConversation) error: %+v\n", err)
 	}
 
-	return populatedChats, nil
+	return populatedConversations, nil
 }

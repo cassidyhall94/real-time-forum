@@ -103,7 +103,7 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 
 	// Create the database for each user
 	_, errChats := sqliteDatabase.Exec(`
-		CREATE TABLE IF NOT EXISTS "chats" (
+		CREATE TABLE IF NOT EXISTS "conversations" (
 			"chatID"	TEXT,
 			"participants"	TEXT
 			);
@@ -144,9 +144,9 @@ func insertPlaceholdersInDB() {
 
 		"fake comment 2": fmt.Sprintf(`INSERT INTO comments values ("fbbd419a-e40f-49d5-867a-afa328127cbb", "16f94e48-82bc-4884-96b3-c847d37f069c", "Jeff", "Thanks for this post!")`),
 
-		"fake chats 1": fmt.Sprintf(`INSERT INTO chats values ("d5327a90-e76a-46ef-8b09-531875a534c8", "'foo', 'bar'")`),
-		
-		"fake chats 2": fmt.Sprintf(`INSERT INTO chats values ("d5327a90-e76a-46ef-8b09-531875a534c8", "'foo', 'bar'")`),
+		"fake conversation 1": fmt.Sprintf(`INSERT INTO conversations values ("d5327a90-e76a-46ef-8b09-531875a534c8", "'foo', 'bar'")`),
+
+		"fake conversation 2": fmt.Sprintf(`INSERT INTO conversations values ("d5327a90-e76a-46ef-8b09-531875a534c8", "'foo', 'bar'")`),
 
 		"fake chat 1": fmt.Sprintf(`INSERT INTO chat values ("d5327a90-e76a-46ef-8b09-531875a534c8", "bar", "foo", "TIME", "Hey! How are you?")`),
 

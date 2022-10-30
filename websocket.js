@@ -9,6 +9,7 @@ class MySocket {
 
   // TODO: insert username variable
   sendNewChatRequest() {
+    console.log("new chat request")
     let m = {
       type: 'chat',
       text: document.getElementById("chatIPT").value,
@@ -20,17 +21,18 @@ class MySocket {
   }
 
   keypress(e) {
+    console.log("keypressed: ", e)
     if (e.keyCode == 13) {
       this.wsType = e.target.id.slice(0, -3)
       if (this.wsType = 'chat') {
-        this.sendNewChatRequest
+        this.sendNewChatRequest()
       }
     }
   }
 
   chatHandler(text) {
     const m = JSON.parse(text)
-    console.log(m)
+    console.log("CHAT M: ", m)
     for (let c of m.chats) {
       let chat = document.createElement("div");
       chat.className = "chat " + c.chat_id
@@ -47,7 +49,6 @@ class MySocket {
 
   presenceHandler(text) {
     const m = JSON.parse(text)
-    console.log("Presence M: ", m)
     for (let p of m.presences) {
       let user = document.createElement("button");
       user.addEventListener('click', function (event) {
