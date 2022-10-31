@@ -13,20 +13,6 @@ type ChatMessage struct {
 	Conversations []*database.Conversation `json:"chats"`
 }
 
-// type Conversation struct {
-// 	ChatID       string   `json:"chat_id,omitempty"`
-// 	Participants []string `json:"participants"`
-// 	Chats        []Chat   `json:"chats,omitempty"`
-// }
-
-// type Chat struct {
-// 	ChatID   string `json:"chat_id"`
-// 	Sender   string `json:"sender"`
-// 	Receiver string `json:"receiver"`
-// 	Date     string `json:"date,omitempty"`
-// 	Body     string `json:"body,omitempty"`
-// }
-
 func (m *ChatMessage) Broadcast(s *socket) error {
 	if s.t == m.Type {
 		if err := s.con.WriteJSON(m); err != nil {
@@ -52,25 +38,26 @@ func (m *ChatMessage) Handle(s *socket) error {
 
 		return c.Broadcast(s)
 	}
-	for _, chats := range m.Conversations {
-		if chats.ChatID == "" {
-			if err := CreateConversations(chats); err != nil {
-				return fmt.Errorf("ChatSocket Handle (CreateConversations) error: %w", err)
+	for _, convo := range m.Conversations {
+		if convo.ConvoID == "" {
+			if err := CreateConversation(convo); err != nil {
+				return fmt.Errorf("ChatSocket Handle (CreateConversation) error: %w", err)
 			}
 		}
-		for _, chat := range chats.Chats {
+		for _, chat := range convo.Chats {
 			if chat.ChatID == "" {
 				if err := CreateChat(chat); err != nil {
 					return fmt.Errorf("ChatSocket Handle (CreateChat) error: %w", err)
 				}
 			}
 		}
+		return m.Broadcast(s)
 	}
 	return nil
 }
 
 func CreateChat(chat database.Chat) error {
-	stmt, err := database.DB.Prepare("INSERT INTO chat (chatID, sender, receiver, date, body) VALUES (?, ?, ?, ?, ?);")
+	stmt, err := database.DB.Prepare("INSERT INTO chats (convoID, chatID, sender, date, body) VALUES (?, ?, ?, ?, ?);")
 	defer stmt.Close()
 	if err != nil {
 		return fmt.Errorf("CreateChat DB Prepare error: %+v\n", err)
@@ -80,32 +67,29 @@ func CreateChat(chat database.Chat) error {
 	}
 
 	// TODO: remove placeholder nickname once login/sessions are working
-	if chat.Sender == "" {
-		chat.Sender = "Cassidy"
+	if chat.Sender.ID == "" {
+		//this is foo's userID in the database
+		chat.Sender.ID = "6d01e668-2642-4e55-af73-46f057b731f9"
 	}
 
-	if chat.Receiver == "" {
-		chat.Sender = "Jeff"
-	}
-
-	_, err = stmt.Exec(chat.ChatID, chat.Sender, chat.Receiver, chat.Date, chat.Body)
+	_, err = stmt.Exec(chat.ConvoID, chat.ChatID, chat.Sender, chat.Date, chat.Body)
 	if err != nil {
 		return fmt.Errorf("CreateChat Exec error: %+v\n", err)
 	}
 	return nil
 }
 
-func CreateConversations(conversations *database.Conversation) error {
-	stmt, err := database.DB.Prepare("INSERT INTO conversations (chatID, participants) VALUES (?, ?);")
+func CreateConversation(conversations *database.Conversation) error {
+	stmt, err := database.DB.Prepare("INSERT INTO conversations (convoID, participants) VALUES (?, ?);")
 	defer stmt.Close()
 	if err != nil {
 		return fmt.Errorf("CreateConversations DB Prepare error: %+v\n", err)
 	}
-	if conversations.ChatID == "" {
-		conversations.ChatID = uuid.NewV4().String()
+	if conversations.ConvoID == "" {
+		conversations.ConvoID = uuid.NewV4().String()
 	}
 
-	_, err = stmt.Exec(conversations.ChatID, conversations.Participants)
+	_, err = stmt.Exec(conversations.ConvoID, conversations.Participants)
 	if err != nil {
 		return fmt.Errorf("CreateConversations Exec error: %+v\n", err)
 	}
