@@ -91,20 +91,20 @@ func GetPosts() ([]*Post, error) {
 	}
 	var postid string
 	var nickname string
-	var category string
 	var title string
+	var category string
 	var postcontent string
 
 	for rows.Next() {
-		err := rows.Scan(&postid, &nickname, &category, &title, &postcontent)
+		err := rows.Scan(&postid, &nickname, &title, &category, &postcontent)
 		if err != nil {
 			return posts, fmt.Errorf("GetPosts rows.Scan error: %+v\n", err)
 		}
 		posts = append(posts, &Post{
 			PostID:     postid,
 			Nickname:   nickname,
-			Categories: category,
 			Title:      title,
+			Categories: category,
 			Body:       postcontent,
 		})
 	}

@@ -35,7 +35,7 @@ class MySocket {
     console.log("CHAT M: ", m)
     for (let c of m.chats) {
       let chat = document.createElement("div");
-      chat.className = "chat " + c.chat_id
+      chat.className = "submittedchat"
       chat.id = c.chat_id
       chat.innerHTML = "<b>Nickname: " + c.nickname + "</b>" + "<br>" + "<b>Date: " + "</b>" + c.time_message_sent + "<br>" + c.body + "<br>";
       document.getElementById("chatcontainer").appendChild(chat)
@@ -65,11 +65,12 @@ class MySocket {
   postHandler(text) {
     const m = JSON.parse(text)
     for (let p of m.posts) {
+      console.log(p)
       const consp = p
       let post = document.createElement("div");
-      post.className = "submittedpost " + p.post_id
+      post.className = "submittedpost"
       post.id = p.post_id
-      post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "<b>Nickname: " + "</b>" + p.nickname + "<br>" + "<b>Category/Categories: " + "</b>" + p.categories + "<br>" + p.body + "<br>";
+      post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "<b>Nickname: " + "</b>" + p.nickname + "<br>" + "<b>Category: " + p.categories + "</b>" + "<br>" + p.body + "<br>";
       let button = document.createElement("button")
       button.classname = "addcomment"
       button.innerHTML = "Comments"

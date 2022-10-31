@@ -28,20 +28,23 @@ func (m PostMessage) Handle(s *socket) error {
 
 		return c.Broadcast(s)
 	}
-		for _, post := range m.Posts {
-			if post.PostID == "" {
-				if err := CreatePost(post); err != nil {
-					return fmt.Errorf("PostSocket Handle (CreatePost) error: %w", err)
-				}
+	for _, pt := range m.Posts {
+		if pt.PostID == "" {
+			if err := CreatePost(pt); err != nil {
+				return fmt.Errorf("PostSocket Handle (CreatePost) error: %w", err)
 			}
-			for _, comment := range post.Comments {
-				if comment.CommentID == "" {
-					if err := CreateComment(comment); err != nil {
-						return fmt.Errorf("PostSocket Handle (CreateComment) error: %w", err)
-					}
+		}
+
+		// TODO: we need to write the post created by CreatePost back in to the client to render the new post
+		for _, comment := range pt.Comments {
+			if comment.CommentID == "" {
+				if err := CreateComment(comment); err != nil {
+					return fmt.Errorf("PostSocket Handle (CreateComment) error: %w", err)
 				}
 			}
 		}
+		return m.Broadcast(s)
+	}
 	return nil
 }
 
