@@ -48,7 +48,7 @@
         }
     </style>
 
-        <input id="chatIPT" style="margin-top: 10px; margin-bottom: 10px;"
-            onkeypress="chatSocket.keypress(event)" type="text"/>
+    <input id="chatIPT" style="margin-top: 10px; margin-bottom: 10px;" onkeypress="chatSocket.keypress(event)"
+        type="text" />
     <br>
 </div>

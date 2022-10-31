@@ -10,7 +10,7 @@ import (
 type ChatMessage struct {
 	Type          messageType              `json:"type,omitempty"`
 	Timestamp     string                   `json:"timestamp,omitempty"`
-	Conversations []*database.Conversation `json:"chats"`
+	Conversations []*database.Conversation `json:"conversations"`
 }
 
 func (m *ChatMessage) Broadcast(s *socket) error {
@@ -35,7 +35,11 @@ func (m *ChatMessage) Handle(s *socket) error {
 			Type:          chat,
 			Conversations: conversations,
 		}
-
+		for _, convo := range conversations {
+			for _, chat := range convo.Chats {
+				fmt.Println("handle: ", chat)
+			}
+		}
 		return c.Broadcast(s)
 	}
 	for _, convo := range m.Conversations {
@@ -51,6 +55,7 @@ func (m *ChatMessage) Handle(s *socket) error {
 				}
 			}
 		}
+
 		return m.Broadcast(s)
 	}
 	return nil

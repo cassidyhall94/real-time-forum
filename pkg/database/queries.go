@@ -217,6 +217,7 @@ func GetConversations() ([]*Conversation, error) {
 			return conversations, fmt.Errorf("GetConversations rows.Scan error: %+v\n", err)
 		}
 		users := []User{}
+		// getParticipantsForConvo here
 		participantsSlice := strings.Split(participants, ", ")
 
 		for _, participant := range participantsSlice {
@@ -273,19 +274,24 @@ func GetChats() ([]*Chat, error) {
 }
 
 func populateChatsForConversation(conversations []*Conversation) ([]*Conversation, error) {
-	chats, err := GetChats()
-	if err != nil {
-		return nil, fmt.Errorf("populateChatsForConversations (GetChats) error: %+v\n", err)
-	}
 	outConvo := []*Conversation{}
 	for _, convo := range conversations {
 		newConvo := convo
+		chats, err := populateUsersForChats(newConvo.Chats)
+		if err != nil {
+			return nil, fmt.Errorf("populateChatsForConversations (populateUsersForChats) error: %+v\n", err)
+		}
 		for _, cht := range chats {
 			if convo.ConvoID == cht.ConvoID {
 				newConvo.Chats = append(newConvo.Chats, *cht)
 			}
 		}
 		outConvo = append(outConvo, newConvo)
+		for _, convo := range outConvo {
+			for _, chat := range convo.Chats {
+				fmt.Println("populateChatsForConversation: ", chat)
+			}
+		}
 	}
 	return outConvo, nil
 }
@@ -300,6 +306,31 @@ func GetPopulatedConversations() ([]*Conversation, error) {
 	if err != nil {
 		return nil, fmt.Errorf("GetPopulatedConversation (populateChatForConversation) error: %+v\n", err)
 	}
-
+	for _, convo := range populatedConversations {
+		for _, chat := range convo.Chats {
+			fmt.Println("GetPopulatedConversation: ", chat)
+		}
+	}
 	return populatedConversations, nil
+}
+
+func populateUsersForChats(chats []Chat) ([]*Chat, error) {
+	users, err := GetUsers()
+	if err != nil {
+		return nil, fmt.Errorf("populateUsersForChats (GetUsers) error: %+v\n", err)
+	}
+	outChats := []*Chat{}
+	for _, chat := range chats {
+		newChat := chat
+		for _, user := range users {
+			if chat.Sender.ID == user.ID {
+				newChat.Sender = user
+			}
+		}
+		outChats = append(outChats, &newChat)
+		for _, chat := range outChats {
+			fmt.Println("populateUsersForChats: ", chat)
+		}
+	}
+	return outChats, nil
 }

@@ -7,21 +7,35 @@ class MySocket {
     this.mysocket = null;
   }
 
-  // TODO: insert username variable
+  // TODO: insert username variable and timestamp
   sendNewChatRequest() {
     console.log("new chat request")
     let m = {
       type: 'chat',
-      text: document.getElementById("chatIPT").value,
-      timestamp: time(),
-      nickname: "",
+      conversations: [
+        {
+          // participants: [
+          //   {
+          //     ID: "insert sender",
+          //   },
+          //   {
+          //     ID: "insert receiver",
+          //   }
+          // ],
+          chats: [
+            {
+              body: document.getElementById('chatIPT').value,
+            }
+          ]
+        }
+      ]
     }
+    console.log("REQUEST M: ", m)
     this.mysocket.send(JSON.stringify(m));
-    document.getElementById("chatIPT").value = ""
+    document.getElementById('chatIPT').value = ""
   }
 
   keypress(e) {
-    console.log("keypressed: ", e)
     if (e.keyCode == 13) {
       this.wsType = e.target.id.slice(0, -3)
       if (this.wsType = 'chat') {
@@ -32,8 +46,8 @@ class MySocket {
 
   chatHandler(text) {
     const m = JSON.parse(text)
-    console.log("CHAT M: ", m)
-    for (let c of m.chats) {
+    console.log("CHAT HANDLER: ", m)
+    for (let c of m.conversations) {
       let chat = document.createElement("div");
       chat.className = "submittedchat"
       chat.id = c.chat_id
@@ -65,7 +79,6 @@ class MySocket {
   postHandler(text) {
     const m = JSON.parse(text)
     for (let p of m.posts) {
-      console.log(p)
       const consp = p
       let post = document.createElement("div");
       post.className = "submittedpost"
