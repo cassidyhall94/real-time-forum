@@ -2,7 +2,6 @@ package database
 
 import (
 	"fmt"
-	"strings"
 )
 
 type User struct {
@@ -209,34 +208,77 @@ func GetConversations() ([]*Conversation, error) {
 	}
 
 	var convoid string
-	var participants string
+	var participant string
+
+	users, err := GetUsers()
+	if err != nil {
+		return nil, fmt.Errorf("GetConversations (GetUsers) error: %+v\n", err)
+	}
 
 	for rows.Next() {
-		err := rows.Scan(&convoid, &participants)
+		err := rows.Scan(&convoid, &participant)
 		if err != nil {
 			return conversations, fmt.Errorf("GetConversations rows.Scan error: %+v\n", err)
 		}
-		users := []User{}
-		// getParticipantsForConvo here
-		participantsSlice := strings.Split(participants, ", ")
 
-		for _, participant := range participantsSlice {
-			user := User{
-				ID: participant,
+		// we have the convoid and pid
+		// use the pid to get the user
+		// find the convo in conversations using convoid
+		// append the user from 2 to the convo from 3
+		if i := convoInConvos(convoid, conversations); i >= 0 {
+			convo := conversations[i]
+			if convo.ConvoID == convoid {
+				for _, u := range users {
+					if u.ID == participant {
+						convo.Participants = append(convo.Participants, u)
+					}
+				}
 			}
-			users = append(users, user)
+			conversations[i] = convo
+		} else {
+			user := User{}
+			for _, u := range users {
+				if u.ID == participant {
+					user = u
+				}
+			}
+			conversations = append(conversations, &Conversation{
+				ConvoID: convoid,
+				Participants: []User{user},
+			})
 		}
 
-		conversations = append(conversations, &Conversation{
-			ConvoID:      convoid,
-			Participants: users,
-		})
+		// outConvo := []*Conversation{}
+		// outParticipants := []User{}
+		// for _, convo := range conversations {
+		// 	if convo.ConvoID == convoid {
+		// 		for _, cp := range convo.Participants {
+		// 			for _, user := range users {
+		// 				if participant == user.ID {
+		// 					newParticipant = user
+		// 				}
+		// 				outParticipants = append(outParticipants, newParticipant)
+		// 			}
+		// 			outConvo = append(outConvo, newConvo)
+		// 			conversations = outConvo
+		// 		}
+		// 	}
+		// }
 	}
 	err = rows.Err()
 	if err != nil {
 		return conversations, err
 	}
 	return conversations, nil
+}
+
+func convoInConvos(convoID string, convos []*Conversation) int {
+	for i, c := range convos {
+		if convoID == c.ConvoID {
+			return i
+		}
+	}
+	return -1
 }
 
 func GetChats() ([]*Chat, error) {
