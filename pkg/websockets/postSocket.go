@@ -30,17 +30,21 @@ func (m PostMessage) Handle(s *socket) error {
 	}
 	for _, pt := range m.Posts {
 		if pt.PostID == "" {
-			if err := CreatePost(pt); err != nil {
+			newPost, err := CreatePost(pt)
+			if err != nil {
 				return fmt.Errorf("PostSocket Handle (CreatePost) error: %w", err)
 			}
+			pt = newPost
 		}
 
 		// TODO: we need to write the post created by CreatePost back in to the client to render the new post
 		for _, comment := range pt.Comments {
 			if comment.CommentID == "" {
-				if err := CreateComment(comment); err != nil {
+				newComment, err := CreateComment(comment)
+				if err != nil {
 					return fmt.Errorf("PostSocket Handle (CreateComment) error: %w", err)
 				}
+				comment = newComment
 			}
 		}
 		return m.Broadcast(s)
@@ -59,7 +63,7 @@ func (m *PostMessage) Broadcast(s *socket) error {
 	return nil
 }
 
-// TODO: add timestamp
+// TODO: add timestamp in the PostMessage struct; c
 func OnPostsConnect(s *socket) error {
 	time.Sleep(1 * time.Second)
 
@@ -76,33 +80,33 @@ func OnPostsConnect(s *socket) error {
 	return c.Broadcast(s)
 }
 
-func CreatePost(post *database.Post) error {
+func CreatePost(post *database.Post) (*database.Post, error) {
 	stmt, err := database.DB.Prepare("INSERT INTO posts (postID, nickname, title, categories, body) VALUES (?, ?, ?, ?, ?);")
 	defer stmt.Close()
 	if err != nil {
-		return fmt.Errorf("CreatePost DB Prepare error: %+v\n", err)
+		return nil, fmt.Errorf("CreatePost DB Prepare error: %+v\n", err)
 	}
 	if post.PostID == "" {
 		post.PostID = uuid.NewV4().String()
 	}
 
-	// TODO: remove placeholder nickname once login/sessions are working
+	// TODO: remove placeholder nickname once login/sessions are working, and hook up the real user who is logged in
 	if post.Nickname == "" {
 		post.Nickname = "Cassidy"
 	}
 
 	_, err = stmt.Exec(post.PostID, post.Nickname, post.Title, post.Categories, post.Body)
 	if err != nil {
-		return fmt.Errorf("CreatePost Exec error: %+v\n", err)
+		return nil, fmt.Errorf("CreatePost Exec error: %+v\n", err)
 	}
-	return nil
+	return post, err
 }
 
-func CreateComment(comment database.Comment) error {
+func CreateComment(comment database.Comment) (database.Comment, error) {
 	stmt, err := database.DB.Prepare("INSERT INTO comments (commentID, postID, nickname, body) VALUES (?, ?, ?, ?);")
 	defer stmt.Close()
 	if err != nil {
-		return fmt.Errorf("CreateComment DB Prepare error: %+v\n", err)
+		return comment, fmt.Errorf("CreateComment DB Prepare error: %+v\n", err)
 	}
 	if comment.CommentID == "" {
 		comment.CommentID = uuid.NewV4().String()
@@ -115,7 +119,7 @@ func CreateComment(comment database.Comment) error {
 
 	_, err = stmt.Exec(comment.CommentID, comment.PostID, comment.Nickname, comment.Body)
 	if err != nil {
-		return fmt.Errorf("CreateComment Exec error: %+v\n", err)
+		return comment, fmt.Errorf("CreateComment Exec error: %+v\n", err)
 	}
-	return nil
+	return comment, err
 }

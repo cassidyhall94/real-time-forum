@@ -1,3 +1,4 @@
+//TODO: fix const time as it is not formatted correctly and add where time/date is needed
 const time = () => { new Date().toLocaleString() };
 
 class MySocket {
@@ -7,7 +8,7 @@ class MySocket {
     this.mysocket = null;
   }
 
-  // TODO: insert username variable and timestamp
+  // TODO: insert username variable and timestamp, participants needs to be filled
   sendNewChatRequest() {
     console.log("new chat request")
     let m = {
@@ -69,6 +70,7 @@ class MySocket {
         event.target.id = "presence"
         contentSocket.sendContentRequest(event)
       });
+      user.id = p.id
       user.innerHTML = p.nickname
       user.style.color = 'white'
       user.className = "presence " + p.nickname

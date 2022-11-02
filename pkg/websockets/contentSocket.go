@@ -82,16 +82,26 @@ func (m *ContentMessage) Handle(s *socket) error {
 			return fmt.Errorf("Unable to get comments for comment template: %w", err)
 		}
 		comments = database.FilterCommentsForPost(m.PostID, comments)
-		post, err := database.GetPostForComment(comments[0])
+		allPosts, err := database.GetPosts()
 		if err != nil {
-			return fmt.Errorf("Unable to get post for comments: %w", err)
+			return fmt.Errorf("Unable to get posts for comment template: %w", err)
 		}
+		newPost := database.Post{}
+		for _, pst := range allPosts {
+			if pst.PostID == m.PostID {
+				newPost = *pst
+			}
+		}
+		// post, err := database.GetPostForComment(comments[0])
+		// if err != nil {
+		// 	return fmt.Errorf("Unable to get post for comments: %w", err)
+		// }
 
 		commentTemplateData := struct {
 			Post     database.Post
 			Comments []database.Comment
 		}{
-			Post: post,
+			Post:     newPost,
 			Comments: comments,
 		}
 

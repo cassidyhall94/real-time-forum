@@ -28,6 +28,7 @@ WebSockets in backend/frontend
     - form data must include: nickname, age, gender, first and last name, email, password
     - login using either nickname or email with password
     - logout from any page
+    - add authentication for users/guests
 
 - Creation of posts and comments
     - posts will have categories
@@ -49,6 +50,20 @@ Bonus
 - user profiles
 - send images through messaging
 - code is synchronicity (promises and go routines/channels) to increase performance
+
+TODO:
+
+- Logout/Auth:
+    - finish login/register page, link up to the database
+    - login asks for either nickname OR email with password to login, so ensure the funcs allow for this
+    - add logout button on the header into the index.html, as it needs to be on the page at all times
+- Chat:
+    - users organised by online/offline in the presence list, online at the top, with last contacted at the top
+    - add date to each chat message
+    - add notifications for DMing
+    - display 10 chat messages at a time, scroll to see more (throttle)
+
+
 
 
 

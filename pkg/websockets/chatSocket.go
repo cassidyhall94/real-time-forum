@@ -35,32 +35,27 @@ func (m *ChatMessage) Handle(s *socket) error {
 			Type:          chat,
 			Conversations: conversations,
 		}
-		for _, convo := range conversations {
-			for _, chat := range convo.Chats {
-				fmt.Println("handle: ", chat)
-			}
-		}
 		return c.Broadcast(s)
 	}
 	for _, convo := range m.Conversations {
 		if convo.ConvoID == "" {
 			newConvoID, err := CreateConversation(convo)
-			convo.ConvoID = newConvoID
 			if err != nil {
 				return fmt.Errorf("ChatSocket Handle (CreateConversation) error: %w", err)
 			}
+			convo.ConvoID = newConvoID
 
 		}
 		for _, chat := range convo.Chats {
 			if chat.ChatID == "" {
 				newChatID, err := CreateChat(chat)
-				chat.ChatID = newChatID
 				if err != nil {
 					return fmt.Errorf("ChatSocket Handle (CreateChat) error: %w", err)
 				}
+				chat.ChatID = newChatID
 			}
 		}
-		// the id for the chat/convo now exists in the DB as a result of Create*() but the ID is not written back into m
+		// TODO: the id for the chat/convo now exists in the DB as a result of Create*() but the ID is not written back into m
 		// this means that the message that's send in m.Broadcast is missing these newly created ID's
 		return m.Broadcast(s)
 	}
