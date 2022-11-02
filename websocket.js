@@ -15,14 +15,14 @@ class MySocket {
       type: 'chat',
       conversations: [
         {
-          // participants: [
-          //   {
-          //     ID: "insert sender",
-          //   },
-          //   {
-          //     ID: "insert receiver",
-          //   }
-          // ],
+          participants: [
+            {
+              ID: "insert sender",
+            },
+            {
+              ID: "insert receiver",
+            }
+          ],
           chats: [
             {
               body: document.getElementById('chatIPT').value,
