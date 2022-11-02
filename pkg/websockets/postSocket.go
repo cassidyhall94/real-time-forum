@@ -30,25 +30,25 @@ func (m PostMessage) Handle(s *socket) error {
 
 		return c.Broadcast(s)
 	}
-		// create new post
-		// if any posts in m.Posts is id == "" then make a new post
-		// else range over posts, get comments for post and override post.comments then return m
-		for _, post := range m.Posts {
-			if post.PostID == "" {
-				if err := CreatePost(post); err != nil {
-					return fmt.Errorf("PostSocket Handle (CreatePost) error: %w", err)
-				}
+	// create new post
+	// if any posts in m.Posts is id == "" then make a new post
+	// else range over posts, get comments for post and override post.comments then return m
+	for _, post := range m.Posts {
+		if post.PostID == "" {
+			if err := CreatePost(post); err != nil {
+				return fmt.Errorf("PostSocket Handle (CreatePost) error: %w", err)
 			}
-			// create new comment for post
-			// if a post contains a comment with id == "" then create a comment for that post
-			for _, comment := range post.Comments {
-				if comment.CommentID == "" {
-					if err := CreateComment(comment); err != nil {
-						return fmt.Errorf("PostSocket Handle (CreateComment) error: %w", err)
-					}
+		}
+		// create new comment for post
+		// if a post contains a comment with id == "" then create a comment for that post
+		for _, comment := range post.Comments {
+			if comment.CommentID == "" {
+				if err := CreateComment(comment); err != nil {
+					return fmt.Errorf("PostSocket Handle (CreateComment) error: %w", err)
 				}
 			}
 		}
+	}
 	return nil
 }
 

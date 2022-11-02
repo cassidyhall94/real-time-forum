@@ -66,8 +66,8 @@ func (m *ContentMessage) Handle(s *socket) error {
 			return fmt.Errorf("Profile ExecuteTemplate error: %w", err)
 		}
 	case "login":
-		if err := tpl.ExecuteTemplate(sb, "reg-log.template", nil); err != nil {
-			return fmt.Errorf("Reg-Log ExecuteTemplate error: %+v\n", err)
+		if err := tpl.ExecuteTemplate(sb, "login.template", nil); err != nil {
+			return fmt.Errorf("Login ExecuteTemplate error: %+v\n", err)
 		}
 	case "presence":
 		if err := tpl.ExecuteTemplate(sb, "presence.template", nil); err != nil {

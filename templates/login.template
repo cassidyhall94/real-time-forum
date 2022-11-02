@@ -1,6 +1,6 @@
  
  <form id="login-form">
-    <input type="text" name="nickname" id="nickname-field" class="login-form-field" placeholder="Nickname">
+    <input type="text" name="nickname/Email" id="nickname-field/Email-field" class="login-form-field" placeholder="Nickname/Email">
     <input type="password" name="password" id="password-field" class="login-form-field" placeholder="Password">
     <input type="submit" value="Login" id="login-form-submit">
 </form>
