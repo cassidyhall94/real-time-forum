@@ -45,6 +45,13 @@ type Chat struct {
 	Body    string `json:"body,omitempty"`
 }
 
+type Presence struct {
+	ID                string `json:"id"`
+	Nickname          string `json:"nickname"`
+	Online            bool   `json:"online"`
+	LastContactedTime string `json:"last_contacted_time"`
+}
+
 func GetUsers() ([]User, error) {
 	users := []User{}
 	rows, err := DB.Query(`SELECT * FROM users`)
@@ -243,7 +250,7 @@ func GetConversations() ([]*Conversation, error) {
 				}
 			}
 			conversations = append(conversations, &Conversation{
-				ConvoID: convoid,
+				ConvoID:      convoid,
 				Participants: []User{user},
 			})
 		}
@@ -281,8 +288,8 @@ func convoInConvos(convoID string, convos []*Conversation) int {
 	return -1
 }
 
-func GetChats() ([]*Chat, error) {
-	chats := []*Chat{}
+func GetChats() ([]Chat, error) {
+	chats := []Chat{}
 	rows, err := DB.Query(`SELECT * FROM chats`)
 	if err != nil {
 		return chats, fmt.Errorf("GetChats DB Query error: %+v\n", err)
@@ -299,8 +306,9 @@ func GetChats() ([]*Chat, error) {
 		if err != nil {
 			return chats, fmt.Errorf("GetChats rows.Scan error: %+v\n", err)
 		}
-		chats = append(chats, &Chat{
-			ChatID: chatid,
+		chats = append(chats, Chat{
+			ConvoID: convoid,
+			ChatID:  chatid,
 			Sender: User{
 				ID: sender,
 			},
@@ -312,56 +320,84 @@ func GetChats() ([]*Chat, error) {
 	if err != nil {
 		return chats, err
 	}
-	return chats, nil
+
+	return populateUsersForChats(chats)
 }
 
-func populateChatsForConversation(conversations []*Conversation) ([]*Conversation, error) {
-	outConvo := []*Conversation{}
-	for _, convo := range conversations {
-		newConvo := convo
-		chats, err := populateUsersForChats(newConvo.Chats)
-		if err != nil {
-			return nil, fmt.Errorf("populateChatsForConversations (populateUsersForChats) error: %+v\n", err)
-		}
-		for _, cht := range chats {
-			if convo.ConvoID == cht.ConvoID {
-				newConvo.Chats = append(newConvo.Chats, *cht)
-			}
-		}
-		outConvo = append(outConvo, newConvo)
-		for _, convo := range outConvo {
-			for _, chat := range convo.Chats {
-				fmt.Println("populateChatsForConversation: ", chat)
-			}
-		}
+func populateChatsForConversation(conversations []*Conversation) error {
+	chats, err := GetChats()
+	if err != nil {
+		return err
 	}
-	return outConvo, nil
+
+	for i, convo := range conversations {
+		cts := []Chat{}
+		for _, c := range chats {
+			fmt.Println("chat convoID " + c.ConvoID)
+			fmt.Println("convoID " + convo.ConvoID)
+			if c.ConvoID == convo.ConvoID {
+				cts = append(cts, c)
+			}
+		}
+		conversations[i].Chats = cts
+	}
+
+	// outConvo := []*Conversation{}
+	// for _, convo := range conversations {
+	// 	newConvo := convo
+	// 	chats, err := populateUsersForChats(newConvo.Chats)
+	// 	if err != nil {
+	// 		return nil, fmt.Errorf("populateChatsForConversations (populateUsersForChats) error: %+v\n", err)
+	// 	}
+	// 	for _, cht := range chats {
+	// 		if convo.ConvoID == cht.ConvoID {
+	// 			newConvo.Chats = append(newConvo.Chats, *cht)
+	// 		}
+	// 	}
+	// 	outConvo = append(outConvo, newConvo)
+	// 	for _, convo := range outConvo {
+	// 		for _, chat := range convo.Chats {
+	// 			fmt.Println("populateChatsForConversation: ", chat)
+	// 		}
+	// 	}
+	// }
+	return nil
 }
 
-func GetPopulatedConversations() ([]*Conversation, error) {
-	conversations, err := GetConversations()
+func GetPopulatedConversations(conversations []*Conversation) ([]*Conversation, error) {
+	convos, err := GetConversations()
 	if err != nil {
 		return nil, fmt.Errorf("GetPopulatedConversation (GetConversations) error: %+v\n", err)
 	}
+	if conversations == nil {
+		conversations = convos
+	} else {
+		for i, c := range conversations {
+			for _, co := range convos {
+				if c.ConvoID == co.ConvoID {
+					conversations[i] = co
+				}
+			}
+		}
+	}
 
-	populatedConversations, err := populateChatsForConversation(conversations)
-	if err != nil {
+	if err := populateChatsForConversation(conversations); err != nil {
 		return nil, fmt.Errorf("GetPopulatedConversation (populateChatForConversation) error: %+v\n", err)
 	}
-	for _, convo := range populatedConversations {
+	for _, convo := range conversations {
 		for _, chat := range convo.Chats {
 			fmt.Println("GetPopulatedConversation: ", chat)
 		}
 	}
-	return populatedConversations, nil
+	return conversations, nil
 }
 
-func populateUsersForChats(chats []Chat) ([]*Chat, error) {
+func populateUsersForChats(chats []Chat) ([]Chat, error) {
 	users, err := GetUsers()
 	if err != nil {
 		return nil, fmt.Errorf("populateUsersForChats (GetUsers) error: %+v\n", err)
 	}
-	outChats := []*Chat{}
+	outChats := []Chat{}
 	for _, chat := range chats {
 		newChat := chat
 		for _, user := range users {
@@ -369,10 +405,17 @@ func populateUsersForChats(chats []Chat) ([]*Chat, error) {
 				newChat.Sender = user
 			}
 		}
-		outChats = append(outChats, &newChat)
-		for _, chat := range outChats {
-			fmt.Println("populateUsersForChats: ", chat)
-		}
+		outChats = append(outChats, newChat)
 	}
 	return outChats, nil
+}
+
+func FilterChatsForConvo(convoID string, chats []Chat) []Chat {
+	out := []Chat{}
+	for _, c := range chats {
+		if convoID == c.ConvoID {
+			out = append(out, c)
+		}
+	}
+	return out
 }

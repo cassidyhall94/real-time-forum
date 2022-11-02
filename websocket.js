@@ -1,5 +1,5 @@
 //TODO: fix const time as it is not formatted correctly and add where time/date is needed
-const time = () => { new Date().toLocaleString() };
+const time = () => { return new Date().toLocaleString() };
 
 class MySocket {
   wsType = ""
@@ -8,30 +8,36 @@ class MySocket {
     this.mysocket = null;
   }
 
-  // TODO: insert username variable and timestamp, participants needs to be filled
+  // TODO: insert user ID variable, participants needs to be filled
   sendNewChatRequest() {
     console.log("new chat request")
     let m = {
       type: 'chat',
+      timestamp: time(),
       conversations: [
         {
           participants: [
+            //sender
             {
-              ID: "insert sender",
+              id: "975496ca-9bfc-4d71-8736-da4b6383a575",
             },
+            //other participants (receiver)
             {
-              ID: "insert receiver",
+              id: "6d01e668-2642-4e55-af73-46f057b731f9",
             }
           ],
           chats: [
             {
+              sender: {
+                // TODO: this is just the first placeholder above, once the user is logged in and their ID is stored client side this ID should represent the logged in user
+                id: "975496ca-9bfc-4d71-8736-da4b6383a575",
+              },
               body: document.getElementById('chatIPT').value,
             }
           ]
         }
       ]
     }
-    console.log("REQUEST M: ", m)
     this.mysocket.send(JSON.stringify(m));
     document.getElementById('chatIPT').value = ""
   }
@@ -47,13 +53,15 @@ class MySocket {
 
   chatHandler(text) {
     const m = JSON.parse(text)
-    console.log("CHAT HANDLER: ", m)
     for (let c of m.conversations) {
-      let chat = document.createElement("div");
-      chat.className = "submittedchat"
-      chat.id = c.chat_id
-      chat.innerHTML = "<b>Nickname: " + c.nickname + "</b>" + "<br>" + "<b>Date: " + "</b>" + c.time_message_sent + "<br>" + c.body + "<br>";
-      document.getElementById("chatcontainer").appendChild(chat)
+      for (let p of c.chats) {
+        console.log(p)
+        let chat = document.createElement("div");
+        chat.className = "submittedchat"
+        chat.id = p.chat_id
+        chat.innerHTML = "<b>Me: " + p.sender.nickname + "</b>" + "<br>" + "<b>Date: " + "</b>" + p.date + "<br>" + p.body + "<br>";
+        document.getElementById("chatcontainer").appendChild(chat)
+      }
     }
   }
 
@@ -67,7 +75,7 @@ class MySocket {
     for (let p of m.presences) {
       let user = document.createElement("button");
       user.addEventListener('click', function (event) {
-        event.target.id = "presence"
+        event.target.id = "chat"
         contentSocket.sendContentRequest(event)
       });
       user.id = p.id

@@ -25,7 +25,6 @@ func (m PostMessage) Handle(s *socket) error {
 			Type:  post,
 			Posts: p,
 		}
-
 		return c.Broadcast(s)
 	}
 	for _, pt := range m.Posts {
@@ -37,7 +36,6 @@ func (m PostMessage) Handle(s *socket) error {
 			pt = newPost
 		}
 
-		// TODO: we need to write the post created by CreatePost back in to the client to render the new post
 		for _, comment := range pt.Comments {
 			if comment.CommentID == "" {
 				newComment, err := CreateComment(comment)
@@ -73,8 +71,9 @@ func OnPostsConnect(s *socket) error {
 	}
 
 	c := &PostMessage{
-		Type:  post,
-		Posts: p,
+		Type:      post,
+		Timestamp: "",
+		Posts:     p,
 	}
 
 	return c.Broadcast(s)
