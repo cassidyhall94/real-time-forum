@@ -4,6 +4,9 @@ PROJECT: https://learn.01founders.co/git/root/public/src/branch/master/subjects/
 
 AUDIT: https://learn.01founders.co/git/root/public/src/branch/master/subjects/real-time-forum/audit
 
+
+USE DEV=TRUE FOR DATABASE INIT ----- DEV=true go run .
+
 RESOURCES:
     - https://pkg.go.dev/github.com/gorilla/websocket
     - https://medium.com/@bootcampmillionaire/what-i-learned-about-websockets-by-building-a-real-time-chat-application-using-socket-io-3d9e163e504
