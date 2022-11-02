@@ -53,6 +53,8 @@ Bonus
 
 TODO:
 
+https://medium.com/@antoharyanto/make-simple-chat-application-using-golang-websocket-and-vanilla-js-f600e8020961
+
 - Logout/Auth:
     - finish login/register page, link up to the database
     - login asks for either nickname OR email with password to login, so ensure the funcs allow for this
