@@ -56,7 +56,6 @@ class MySocket {
     const m = JSON.parse(text)
     for (let c of m.conversations) {
       for (let p of c.chats) {
-        console.log(p)
         let chat = document.createElement("div");
         chat.className = "submittedchat"
         chat.id = p.chat_id
@@ -104,6 +103,7 @@ class MySocket {
         contentSocket.sendContentRequest(event, post.post_id)
       });
       post.appendChild(button)
+      console.log(document.getElementById("submittedposts"))
       document.getElementById("submittedposts").appendChild(post)
     }
   }

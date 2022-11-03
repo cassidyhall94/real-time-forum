@@ -1,7 +1,6 @@
 package websockets
 
 import (
-	"encoding/json"
 	"fmt"
 	"real-time-forum/pkg/database"
 
@@ -73,8 +72,8 @@ func (m *ChatMessage) Handle(s *socket) error {
 	}
 	m.Conversations = c
 
-	b, _ := json.Marshal(m.Conversations)
-	fmt.Println(string(b))
+	// b, _ := json.Marshal(m.Conversations)
+	// fmt.Println(string(b))
 
 	return m.Broadcast(s)
 }

@@ -64,6 +64,8 @@ https://medium.com/@antoharyanto/make-simple-chat-application-using-golang-webso
     - add date to each chat message
     - add notifications for DMing
     - display 10 chat messages at a time, scroll to see more (throttle)
+- Post:
+    - fix bug with submitted posts not always rendering when you click the home button
 
 
 
