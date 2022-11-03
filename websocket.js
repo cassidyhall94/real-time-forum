@@ -17,11 +17,11 @@ class MySocket {
       conversations: [
         {
           participants: [
-            //sender
+            //sender: bar userID
             {
               id: "975496ca-9bfc-4d71-8736-da4b6383a575",
             },
-            //other participants (receiver)
+            //other participants (receiver): foo userID
             {
               id: "6d01e668-2642-4e55-af73-46f057b731f9",
             }
@@ -30,6 +30,7 @@ class MySocket {
             {
               sender: {
                 // TODO: this is just the first placeholder above, once the user is logged in and their ID is stored client side this ID should represent the logged in user
+                // bar userID
                 id: "975496ca-9bfc-4d71-8736-da4b6383a575",
               },
               body: document.getElementById('chatIPT').value,
@@ -73,10 +74,11 @@ class MySocket {
   presenceHandler(text) {
     const m = JSON.parse(text)
     for (let p of m.presences) {
+      const consp = p
       let user = document.createElement("button");
-      user.addEventListener('click', function (event) {
+      user.addEventListener('click', function (event, chat = consp) {
         event.target.id = "chat"
-        contentSocket.sendContentRequest(event)
+        contentSocket.sendChatContentRequest(event, chat.chat_id)
       });
       user.id = p.id
       user.innerHTML = p.nickname
@@ -107,13 +109,12 @@ class MySocket {
   }
 
   sendNewCommentRequest(e) {
-    // TODO: timestamp
     let post = document.getElementById('postcontainerforcomments')
     for (const child of post.children) {
       if (containsNumber(child.id)) {
         let m = {
           type: 'post',
-          timestamp: "",
+          timestamp: time(),
           posts: [
             {
               post_id: child.id,
@@ -132,11 +133,10 @@ class MySocket {
     }
   }
 
-  // TODO: add timestamp
   sendNewPostRequest(e) {
     let m = {
       type: 'post',
-      timestamp: "time",
+      timestamp: time(),
       posts: [
         {
           nickname: e.target.nickname,
@@ -163,6 +163,14 @@ class MySocket {
       type: "content",
       resource: e.target.id,
       post_id: post_id,
+    }));
+  }
+
+  sendChatContentRequest(e, chat_id = "") {
+    this.mysocket.send(JSON.stringify({
+      type: "content",
+      resource: e.target.id,
+      chat_id: chat_id,
     }));
   }
 

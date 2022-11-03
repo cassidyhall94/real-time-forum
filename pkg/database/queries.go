@@ -384,11 +384,11 @@ func GetPopulatedConversations(conversations []*Conversation) ([]*Conversation, 
 	if err := populateChatsForConversation(conversations); err != nil {
 		return nil, fmt.Errorf("GetPopulatedConversation (populateChatForConversation) error: %+v\n", err)
 	}
-	for _, convo := range conversations {
-		for _, chat := range convo.Chats {
-			fmt.Println("GetPopulatedConversation: ", chat)
-		}
-	}
+	// for _, convo := range conversations {
+	// 	for _, chat := range convo.Chats {
+	// 		fmt.Println("GetPopulatedConversation: ", chat)
+	// 	}
+	// }
 	return conversations, nil
 }
 

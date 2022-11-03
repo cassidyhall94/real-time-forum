@@ -69,8 +69,7 @@ func (m *ChatMessage) Handle(s *socket) error {
 
 	c, err := database.GetPopulatedConversations(m.Conversations)
 	if err != nil {
-		// TODO: this
-		panic(err)
+		return fmt.Errorf("ChatSocket Handle (GetPopulatedConversations) error: %w", err)
 	}
 	m.Conversations = c
 
