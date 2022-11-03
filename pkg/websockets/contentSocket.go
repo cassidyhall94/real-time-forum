@@ -15,6 +15,7 @@ type ContentMessage struct {
 	Nickname  string      `json:"nickname,omitempty"`
 	Resource  string      `json:"resource,omitempty"`
 	PostID    string      `json:"post_id,omitempty"`
+	ConvoID   string      `json:"convo_id,omitempty"`
 }
 
 func (m *ContentMessage) Broadcast(s *socket) error {
@@ -69,9 +70,13 @@ func (m *ContentMessage) Handle(s *socket) error {
 		if err := tpl.ExecuteTemplate(sb, "reg-log.template", nil); err != nil {
 			return fmt.Errorf("Reg-Log ExecuteTemplate error: %+v\n", err)
 		}
-	case "presence":
-		if err := tpl.ExecuteTemplate(sb, "presence.template", nil); err != nil {
-			return fmt.Errorf("Presence ExecuteTemplate error: %+v\n", err)
+	case "chat":
+		chats, err := database.GetChats()
+		if err != nil {
+			return fmt.Errorf("Unable to get chats for chat template: %w", err)
+		}
+		if err := tpl.ExecuteTemplate(sb, "chat.template", database.FilterChatsForConvo(m.ConvoID, chats)); err != nil {
+			return fmt.Errorf("Chat ExecuteTemplate error: %+v\n", err)
 		}
 	case "comment":
 		if m.PostID == "" {
@@ -82,16 +87,22 @@ func (m *ContentMessage) Handle(s *socket) error {
 			return fmt.Errorf("Unable to get comments for comment template: %w", err)
 		}
 		comments = database.FilterCommentsForPost(m.PostID, comments)
-		post, err := database.GetPostForComment(comments[0])
+		allPosts, err := database.GetPosts()
 		if err != nil {
-			return fmt.Errorf("Unable to get post for comments: %w", err)
+			return fmt.Errorf("Unable to get posts for comment template: %w", err)
+		}
+		newPost := database.Post{}
+		for _, pst := range allPosts {
+			if pst.PostID == m.PostID {
+				newPost = *pst
+			}
 		}
 
 		commentTemplateData := struct {
 			Post     database.Post
 			Comments []database.Comment
 		}{
-			Post: post,
+			Post:     newPost,
 			Comments: comments,
 		}
 

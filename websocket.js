@@ -1,4 +1,5 @@
-const time = () => { new Date().toLocaleString() };
+//TODO: fix const time as it is not formatted correctly and add where time/date is needed
+const time = () => { return new Date().toLocaleString() };
 
 class MySocket {
   wsType = ""
@@ -7,36 +8,62 @@ class MySocket {
     this.mysocket = null;
   }
 
-  // TODO: insert username variable
-  requestChat() {
+  // TODO: insert user ID variable, participants needs to be filled
+  sendNewChatRequest() {
+    console.log("new chat request")
     let m = {
       type: 'chat',
-      text: document.getElementById("chatIPT").value,
       timestamp: time(),
-      nickname: "",
+      conversations: [
+        {
+          participants: [
+            //sender: bar userID
+            {
+              id: "975496ca-9bfc-4d71-8736-da4b6383a575",
+            },
+            //other participants (receiver): foo userID
+            {
+              id: "6d01e668-2642-4e55-af73-46f057b731f9",
+            }
+          ],
+          chats: [
+            {
+              sender: {
+                // TODO: this is just the first placeholder above, once the user is logged in and their ID is stored client side this ID should represent the logged in user
+                // bar userID
+                id: "975496ca-9bfc-4d71-8736-da4b6383a575",
+              },
+              body: document.getElementById('chatIPT').value,
+            }
+          ]
+        }
+      ]
     }
     this.mysocket.send(JSON.stringify(m));
-    document.getElementById("chatIPT").value = ""
+    document.getElementById('chatIPT').value = ""
   }
 
   keypress(e) {
     if (e.keyCode == 13) {
       this.wsType = e.target.id.slice(0, -3)
       if (this.wsType = 'chat') {
-        this.requestChat()
+        this.sendNewChatRequest()
       }
     }
   }
-  
-  chatHandler(text, myself) {
+
+  chatHandler(text) {
     const m = JSON.parse(text)
-    let div = document.createElement("div");
-    let msgContainer = document.getElementById('chatIPT')
-    div.innerHTML = "<b>" + m.timestamp + " </b>" + "<br>" + "<b>" + m.nickname + ":</b> " + m.text;
-    let cself = (myself) ? "self" : "";
-    div.className = "msg " + cself;
-    document.getElementById("msgcontainer").appendChild(div);
-    div.after(msgContainer)
+    for (let c of m.conversations) {
+      for (let p of c.chats) {
+        console.log(p)
+        let chat = document.createElement("div");
+        chat.className = "submittedchat"
+        chat.id = p.chat_id
+        chat.innerHTML = "<b>Me: " + p.sender.nickname + "</b>" + "<br>" + "<b>Date: " + "</b>" + p.date + "<br>" + p.body + "<br>";
+        document.getElementById("chatcontainer").appendChild(chat)
+      }
+    }
   }
 
   contentHandler(text) {
@@ -47,11 +74,13 @@ class MySocket {
   presenceHandler(text) {
     const m = JSON.parse(text)
     for (let p of m.presences) {
+      const consp = p
       let user = document.createElement("button");
-      user.addEventListener('click', function (event) {
-        event.target.id = "presence"
-        contentSocket.sendContentRequest(event)
+      user.addEventListener('click', function (event, chat = consp) {
+        event.target.id = "chat"
+        contentSocket.sendChatContentRequest(event, chat.chat_id)
       });
+      user.id = p.id
       user.innerHTML = p.nickname
       user.style.color = 'white'
       user.className = "presence " + p.nickname
@@ -64,9 +93,9 @@ class MySocket {
     for (let p of m.posts) {
       const consp = p
       let post = document.createElement("div");
-      post.className = "submittedpost " + p.post_id
+      post.className = "submittedpost"
       post.id = p.post_id
-      post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "<b>Nickname: " + "</b>" + p.nickname + "<br>" + "<b>Category/Categories: " + "</b>" + p.categories + "<br>" + p.body + "<br>";
+      post.innerHTML = "<b>Title: " + p.title + "</b>" + "<br>" + "<b>Nickname: " + "</b>" + p.nickname + "<br>" + "<b>Category: " + p.categories + "</b>" + "<br>" + p.body + "<br>";
       let button = document.createElement("button")
       button.classname = "addcomment"
       button.innerHTML = "Comments"
@@ -80,13 +109,12 @@ class MySocket {
   }
 
   sendNewCommentRequest(e) {
-    // TODO: timestamp
     let post = document.getElementById('postcontainerforcomments')
     for (const child of post.children) {
       if (containsNumber(child.id)) {
         let m = {
           type: 'post',
-          timestamp: "",
+          timestamp: time(),
           posts: [
             {
               post_id: child.id,
@@ -104,12 +132,11 @@ class MySocket {
       }
     }
   }
-  
-  // TODO: add timestamp
+
   sendNewPostRequest(e) {
     let m = {
       type: 'post',
-      timestamp: "time",
+      timestamp: time(),
       posts: [
         {
           nickname: e.target.nickname,
@@ -136,6 +163,14 @@ class MySocket {
       type: "content",
       resource: e.target.id,
       post_id: post_id,
+    }));
+  }
+
+  sendChatContentRequest(e, chat_id = "") {
+    this.mysocket.send(JSON.stringify({
+      type: "content",
+      resource: e.target.id,
+      chat_id: chat_id,
     }));
   }
 
