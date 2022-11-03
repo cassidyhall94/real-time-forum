@@ -106,13 +106,15 @@ func (s *socket) pollSocket() {
 			if err != nil {
 				fmt.Printf("recovered panic in %s socket: %+v\n%s\n", s.t.String(), err, string(debug.Stack()))
 			}
-			fmt.Println(s.t.String() + " socket closed")
 		}()
 
 		for {
 			b, err := s.read()
 			if err != nil {
 				panic(err)
+			} else if b == nil {
+				fmt.Println(s.t.String() + " socket closed")
+				return
 			}
 			sm := &SocketMessage{}
 			if err := json.Unmarshal(b, sm); err != nil {
@@ -161,6 +163,9 @@ func (s *socket) pollSocket() {
 func (s *socket) read() ([]byte, error) {
 	_, b, err := s.con.ReadMessage()
 	if err != nil {
+		if websocket.IsCloseError(err, websocket.CloseGoingAway) {
+			return nil, nil
+		}
 		return nil, fmt.Errorf("unable to read message from socket, got: '%s', %w", string(b), err)
 	}
 	return b, nil
