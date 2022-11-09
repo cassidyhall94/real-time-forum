@@ -122,3 +122,23 @@ func CreateComment(comment database.Comment) (database.Comment, error) {
 	}
 	return comment, err
 }
+
+func CreateUser (user database.User) (database.User, error){
+	stmt, err := database.DB.Prepare("INSERT INTO users (ID, nickname, age, gender, firstname, lastname, email, password) VALUES (?,?,?,?,?,?,?,?)")
+	defer stmt.Close()
+	if err !=nil {
+		return user, fmt.Errorf("Create User DB Prepare error: %+v\n", err)
+	}
+	if user.ID == ""{
+		user.ID = uuid.NewV4().String()
+	}
+
+	_,err = stmt.Exec(user.ID, user.Nickname, user.Age, user.Gender, user.FirstName, user.LastName, user.Email, user.Password)
+	if err != nil {
+		return user, fmt.Errorf("Create User Exec error: %+v\n", err)
+	}
+
+
+	return user,err
+
+}

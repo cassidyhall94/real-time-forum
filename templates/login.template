@@ -6,7 +6,49 @@
 </form>
 
 <h1 style="text-align: center;">REGISTRATION FORM</h1>
-<form name="RegForm" onsubmit="return GEEKFORGEEKS()" method="post">
+
+<!-- <form action="javascript:void(0)" method="post" id="register" > -->
+<form action="/register" method="POST" id="register" >
+
+  <label for="nickname">Nickname <br>
+    <input type="text" id="nickname" name="nickname" required minlength="3" class="registrationForm"> <br>
+  </label>
+
+  <label for="age">age <br>
+    <input type="number" id="age" name="age" required class="registrationForm"> <br>
+  </label> <br>
+
+  <label for="gender">Gender:<br>
+    <!-- <input type="radio" id="gender" name="gender" required class="registrationForm"> <br> -->
+    <label for="male">Male</label>
+    <input type="radio" id="male" name="gender" value="male" class="registrationForm">
+    <label for="female">Female</label>
+    <input type="radio" id="female" name="gender" value="female" class="registrationForm">
+  </label> <br> <br>
+
+  <label for="fname">First name <br>
+    <input type="text" name="fname" id="fname" required class="registrationForm"> <br>
+  </label>
+
+  <label for="lname">Last name <br>
+    <input type="text" id="lname" required class="registrationForm"> <br>
+  </label>
+
+  <label for="email">Email <br>
+    <input type="email" id="email" name="email" required class="registrationForm"> <br>
+  </label>
+
+  <label for="password">Password <br>
+    <input type="password" name="password" id="password" required minlength="5" class="registrationForm"> <br>
+  </label> 
+
+  <br>
+
+  <!-- <input type="button" value="submit"/> -->
+  <button onclick="getRegDetails()">Submit</button>
+
+</form>
+<!-- <form name="RegForm" onsubmit="return GEEKFORGEEKS()" method="post">
     <p>Nickname: <input type="text" size="65" name="Name" /></p>
     <br />
 
@@ -44,5 +86,5 @@
     <p>
         <input type="submit" value="Submit" name="Submit" />
         <input type="reset" value="Reset" name="Reset" />
-    </p>
+    </p> -->
     </html>

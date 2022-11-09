@@ -25,6 +25,14 @@ func init() {
 	database.InitialiseDB(databaseFilePath, devMode)
 }
 
+// func register(w http.ResponseWriter, r *http.Request){
+// 	r.ParseForm()
+// 	fmt.Println(r.Form)
+// 	if err := tpl.ExecuteTemplate(sb, "login.template", nil); err != nil {
+// 			return fmt.Errorf("loginExecuteTemplate error: %+v\n", err)
+// 		}
+// }
+
 func main() {
 	defer database.DB.Close()
 	myhttp := http.NewServeMux()
@@ -37,6 +45,7 @@ func main() {
 	myhttp.HandleFunc("/post", socket.SocketCreate)
 	myhttp.HandleFunc("/presence", socket.SocketCreate)
 	myhttp.HandleFunc("/comment", socket.SocketCreate)
+	myhttp.HandleFunc("/register",socket.Register)
 
 	// myhttp.HandleFunc("/home", mainHandler)
 	fmt.Println("http://localhost:8080")

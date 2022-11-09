@@ -250,36 +250,80 @@ function containsNumber(str) {
   return /[0-9]/.test(str);
 }
 
-let registerForm = {
-  nickname : "",
-  age: "",
-  gender: "",
-  fName: "",
-  lName: "",
-  email: "",
-  password: "",
-}
 
-function getRegDetails(){
-  console.log("jgjh")
+//object to store form data
+// let registerForm = {
+//   nickname : "",
+//   age: "",
+//   gender: "",
+//   fName: "",
+//   lName: "",
+//   email: "",
+//   password: "",
+// }
 
-  let genderRadios = Array.from (document.getElementsByName('gender'))
-  for(let i=0; i <genderRadios.length; i ++){
-    console.log(genderRadios[i].checked)
-    if(genderRadios[i].checked){
-      registerForm.gender = genderRadios[i].value
-    }
-  }
-    registerForm.nickname = document.getElementById('nickname').value
-    registerForm.age = document.getElementById('age').value
-    // registerForm.gender = document.getElementById('gender').value
-    registerForm.fName = document.getElementById('fname').value
-    registerForm.lName = document.getElementById('lname').value
-    registerForm.email = document.getElementById('email').value
-    registerForm.password = document.getElementById('password').value
+//gets registration details on click
+// function getRegDetails(){
+
+//   //creates an array of genders and stores checked value 
+//   let genderRadios = Array.from (document.getElementsByName('gender'))
+//   for(let i=0; i <genderRadios.length; i ++){
+//     // console.log(genderRadios[i].checked)
+//     if(genderRadios[i].checked){
+//       registerForm.gender = genderRadios[i].value
+//     }
+//   }
+
+//   // stores all from values
+//     registerForm.nickname = document.getElementById('nickname').value
+//     registerForm.age = document.getElementById('age').value
+//     registerForm.fName = document.getElementById('fname').value
+//     registerForm.lName = document.getElementById('lname').value
+//     registerForm.email = document.getElementById('email').value
+//     registerForm.password = document.getElementById('password').value
     
-    let jsonRegForm = JSON.stringify(registerForm)
 
-      console.log(jsonRegForm)
+
+  //stringify form values (json format)
+//     let jsonRegForm = JSON.stringify(registerForm)
+//     sendForm()
+
+//     let sendForm = async()=>{
+
+//       try{
+//         const fetchResponse =await fetch('http/localhost:8000/sendform',{
+//           method:POST,
+//           headers:{
+//             'Accept': 'application/json',
+//             'Content-Type': 'application/json'
+//           },
+//           body: JSON.stringify(jsonRegForm)
+//         })
+//         const data = await fetchResponse.json()
+//         return data
+//       } catch(e){
+//         return e
+//       }
+//     }
+// }
+//     console.log(registerForm)
+
+      // console.log(jsonRegForm)
+
+//       fetch("/get_time", {
+//         headers: {
+//             'Accept': 'application/json',
+//             'Content-Type': 'application/json'
+//         },
+//         method: "POST",
+//         body: JSON.stringify(data)
+//     }).then((response) => {
+//         response.text().then(function (data) {
+//             let result = JSON.parse(data);
+//             console.log(result)
+//         });
+//     }).catch((error) => {
+//         console.log(error)
+//     });
+// }
       // this.mySocket.send(jsonRegForm)
-}
