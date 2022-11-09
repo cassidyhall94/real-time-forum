@@ -8,16 +8,9 @@ import (
 )
 
 type PresenceMessage struct {
-	Type      messageType `json:"type"`
-	Timestamp string      `json:"timestamp"`
-	Presences []Presence  `json:"presences"`
-}
-
-type Presence struct {
-	ID                string `json:"id"`
-	Nickname          string `json:"nickname"`
-	Online            bool   `json:"online"`
-	LastContactedTime string `json:"last_contacted_time"`
+	Type      messageType         `json:"type"`
+	Timestamp string              `json:"timestamp"`
+	Presences []database.Presence `json:"presences"`
 }
 
 func (m *PresenceMessage) Broadcast(s *socket) error {
@@ -35,8 +28,8 @@ func (m *PresenceMessage) Handle(s *socket) error {
 	return m.Broadcast(s)
 }
 
-func GetPresences() ([]Presence, error) {
-	presences := []Presence{}
+func GetPresences() ([]database.Presence, error) {
+	presences := []database.Presence{}
 
 	users, err := database.GetUsers()
 	if err != nil {
@@ -46,7 +39,7 @@ func GetPresences() ([]Presence, error) {
 		return users[i].Nickname < users[j].Nickname
 	})
 	for _, user := range users {
-		presences = append(presences, Presence{
+		presences = append(presences, database.Presence{
 			ID:       user.ID,
 			Nickname: user.Nickname,
 			// Online:            bool,

@@ -1,9 +1,9 @@
 <div id="chatcontainer">
     <div>
-        {{ range .Chats }}
+        {{ range . }}
         <div id="submittedchats">
             <br>
-            Nickname: {{.Nickname}}
+            Nickname: {{.Sender.Nickname}}
             <br>
             {{.Body}}
             <br>

@@ -26,7 +26,7 @@ func (m *ChatMessage) Broadcast(s *socket) error {
 
 func (m *ChatMessage) Handle(s *socket) error {
 	if len(m.Conversations) == 0 {
-		conversations, err := database.GetPopulatedConversations()
+		conversations, err := database.GetPopulatedConversations(nil)
 		if err != nil {
 			return err
 		}
@@ -37,16 +37,23 @@ func (m *ChatMessage) Handle(s *socket) error {
 		}
 		return c.Broadcast(s)
 	}
-	for _, convo := range m.Conversations {
+
+	for i, convo := range m.Conversations {
+		// creates a new conversation if the convoID is missing
 		if convo.ConvoID == "" {
 			newConvoID, err := CreateConversation(convo)
 			if err != nil {
 				return fmt.Errorf("ChatSocket Handle (CreateConversation) error: %w", err)
 			}
 			convo.ConvoID = newConvoID
-
 		}
-		for _, chat := range convo.Chats {
+
+		for j, chat := range convo.Chats {
+			// for new chats, the chat.ConvoID is given the conversation's convoID if it is missing
+			if chat.ConvoID == "" {
+				chat.ConvoID = convo.ConvoID
+			}
+
 			if chat.ChatID == "" {
 				newChatID, err := CreateChat(chat)
 				if err != nil {
@@ -54,12 +61,21 @@ func (m *ChatMessage) Handle(s *socket) error {
 				}
 				chat.ChatID = newChatID
 			}
+			convo.Chats[j] = chat
 		}
-		// TODO: the id for the chat/convo now exists in the DB as a result of Create*() but the ID is not written back into m
-		// this means that the message that's send in m.Broadcast is missing these newly created ID's
-		return m.Broadcast(s)
+		m.Conversations[i] = convo
 	}
-	return nil
+
+	c, err := database.GetPopulatedConversations(m.Conversations)
+	if err != nil {
+		return fmt.Errorf("ChatSocket Handle (GetPopulatedConversations) error: %w", err)
+	}
+	m.Conversations = c
+
+	// b, _ := json.Marshal(m.Conversations)
+	// fmt.Println(string(b))
+
+	return m.Broadcast(s)
 }
 
 func CreateChat(chat database.Chat) (string, error) {
