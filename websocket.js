@@ -1,6 +1,7 @@
 //TODO: fix const time as it is not formatted correctly and add where time/date is needed
 const time = () => { return new Date().toLocaleString() };
 
+
 class MySocket {
   wsType = ""
 
@@ -51,6 +52,10 @@ class MySocket {
       }
     }
   }
+
+  // registerHandler(text){
+  //   console.log("register handler")
+  // }
 
   chatHandler(text) {
     const m = JSON.parse(text)
@@ -233,9 +238,48 @@ class MySocket {
   //       }
   //     }
   //   }
+
+
+
+
+  
   // }
 }
 
 function containsNumber(str) {
   return /[0-9]/.test(str);
+}
+
+let registerForm = {
+  nickname : "",
+  age: "",
+  gender: "",
+  fName: "",
+  lName: "",
+  email: "",
+  password: "",
+}
+
+function getRegDetails(){
+  console.log("jgjh")
+
+  let genderRadios = Array.from (document.getElementsByName('gender'))
+  for(let i=0; i <genderRadios.length; i ++){
+    console.log(genderRadios[i].checked)
+    if(genderRadios[i].checked){
+      registerForm.gender = genderRadios[i].value
+    }
+  }
+    registerForm.nickname = document.getElementById('nickname').value
+    registerForm.age = document.getElementById('age').value
+    // registerForm.gender = document.getElementById('gender').value
+    registerForm.fName = document.getElementById('fname').value
+    registerForm.lName = document.getElementById('lname').value
+    registerForm.email = document.getElementById('email').value
+    registerForm.password = document.getElementById('password').value
+    
+    let jsonRegForm = JSON.stringify(registerForm)
+
+      console.log(jsonRegForm)
+      // this.mySocket.send(jsonRegForm)
 }

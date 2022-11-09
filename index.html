@@ -55,6 +55,7 @@
     </div>
     <footer></footer>
     <script src="websocket.js"></script>
+    <!-- <script src="test.js"></script> -->
     <script>
         let contentSocket = new MySocket()
         contentSocket.connectSocket("content", contentSocket.contentHandler);
@@ -67,7 +68,13 @@
 
         let presenceSocket = new MySocket()
         presenceSocket.connectSocket("presence", presenceSocket.presenceHandler);
+
+        // let registerSocket = new MySocket()
+        // registerSocket.connectSocket("register", registerSocket.registerHandler)
     </script>
+
+
+   
 </body>
 
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"real-time-forum/pkg/database"
@@ -39,7 +40,9 @@ func main() {
 
 	// myhttp.HandleFunc("/home", mainHandler)
 	fmt.Println("http://localhost:8080")
-	http.ListenAndServe(":8080", myhttp)
+	err := http.ListenAndServe(":8080", myhttp); if err !=nil{
+		log.Fatal(err)
+	}
 }
 
 // func mainHandler(w http.ResponseWriter, r *http.Request) {
