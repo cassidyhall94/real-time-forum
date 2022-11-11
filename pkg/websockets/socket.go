@@ -1,5 +1,4 @@
 package websockets
-
 import (
 	"encoding/json"
 	"fmt"
@@ -8,22 +7,18 @@ import (
 	auth "real-time-forum/pkg/authentication"
 	"runtime/debug"
 	"time"
-
 	"github.com/gorilla/websocket"
 	uuid "github.com/satori/go.uuid"
 )
-
 type SocketMessage struct {
 	Type messageType `json:"type,omitempty"`
 }
-
 type socket struct {
 	con      *websocket.Conn
 	nickname string
 	t        messageType
 	uuid     uuid.UUID
 }
-
 var (
 	t        = time.Now()
 	dateTime = t.Format("1/2/2006, 3:04:05 PM")
@@ -33,7 +28,6 @@ var (
 	}
 	savedSockets = make([]*socket, 0)
 )
-
 func SocketCreate(w http.ResponseWriter, r *http.Request) {
 	c1, err1 := r.Cookie("1st-cookie")
 	if err1 == nil && !auth.Person.Accesslevel {
@@ -52,7 +46,6 @@ func SocketCreate(w http.ResponseWriter, r *http.Request) {
 		// not logged in yet
 		auth.Person.CookieChecker = false
 	}
-
 	fmt.Println("Socket Request on " + r.RequestURI)
 	con, _ := upgrader.Upgrade(w, r, nil)
 	ptrSocket := &socket{
@@ -63,7 +56,6 @@ func SocketCreate(w http.ResponseWriter, r *http.Request) {
 	switch r.RequestURI {
 	case "/content":
 		ptrSocket.t = content
-
 		// loads the home page (which contains the posts form)
 		if err := OnContentConnect(ptrSocket); err != nil {
 			fmt.Println(err)
@@ -88,7 +80,6 @@ func SocketCreate(w http.ResponseWriter, r *http.Request) {
 	default:
 		ptrSocket.t = unknown
 	}
-
 	savedSockets = append(savedSockets, ptrSocket)
 	ptrSocket.pollSocket()
 	for i, so := range savedSockets {
@@ -99,7 +90,6 @@ func SocketCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
-
 func (s *socket) pollSocket() {
 	go func() {
 		defer func() {
@@ -108,7 +98,6 @@ func (s *socket) pollSocket() {
 				fmt.Printf("recovered panic in %s socket: %+v\n%s\n", s.t.String(), err, string(debug.Stack()))
 			}
 		}()
-
 		for {
 			b, err := s.read()
 			if err != nil {
@@ -160,16 +149,15 @@ func (s *socket) pollSocket() {
 		}
 	}()
 }
-
 func (s *socket) read() ([]byte, error) {
 	_, b, err := s.con.ReadMessage()
 	if err != nil {
 		if websocket.IsCloseError(err, websocket.CloseGoingAway) {
 			return nil, nil
 		}
-
 		log.Print(b)
 		return nil, fmt.Errorf("unable to read message from socket, got: '%s', %w", string(b), err)
 	}
 	return b, nil
 }
+

@@ -1,26 +1,21 @@
 package websockets
-
 import (
 	"fmt"
 	"real-time-forum/pkg/database"
 	"time"
-
 	uuid "github.com/satori/go.uuid"
 )
-
 type PostMessage struct {
 	Type      messageType      `json:"type,omitempty"`
 	Timestamp string           `json:"timestamp,omitempty"`
 	Posts     []*database.Post `json:"posts"`
 }
-
 func (m PostMessage) Handle(s *socket) error {
 	if len(m.Posts) == 0 {
 		p, err := database.GetPopulatedPosts()
 		if err != nil {
 			return err
 		}
-
 		c := &PostMessage{
 			Type:  post,
 			Posts: p,
@@ -35,7 +30,6 @@ func (m PostMessage) Handle(s *socket) error {
 			}
 			pt = newPost
 		}
-
 		for _, comment := range pt.Comments {
 			if comment.CommentID == "" {
 				newComment, err := CreateComment(comment)
@@ -49,7 +43,6 @@ func (m PostMessage) Handle(s *socket) error {
 	}
 	return nil
 }
-
 func (m *PostMessage) Broadcast(s *socket) error {
 	if s.t == m.Type {
 		if err := s.con.WriteJSON(m); err != nil {
@@ -60,25 +53,20 @@ func (m *PostMessage) Broadcast(s *socket) error {
 	}
 	return nil
 }
-
 // TODO: add timestamp in the PostMessage struct; c
 func OnPostsConnect(s *socket) error {
 	time.Sleep(1 * time.Second)
-
 	p, err := database.GetPopulatedPosts()
 	if err != nil {
 		return err
 	}
-
 	c := &PostMessage{
 		Type:      post,
 		Timestamp: "",
 		Posts:     p,
 	}
-
 	return c.Broadcast(s)
 }
-
 func CreatePost(post *database.Post) (*database.Post, error) {
 	stmt, err := database.DB.Prepare("INSERT INTO posts (postID, nickname, title, categories, body) VALUES (?, ?, ?, ?, ?);")
 	defer stmt.Close()
@@ -88,19 +76,16 @@ func CreatePost(post *database.Post) (*database.Post, error) {
 	if post.PostID == "" {
 		post.PostID = uuid.NewV4().String()
 	}
-
 	// TODO: remove placeholder nickname once login/sessions are working, and hook up the real user who is logged in
 	if post.Nickname == "" {
 		post.Nickname = "Cassidy"
 	}
-
 	_, err = stmt.Exec(post.PostID, post.Nickname, post.Title, post.Categories, post.Body)
 	if err != nil {
 		return nil, fmt.Errorf("CreatePost Exec error: %+v\n", err)
 	}
 	return post, err
 }
-
 func CreateComment(comment database.Comment) (database.Comment, error) {
 	stmt, err := database.DB.Prepare("INSERT INTO comments (commentID, postID, nickname, body) VALUES (?, ?, ?, ?);")
 	defer stmt.Close()
@@ -110,19 +95,16 @@ func CreateComment(comment database.Comment) (database.Comment, error) {
 	if comment.CommentID == "" {
 		comment.CommentID = uuid.NewV4().String()
 	}
-
 	// TODO: remove placeholder nickname once login/sessions are working
 	if comment.Nickname == "" {
 		comment.Nickname = "Cassidy"
 	}
-
 	_, err = stmt.Exec(comment.CommentID, comment.PostID, comment.Nickname, comment.Body)
 	if err != nil {
 		return comment, fmt.Errorf("CreateComment Exec error: %+v\n", err)
 	}
 	return comment, err
 }
-
 func CreateUser (user database.User) (database.User, error){
 	stmt, err := database.DB.Prepare("INSERT INTO users (ID, nickname, age, gender, firstname, lastname, email, password) VALUES (?,?,?,?,?,?,?,?)")
 	defer stmt.Close()
@@ -138,3 +120,4 @@ func CreateUser (user database.User) (database.User, error){
 	}
 	return user,err
 }
+

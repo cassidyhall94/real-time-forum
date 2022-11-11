@@ -1,14 +1,10 @@
 //TODO: fix const time as it is not formatted correctly and add where time/date is needed
 const time = () => { return new Date().toLocaleString() };
-
-
 class MySocket {
   wsType = ""
-
   constructor() {
     this.mysocket = null;
   }
-
   // TODO: insert user ID variable, participants needs to be filled
   sendNewChatRequest() {
     console.log("new chat request")
@@ -43,7 +39,6 @@ class MySocket {
     this.mysocket.send(JSON.stringify(m));
     document.getElementById('chatIPT').value = ""
   }
-
   keypress(e) {
     if (e.keyCode == 13) {
       this.wsType = e.target.id.slice(0, -3)
@@ -52,11 +47,9 @@ class MySocket {
       }
     }
   }
-
   // registerHandler(text){
   //   console.log("register handler")
   // }
-
   chatHandler(text) {
     const m = JSON.parse(text)
     for (let c of m.conversations) {
@@ -69,12 +62,10 @@ class MySocket {
       }
     }
   }
-
   contentHandler(text) {
     const c = JSON.parse(text)
     document.getElementById("content").innerHTML = c.body;
   }
-
   presenceHandler(text) {
     const m = JSON.parse(text)
     for (let p of m.presences) {
@@ -91,7 +82,6 @@ class MySocket {
       document.getElementById("presencecontainer").appendChild(user)
     }
   }
-
   postHandler(text) {
     const m = JSON.parse(text)
     for (let p of m.posts) {
@@ -112,7 +102,6 @@ class MySocket {
       document.getElementById("submittedposts").appendChild(post)
     }
   }
-
   sendNewCommentRequest(e) {
     let post = document.getElementById('postcontainerforcomments')
     for (const child of post.children) {
@@ -137,7 +126,6 @@ class MySocket {
       }
     }
   }
-
   sendNewPostRequest(e) {
     let m = {
       type: 'post',
@@ -156,13 +144,11 @@ class MySocket {
     document.getElementById('category').value = ""
     document.getElementById('postbody').value = ""
   }
-
   sendSubmittedPostsRequest() {
     this.mysocket.send(JSON.stringify({
       type: "post",
     }));
   }
-
   sendContentRequest(e, post_id = "") {
     this.mysocket.send(JSON.stringify({
       type: "content",
@@ -170,7 +156,6 @@ class MySocket {
       post_id: post_id,
     }));
   }
-
   sendChatContentRequest(e, chat_id = "") {
     this.mysocket.send(JSON.stringify({
       type: "content",
@@ -178,7 +163,6 @@ class MySocket {
       chat_id: chat_id,
     }));
   }
-
   connectSocket(URI, handler) {
     if (URI === 'chat') {
       this.wsType = 'chat'
@@ -198,7 +182,6 @@ class MySocket {
     }
     var socket = new WebSocket("ws://localhost:8080/" + URI);
     this.mysocket = socket;
-
     socket.onmessage = (e) => {
       // console.log("socket message")
       handler(e.data, false);
@@ -210,7 +193,6 @@ class MySocket {
       // console.log("socket closed");
     };
   }
-
   // getRegistrationDetails() {
   //   //AJAX html request
   //   httpRequest = new XMLHttpRequest();
@@ -228,9 +210,7 @@ class MySocket {
   //   fd.set("nickname", document.getElementById("reg-nickname").value);
   //   fd.set("email", document.getElementById("reg-email").value);
   //   fd.set("password", document.getElementsByClassName("reg-password").value);
-
   //   httpRequest.send(fd);
-
   //   function sendContents() {
   //     if (httpRequest.readyState === 4) {
   //       if (httpRequest.Status === 200) {
@@ -238,18 +218,13 @@ class MySocket {
   //       }
   //     }
   //   }
-
-
-
-
   
   // }
 }
-
 function containsNumber(str) {
   return /[0-9]/.test(str);
 }
-
+//object to store form data
 // let registerForm = {
 //   nickname : "",
 //   age: "",
@@ -259,27 +234,61 @@ function containsNumber(str) {
 //   email: "",
 //   password: "",
 // }
-
+//gets registration details on click
 // function getRegDetails(){
-//   console.log("jgjh")
-
+//   //creates an array of genders and stores checked value 
 //   let genderRadios = Array.from (document.getElementsByName('gender'))
 //   for(let i=0; i <genderRadios.length; i ++){
-//     console.log(genderRadios[i].checked)
+//     // console.log(genderRadios[i].checked)
 //     if(genderRadios[i].checked){
 //       registerForm.gender = genderRadios[i].value
 //     }
 //   }
+//   // stores all from values
 //     registerForm.nickname = document.getElementById('nickname').value
 //     registerForm.age = document.getElementById('age').value
-//     // registerForm.gender = document.getElementById('gender').value
 //     registerForm.fName = document.getElementById('fname').value
 //     registerForm.lName = document.getElementById('lname').value
 //     registerForm.email = document.getElementById('email').value
 //     registerForm.password = document.getElementById('password').value
     
+  //stringify form values (json format)
 //     let jsonRegForm = JSON.stringify(registerForm)
-
-//       console.log(jsonRegForm)
-//       // this.mySocket.send(jsonRegForm)
+//     sendForm()
+//     let sendForm = async()=>{
+//       try{
+//         const fetchResponse =await fetch('http/localhost:8000/sendform',{
+//           method:POST,
+//           headers:{
+//             'Accept': 'application/json',
+//             'Content-Type': 'application/json'
+//           },
+//           body: JSON.stringify(jsonRegForm)
+//         })
+//         const data = await fetchResponse.json()
+//         return data
+//       } catch(e){
+//         return e
+//       }
+//     }
 // }
+//     console.log(registerForm)
+      // console.log(jsonRegForm)
+//       fetch("/get_time", {
+//         headers: {
+//             'Accept': 'application/json',
+//             'Content-Type': 'application/json'
+//         },
+//         method: "POST",
+//         body: JSON.stringify(data)
+//     }).then((response) => {
+//         response.text().then(function (data) {
+//             let result = JSON.parse(data);
+//             console.log(result)
+//         });
+//     }).catch((error) => {
+//         console.log(error)
+//     });
+// }
+      // this.mySocket.send(jsonRegForm)
+

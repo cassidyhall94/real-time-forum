@@ -1,9 +1,7 @@
 package database
-
 import (
 	"fmt"
 )
-
 type User struct {
 	ID        string `json:"id,omitempty"`
 	Nickname  string `json:"nickname,omitempty"`
@@ -14,7 +12,6 @@ type User struct {
 	Email     string `json:"email,omitempty"`
 	Password  string `json:"password,omitempty"`
 }
-
 type Post struct {
 	PostID     string    `json:"post_id,omitempty"`
 	Nickname   string    `json:"nickname"`
@@ -23,20 +20,17 @@ type Post struct {
 	Body       string    `json:"body,omitempty"`
 	Comments   []Comment `json:"comments,omitempty"`
 }
-
 type Comment struct {
 	CommentID string `json:"comment_id,omitempty"`
 	PostID    string `json:"post_id,omitempty"`
 	Nickname  string `json:"nickname"`
 	Body      string `json:"body,omitempty"`
 }
-
 type Conversation struct {
 	ConvoID      string `json:"convo_id"`
 	Participants []User `json:"participants"`
 	Chats        []Chat `json:"chats"`
 }
-
 type Chat struct {
 	ConvoID string `json:"convo_id"`
 	ChatID  string `json:"chat_id"`
@@ -44,14 +38,12 @@ type Chat struct {
 	Date    string `json:"date,omitempty"`
 	Body    string `json:"body,omitempty"`
 }
-
 type Presence struct {
 	ID                string `json:"id"`
 	Nickname          string `json:"nickname"`
 	Online            bool   `json:"online"`
 	LastContactedTime string `json:"last_contacted_time"`
 }
-
 func GetUsers() ([]User, error) {
 	users := []User{}
 	rows, err := DB.Query(`SELECT * FROM users`)
@@ -66,7 +58,6 @@ func GetUsers() ([]User, error) {
 	var lastname string
 	var email string
 	var password string
-
 	for rows.Next() {
 		err := rows.Scan(&id, &nickname, &age, &gender, &firstname, &lastname, &email, &password)
 		if err != nil {
@@ -89,7 +80,6 @@ func GetUsers() ([]User, error) {
 	}
 	return users, nil
 }
-
 func GetPosts() ([]*Post, error) {
 	posts := []*Post{}
 	rows, err := DB.Query(`SELECT * FROM posts`)
@@ -101,7 +91,6 @@ func GetPosts() ([]*Post, error) {
 	var title string
 	var category string
 	var postcontent string
-
 	for rows.Next() {
 		err := rows.Scan(&postid, &nickname, &title, &category, &postcontent)
 		if err != nil {
@@ -121,7 +110,6 @@ func GetPosts() ([]*Post, error) {
 	}
 	return posts, nil
 }
-
 func GetPostForComment(c Comment) (Post, error) {
 	posts, err := GetPosts()
 	if err != nil {
@@ -134,21 +122,17 @@ func GetPostForComment(c Comment) (Post, error) {
 	}
 	return Post{}, fmt.Errorf("no matching post found for id: %s", c.PostID)
 }
-
 func GetPopulatedPosts() ([]*Post, error) {
 	posts, err := GetPosts()
 	if err != nil {
 		return nil, fmt.Errorf("GetPopulatedPosts (GetPosts) error: %+v\n", err)
 	}
-
 	populatedPosts, err := populateCommentsForPosts(posts)
 	if err != nil {
 		return nil, fmt.Errorf("GetPopulatedPosts (populateCommentsForPosts) error: %+v\n", err)
 	}
-
 	return populatedPosts, nil
 }
-
 func populateCommentsForPosts(posts []*Post) ([]*Post, error) {
 	comments, err := GetComments()
 	if err != nil {
@@ -166,7 +150,6 @@ func populateCommentsForPosts(posts []*Post) ([]*Post, error) {
 	}
 	return outPost, nil
 }
-
 func GetComments() ([]Comment, error) {
 	comments := []Comment{}
 	rows, err := DB.Query(`SELECT * FROM comments`)
@@ -177,7 +160,6 @@ func GetComments() ([]Comment, error) {
 	var commentid string
 	var nickname string
 	var commentcontent string
-
 	for rows.Next() {
 		err := rows.Scan(&commentid, &postid, &nickname, &commentcontent)
 		if err != nil {
@@ -196,7 +178,6 @@ func GetComments() ([]Comment, error) {
 	}
 	return comments, nil
 }
-
 func FilterCommentsForPost(postID string, comments []Comment) []Comment {
 	out := []Comment{}
 	for _, c := range comments {
@@ -206,28 +187,23 @@ func FilterCommentsForPost(postID string, comments []Comment) []Comment {
 	}
 	return out
 }
-
 func GetConversations() ([]*Conversation, error) {
 	conversations := []*Conversation{}
 	rows, err := DB.Query(`SELECT * FROM conversations`)
 	if err != nil {
 		return conversations, fmt.Errorf("GetConversations DB Query error: %+v\n", err)
 	}
-
 	var convoid string
 	var participant string
-
 	users, err := GetUsers()
 	if err != nil {
 		return nil, fmt.Errorf("GetConversations (GetUsers) error: %+v\n", err)
 	}
-
 	for rows.Next() {
 		err := rows.Scan(&convoid, &participant)
 		if err != nil {
 			return conversations, fmt.Errorf("GetConversations rows.Scan error: %+v\n", err)
 		}
-
 		if i := convoInConvos(convoid, conversations); i >= 0 {
 			convo := conversations[i]
 			if convo.ConvoID == convoid {
@@ -257,7 +233,6 @@ func GetConversations() ([]*Conversation, error) {
 	}
 	return conversations, nil
 }
-
 func convoInConvos(convoID string, convos []*Conversation) int {
 	for i, c := range convos {
 		if convoID == c.ConvoID {
@@ -266,20 +241,17 @@ func convoInConvos(convoID string, convos []*Conversation) int {
 	}
 	return -1
 }
-
 func GetChats() ([]Chat, error) {
 	chats := []Chat{}
 	rows, err := DB.Query(`SELECT * FROM chats`)
 	if err != nil {
 		return chats, fmt.Errorf("GetChats DB Query error: %+v\n", err)
 	}
-
 	var convoid string
 	var chatid string
 	var sender string
 	var date string
 	var body string
-
 	for rows.Next() {
 		err := rows.Scan(&convoid, &chatid, &sender, &date, &body)
 		if err != nil {
@@ -299,16 +271,13 @@ func GetChats() ([]Chat, error) {
 	if err != nil {
 		return chats, err
 	}
-
 	return populateUsersForChats(chats)
 }
-
 func populateChatsForConversation(conversations []*Conversation) error {
 	chats, err := GetChats()
 	if err != nil {
 		return err
 	}
-
 	for i, convo := range conversations {
 		cts := []Chat{}
 		for _, c := range chats {
@@ -320,7 +289,6 @@ func populateChatsForConversation(conversations []*Conversation) error {
 	}
 	return nil
 }
-
 func GetPopulatedConversations(conversations []*Conversation) ([]*Conversation, error) {
 	convos, err := GetConversations()
 	if err != nil {
@@ -337,13 +305,11 @@ func GetPopulatedConversations(conversations []*Conversation) ([]*Conversation, 
 			}
 		}
 	}
-
 	if err := populateChatsForConversation(conversations); err != nil {
 		return nil, fmt.Errorf("GetPopulatedConversation (populateChatForConversation) error: %+v\n", err)
 	}
 	return conversations, nil
 }
-
 func populateUsersForChats(chats []Chat) ([]Chat, error) {
 	users, err := GetUsers()
 	if err != nil {
@@ -361,7 +327,6 @@ func populateUsersForChats(chats []Chat) ([]Chat, error) {
 	}
 	return outChats, nil
 }
-
 func FilterChatsForConvo(convoID string, chats []Chat) []Chat {
 	out := []Chat{}
 	for _, c := range chats {
