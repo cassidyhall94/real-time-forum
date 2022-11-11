@@ -3,6 +3,7 @@ package websockets
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	auth "real-time-forum/pkg/authentication"
 	"runtime/debug"
@@ -166,6 +167,8 @@ func (s *socket) read() ([]byte, error) {
 		if websocket.IsCloseError(err, websocket.CloseGoingAway) {
 			return nil, nil
 		}
+
+		log.Print(b)
 		return nil, fmt.Errorf("unable to read message from socket, got: '%s', %w", string(b), err)
 	}
 	return b, nil

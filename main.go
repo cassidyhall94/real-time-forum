@@ -37,6 +37,7 @@ func main() {
 	myhttp.HandleFunc("/post", socket.SocketCreate)
 	myhttp.HandleFunc("/presence", socket.SocketCreate)
 	myhttp.HandleFunc("/comment", socket.SocketCreate)
+	myhttp.HandleFunc("/register", socket.SocketCreate)
 
 	// myhttp.HandleFunc("/home", mainHandler)
 	fmt.Println("http://localhost:8080")
