@@ -78,7 +78,7 @@ class MySocket {
       user.id = p.id
       user.innerHTML = p.nickname
       user.style.color = 'white'
-      user.className = "presence " + p.nickname
+      user.className = "presence " + p.nickname 
       document.getElementById("presencecontainer").appendChild(user)
     }
   }
@@ -225,16 +225,54 @@ function containsNumber(str) {
   return /[0-9]/.test(str);
 }
 //object to store form data
-// let registerForm = {
-//   nickname : "",
-//   age: "",
-//   gender: "",
-//   fName: "",
-//   lName: "",
-//   email: "",
-//   password: "",
-// }
-//gets registration details on click
+let registerForm = {
+  nickname : "",
+  age: "",
+  gender: "",
+  fName: "",
+  lName: "",
+  email: "",
+  password: "",
+}
+
+function getRegDetails(){
+  console.log("jgjh")
+  let genderRadios = Array.from (document.getElementsByName('gender'))
+  for(let i=0; i <genderRadios.length; i ++){
+    console.log(genderRadios[i].checked)
+    if(genderRadios[i].checked){
+      registerForm.gender = genderRadios[i].value
+    }
+  }
+    registerForm.nickname = document.getElementById('nickname').value 
+    registerForm.age = document.getElementById('age').value
+    // registerForm.gender = document.getElementById('gender').value
+    registerForm.firstname = document.getElementById('fname').value
+    registerForm.lastname = document.getElementById('lname').value
+    registerForm.email = document.getElementById('email').value
+    registerForm.password = document.getElementById('password').value
+    
+    let jsonRegForm = JSON.stringify(registerForm)
+    console.log(jsonRegForm)
+    
+    fetch("/register",{
+      headers:{
+        'Accept':'application/json',
+        'Content-Type': 'application/json'
+      },
+      method: "POST",
+      body:jsonRegForm
+    }).then((response)=>{
+      response.text().then(function (jsonRegForm){
+        let result = JSON.parse(jsonRegForm)
+        console.log(result)
+      })
+    }).catch((error)=>{
+      console.log(error)
+    })
+      // this.mySocket.send(jsonRegForm)
+}
+// gets registration details on click
 // function getRegDetails(){
 //   //creates an array of genders and stores checked value 
 //   let genderRadios = Array.from (document.getElementsByName('gender'))

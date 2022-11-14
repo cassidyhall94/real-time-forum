@@ -1,9 +1,10 @@
 let registerForm = {
+  id: "",
   nickname : "",
   age: "",
   gender: "",
-  fName: "",
-  lName: "",
+  firstname: "",
+  lastname: "",
   email: "",
   password: "",
 }
@@ -23,18 +24,18 @@ function getRegDetails(){
       registerForm.gender = genderRadios[i].value
     }
   }
-    registerForm.nickname = document.getElementById('nickname').value
+    registerForm.nickname = document.getElementById('nickname').value 
     registerForm.age = document.getElementById('age').value
     // registerForm.gender = document.getElementById('gender').value
-    registerForm.fName = document.getElementById('fname').value
-    registerForm.lName = document.getElementById('lname').value
+    registerForm.firstname = document.getElementById('fname').value
+    registerForm.lastname = document.getElementById('lname').value
     registerForm.email = document.getElementById('email').value
     registerForm.password = document.getElementById('password').value
     
     let jsonRegForm = JSON.stringify(registerForm)
     console.log(jsonRegForm)
     
-    fetch("./pkg/websockets/register",{
+    fetch("/register",{
       headers:{
         'Accept':'application/json',
         'Content-Type': 'application/json'
