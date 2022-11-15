@@ -198,33 +198,7 @@ class MySocket {
 function containsNumber(str) {
   return /[0-9]/.test(str);
 }
-  // getRegistrationDetails() {
-  //   //AJAX html request
-  //   httpRequest = new XMLHttpRequest();
-  //   if (!httpRequest) {
-  //     console.log("Giving up :( Cannot create an XMLHTTP instance'");
-  //   }
-  //   url = "ws://localhost:8080/";
-  //   httpRequest.onreadystatechange = sendContents;
-  //   httpRequest.open("POST", url);
-  //   httpRequest.setRequestHeader(
-  //     "Content-type",
-  //     "application/x-www-form-urlencoded"
-  //   );
-  //   var fd = new FormData();
-  //   fd.set("nickname", document.getElementById("reg-nickname").value);
-  //   fd.set("email", document.getElementById("reg-email").value);
-  //   fd.set("password", document.getElementsByClassName("reg-password").value);
-  //   httpRequest.send(fd);
-  //   function sendContents() {
-  //     if (httpRequest.readyState === 4) {
-  //       if (httpRequest.Status === 200) {
-  //         alert(httpRequest.responseText);
-  //       }
-  //     }
-  //   }
   
-  // }
 //object to store form data
 let registerForm = {
   nickname : "",
@@ -234,6 +208,11 @@ let registerForm = {
   lName: "",
   email: "",
   password: "",
+}
+
+let loginForm ={
+  nickname:"",
+  password:"",
 }
 
 //gets registration form details
@@ -278,4 +257,34 @@ function getRegDetails(){
 
     document.getElementById('register').reset()
     alert("successfully registered")
+}
+
+function loginFormData(){
+  loginForm.nickname = document.getElementById('nickname-login').value
+  loginForm.password = document.getElementById('password-login').value
+
+  // console.log(loginForm)
+
+  let loginFormJSON = JSON.stringify(loginForm)
+  // console.log(loginFormJSON)
+
+  fetch("/login",{
+      headers:{
+        'Accept':'application/json',
+        'Content-Type': 'application/json'
+      },
+      method: "POST",
+      body:loginFormJSON
+    }).then((response)=>{
+      response.text().then(function (loginFormJSON){
+        let result = JSON.parse(loginFormJSON)
+        console.log(result)
+      })
+    }).catch((error)=>{
+      console.log(error)
+    })
+
+  document.getElementById('login-form').reset()
+  console.log(loginForm)
+
 }

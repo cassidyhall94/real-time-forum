@@ -1,7 +1,9 @@
 package database
+
 import (
 	"fmt"
 )
+
 type User struct {
 	ID        string `json:"id,omitempty"`
 	Nickname  string `json:"nickname,omitempty"`
@@ -44,6 +46,13 @@ type Presence struct {
 	Online            bool   `json:"online"`
 	LastContactedTime string `json:"last_contacted_time"`
 }
+
+type Login struct {
+	Nickname string `json:"nickname,omitempty"`
+	Password string `json:"password,omitempty"`
+}
+
+
 func GetUsers() ([]User, error) {
 	users := []User{}
 	rows, err := DB.Query(`SELECT * FROM users`)

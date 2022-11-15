@@ -1,8 +1,10 @@
- 
- <form id="login-form">
-    <input type="text" name="nickname" id="nickname-field" class="login-form-field" placeholder="Nickname">
-    <input type="password" name="password" id="password-field" class="login-form-field" placeholder="Password">
-    <input type="submit" value="Login" id="login-form-submit">
+ <br><h1 style="text-align: center;">LOGIN</h1>
+
+ <form action="javascript:void(0)" method="post" id="login-form">
+  <br>
+    <input type="text" name="nickname" id="nickname-login" class="login-form-field" placeholder="Nickname"> <br> <br>
+    <input type="password" name="password" id="password-login" class="login-form-field" placeholder="Password"> <br> <br>
+  <button onclick="loginFormData()">Submit</button>
 </form>
 <h1 style="text-align: center;">REGISTRATION FORM</h1>
 
