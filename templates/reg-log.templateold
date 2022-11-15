@@ -11,9 +11,7 @@
   />
   <input type="button" onclick="getLoginDetails()" />
 </form>
-
 <h1>Registration</h1>
-
 <form action="/reglog" method="POST">
   <p>Nickname</p>
   <input
