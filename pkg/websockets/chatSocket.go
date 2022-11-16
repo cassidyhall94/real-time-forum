@@ -67,10 +67,10 @@ func (m *ChatMessage) Handle(s *socket) error {
 }
 func CreateChat(chat database.Chat) (string, error) {
 	stmt, err := database.DB.Prepare("INSERT INTO chats (convoID, chatID, sender, date, body) VALUES (?, ?, ?, ?, ?);")
-	defer stmt.Close()
 	if err != nil {
 		return "", fmt.Errorf("CreateChat DB Prepare error: %+v\n", err)
 	}
+	defer stmt.Close()
 	if chat.ChatID == "" {
 		chat.ChatID = uuid.NewV4().String()
 	}

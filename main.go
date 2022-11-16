@@ -40,6 +40,7 @@ func main() {
 	myhttp.HandleFunc("/comment", socket.SocketCreate)
 	myhttp.HandleFunc("/register",socket.Register)
 	myhttp.HandleFunc("/login", socket.Login)
+	http.HandleFunc("/logout", socket.Logout)
 	// myhttp.HandleFunc("/home", mainHandler)
 	fmt.Println("http://localhost:8080")
 	err := http.ListenAndServe(":8080", myhttp); if err !=nil{

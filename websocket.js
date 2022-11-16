@@ -208,6 +208,7 @@ let registerForm = {
   lName: "",
   email: "",
   password: "",
+  loggedin: "false",
 }
 
 let loginForm ={
@@ -233,12 +234,17 @@ function getRegDetails(){
     registerForm.lastname = document.getElementById('lname').value
     registerForm.email = document.getElementById('email').value
     registerForm.password = document.getElementById('password').value
-    
     //convert data to JSON
     let jsonRegForm = JSON.stringify(registerForm)
     // console.log(jsonRegForm)
     
 // SEND DATA TO BACKEND USING FETCH
+console.log(registerForm)
+    if(registerForm.nickname !=""&& registerForm.email !="" &&registerForm.password !=""){
+    
+
+    
+    
     fetch("/register",{
       headers:{
         'Accept':'application/json',
@@ -257,6 +263,11 @@ function getRegDetails(){
 
     document.getElementById('register').reset()
     alert("successfully registered")
+  }
+}
+
+function sendreg(){
+  
 }
 
 function loginFormData(){
@@ -292,32 +303,11 @@ function loginFormData(){
     }).catch((error)=>{
       console.log(error)
     })
-    console.log("logindata",logindata)
+    // console.log("logindata",logindata)
 
   document.getElementById('login-form').reset()
-  // console.log(loginForm)
 
-
-  //  fetch("/login",{
-  //     headers:{
-  //       'Accept':'application/json',
-  //       'Content-Type': 'application/json'
-  //     },
-  //     method: "GET",
-     
-  //   }).then((response)=>{
-  //     response.text().then(function (t){
-  //       let result = JSON.parse(t)
-  //       console.log(result)
-  //     })
-  //     // return response.json()
-  //   }).then((data)=>{
-  //     console.log("backend",data)
-  //   }).catch((error)=>{
-  //     console.log(error)
-  //   })
-
-  document.getElementById('login-form').reset()
+  // document.getElementById('login-form').reset()
   // console.log(t)
 
 }

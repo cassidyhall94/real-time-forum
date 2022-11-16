@@ -33,12 +33,15 @@ func GetPresences() ([]database.Presence, error) {
 		return users[i].Nickname < users[j].Nickname
 	})
 	for _, user := range users {
-		presences = append(presences, database.Presence{
-			ID:       user.ID,
-			Nickname: user.Nickname,
-			// Online:            bool,
-			// LastContactedTime: created,
-		})
+		if user.LoggedIn =="true"{
+			presences = append(presences, database.Presence{
+				ID:       user.ID,
+				Nickname: user.Nickname,
+				// Online:            bool,
+				// LastContactedTime: created,
+			})
+
+		}
 	}
 	return presences, nil
 }

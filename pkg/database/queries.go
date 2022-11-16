@@ -13,6 +13,7 @@ type User struct {
 	LastName  string `json:"lastname,omitempty"`
 	Email     string `json:"email,omitempty"`
 	Password  string `json:"password,omitempty"`
+	LoggedIn  string  `json:"loggedin,omitempty"`
 }
 type Post struct {
 	PostID     string    `json:"post_id,omitempty"`
@@ -43,7 +44,7 @@ type Chat struct {
 type Presence struct {
 	ID                string `json:"id"`
 	Nickname          string `json:"nickname"`
-	Online            bool   `json:"online"`
+	Online            string   `json:"online"`
 	LastContactedTime string `json:"last_contacted_time"`
 }
 
@@ -67,8 +68,10 @@ func GetUsers() ([]User, error) {
 	var lastname string
 	var email string
 	var password string
+	var loggedin string
+
 	for rows.Next() {
-		err := rows.Scan(&id, &nickname, &age, &gender, &firstname, &lastname, &email, &password)
+		err := rows.Scan(&id, &nickname, &age, &gender, &firstname, &lastname, &email, &password, &loggedin)
 		if err != nil {
 			return users, fmt.Errorf("GetUsers rows.Scan error: %+v\n", err)
 		}
@@ -81,6 +84,7 @@ func GetUsers() ([]User, error) {
 			LastName:  lastname,
 			Email:     email,
 			Password:  password,
+			LoggedIn: loggedin,
 		})
 	}
 	err = rows.Err()

@@ -106,7 +106,7 @@ func CreateComment(comment database.Comment) (database.Comment, error) {
 	return comment, err
 }
 func CreateUser (user database.User) (database.User, error){
-	stmt, err := database.DB.Prepare("INSERT INTO users (ID, nickname, age, gender, firstname, lastname, email, password) VALUES (?,?,?,?,?,?,?,?)")
+	stmt, err := database.DB.Prepare("INSERT INTO users (ID, nickname, age, gender, firstname, lastname, email, password, loggedin) VALUES (?,?,?,?,?,?,?,?,?)")
 	defer stmt.Close()
 	if err !=nil {
 		return user, fmt.Errorf("Create User DB Prepare error: %+v\n", err)
@@ -114,7 +114,7 @@ func CreateUser (user database.User) (database.User, error){
 	if user.ID == ""{
 		user.ID = uuid.NewV4().String()
 	}
-	_,err = stmt.Exec(user.ID, user.Nickname, user.Age, user.Gender, user.FirstName, user.LastName, user.Email, user.Password)
+	_,err = stmt.Exec(user.ID, user.Nickname, user.Age, user.Gender, user.FirstName, user.LastName, user.Email, user.Password, user.LoggedIn)
 	if err != nil {
 		return user, fmt.Errorf("Create User Exec error: %+v\n", err)
 	}

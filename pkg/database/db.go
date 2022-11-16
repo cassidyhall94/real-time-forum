@@ -36,7 +36,8 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 			"firstname" TEXT,
 			"lastname" TEXT,
 			"email" 	TEXT UNIQUE,
-			"password"	TEXT UNIQUE
+			"password"	TEXT UNIQUE,
+			"loggedin" 	TEXT 
 		);
 	`)
 	if errTbl != nil {
