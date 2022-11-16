@@ -52,6 +52,12 @@ func checkPwHash(password, hash string) bool {
 
 func Login(w http.ResponseWriter, r *http.Request) {
 
+	// upgrader = websocket.Upgrader{
+	// 	ReadBufferSize:  1024,
+	// 	WriteBufferSize: 1024,
+	// }
+	// con, _ := upgrader.Upgrade(w, r, nil)
+
 	var user database.Login
 
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -80,22 +86,27 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 		// compares data with front end, if user nick match, checks pw if match stores value
 		if user.Nickname == nickname {
-			if checkPwHash(user.Password, password){
+			if checkPwHash(user.Password, password) {
 				users = append(users, database.User{
 					Nickname: nickname,
 					Password: password,
 				})
 
 			}
-			
+
 		}
 	}
 
-	
-	if len(users)==0{
+	if len(users) == 0 {
 		fmt.Println("pw mismatch")
 	}
 	fmt.Println(users)
-	
-	
+	var usersJson, err2 = json.Marshal(users)
+	if err2 != nil {
+		log.Println(err2)
+	}
+	// http.Post("/", user.Password)
+
+	_ = json.NewEncoder(w).Encode(usersJson)
+
 }

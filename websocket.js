@@ -287,4 +287,29 @@ function loginFormData(){
   document.getElementById('login-form').reset()
   console.log(loginForm)
 
+  let t = {nickname:"",
+  password:"",}
+
+   fetch("/login",{
+      headers:{
+        'Accept':'application/json',
+        'Content-Type': 'application/json'
+      },
+      method: "GET",
+     
+    }).then((response)=>{
+      response.text().then(function (t){
+        let result = JSON.parse(t)
+        console.log(result)
+      })
+      // return response.json()
+    }).then((data)=>{
+      console.log("backend",data)
+    }).catch((error)=>{
+      console.log(error)
+    })
+
+  document.getElementById('login-form').reset()
+  console.log(t)
+
 }
