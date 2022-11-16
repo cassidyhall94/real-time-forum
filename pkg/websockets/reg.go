@@ -58,6 +58,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	// }
 	// con, _ := upgrader.Upgrade(w, r, nil)
 
+
 	var user database.Login
 
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -101,12 +102,13 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("pw mismatch")
 	}
 	fmt.Println(users)
-	var usersJson, err2 = json.Marshal(users)
-	if err2 != nil {
-		log.Println(err2)
-	}
+	// var usersJson, err2 = json.Marshal(users)
+	// if err2 != nil {
+	// 	log.Println(err2)
+	// }
 	// http.Post("/", user.Password)
+	// fmt.Println(users)
 
-	_ = json.NewEncoder(w).Encode(usersJson)
+	 json.NewEncoder(w).Encode(users)
 
 }

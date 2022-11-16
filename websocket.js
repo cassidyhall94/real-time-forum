@@ -267,6 +267,8 @@ function loginFormData(){
 
   let loginFormJSON = JSON.stringify(loginForm)
   // console.log(loginFormJSON)
+  let logindata = {nickname:"",
+  password:"",}
 
   fetch("/login",{
       headers:{
@@ -278,38 +280,44 @@ function loginFormData(){
     }).then((response)=>{
       response.text().then(function (loginFormJSON){
         let result = JSON.parse(loginFormJSON)
-        console.log(result)
+        console.log("parse",result)
+        if (result == null){
+          alert("incorrect username or password")
+        } else{
+          logindata.nickname = result[0].Nickname
+          logindata.password = result[0].Password
+          alert("you are logged in ")
+        }
       })
     }).catch((error)=>{
       console.log(error)
     })
+    console.log("logindata",logindata)
 
   document.getElementById('login-form').reset()
-  console.log(loginForm)
+  // console.log(loginForm)
 
-  let t = {nickname:"",
-  password:"",}
 
-   fetch("/login",{
-      headers:{
-        'Accept':'application/json',
-        'Content-Type': 'application/json'
-      },
-      method: "GET",
+  //  fetch("/login",{
+  //     headers:{
+  //       'Accept':'application/json',
+  //       'Content-Type': 'application/json'
+  //     },
+  //     method: "GET",
      
-    }).then((response)=>{
-      response.text().then(function (t){
-        let result = JSON.parse(t)
-        console.log(result)
-      })
-      // return response.json()
-    }).then((data)=>{
-      console.log("backend",data)
-    }).catch((error)=>{
-      console.log(error)
-    })
+  //   }).then((response)=>{
+  //     response.text().then(function (t){
+  //       let result = JSON.parse(t)
+  //       console.log(result)
+  //     })
+  //     // return response.json()
+  //   }).then((data)=>{
+  //     console.log("backend",data)
+  //   }).catch((error)=>{
+  //     console.log(error)
+  //   })
 
   document.getElementById('login-form').reset()
-  console.log(t)
+  // console.log(t)
 
 }
