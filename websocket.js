@@ -280,6 +280,7 @@ function loginFormData(){
   // console.log(loginFormJSON)
   let logindata = {nickname:"",
   password:"",}
+  // let id = ""
 
   fetch("/login",{
       headers:{
@@ -289,24 +290,35 @@ function loginFormData(){
       method: "POST",
       body:loginFormJSON
     }).then((response)=>{
+
       response.text().then(function (loginFormJSON){
         let result = JSON.parse(loginFormJSON)
         console.log("parse",result)
+
         if (result == null){
           alert("incorrect username or password")
+
         } else{
-          logindata.nickname = result[0].Nickname
-          logindata.password = result[0].Password
+          logindata.nickname = result[0].nickname
+          logindata.password = result[0].password
+          user.innerText = `Hello ${document.cookie.match(logindata.nickname)}`
           alert("you are logged in ")
         }
       })
+
     }).catch((error)=>{
       console.log(error)
+
     })
-    // console.log("logindata",logindata)
+    console.log("logindata",logindata, "hi")
+    // console.log( Object.keys(logindata).length)
+    console.log(JSON.stringify(logindata))
 
   document.getElementById('login-form').reset()
 
+  console.log("cookies",document.cookie)
+
+    let user= document.getElementById('welcome')
   // document.getElementById('login-form').reset()
   // console.log(t)
 

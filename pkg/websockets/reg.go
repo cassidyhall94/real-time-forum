@@ -6,7 +6,9 @@ import (
 	"log"
 	"net/http"
 	"real-time-forum/pkg/database"
+	"time"
 
+	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -60,7 +62,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	// }
 	// con, _ := upgrader.Upgrade(w, r, nil)
 
-
 	var user database.Login
 
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -69,7 +70,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var users []database.User
-	
 
 	//selects nickname and password from user database
 	rows, err := database.DB.Query(`SELECT nickname, password,loggedin FROM users`)
@@ -80,7 +80,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	var nickname string
 	var password string
 	var loggedin string
-
 
 	for rows.Next() {
 		err := rows.Scan(&nickname, &password, &loggedin)
@@ -96,39 +95,56 @@ func Login(w http.ResponseWriter, r *http.Request) {
 					Password: password,
 					LoggedIn: "true",
 				})
-				
+
 			}
-			
+
 		}
 	}
-	
+
 	//if len ==0, no matching user was found
 	if len(users) == 0 {
 		fmt.Println("pw mismatch")
 	}
 	fmt.Println(users)
-		//checks len again to stop panic err && updates user logged in to true in DB
-		if len(users)>0 && users[0].LoggedIn =="true" {
-			var loggedin= "true"
-			UpdateUser(user.Nickname, loggedin)
-			
-		}
-		//sends data to js front end
-	 json.NewEncoder(w).Encode(users)
+
+	//checks len again to stop panic err && updates user logged in to true in DB and creates cookie
+	if len(users) > 0 && users[0].LoggedIn == "true" {
+		var loggedin = "true"
+		UpdateUser(user.Nickname, loggedin)
+		var cookieValue =uuid.NewV4()
+		Cookie(w,r, user.Nickname, (cookieValue.String()))
+
+	}
+	//sends data to js front end
+	json.NewEncoder(w).Encode(users)
 
 }
 
-func UpdateUser(nickname, loggedin string){
-	fmt.Println(nickname)
-	
-	stmt,err:= database.DB.Prepare(`UPDATE "users" SET "loggedin" = ? WHERE "nickname" = ?`);if err !=nil {
+//updates user table 
+func UpdateUser(nickname, loggedin string) {
+
+	stmt, err := database.DB.Prepare(`UPDATE "users" SET "loggedin" = ? WHERE "nickname" = ?`)
+	if err != nil {
 		log.Println(err)
 	}
 	stmt.Exec(loggedin, nickname)
 }
 
-func Logout(w http.ResponseWriter, r * http.Request){
+
+//logout user NOT WORKING YET
+func Logout(w http.ResponseWriter, r *http.Request) {
 	var name = "test"
 	var loggedin = "false"
 	UpdateUser(name, loggedin)
+}
+
+
+//creates cookie
+func Cookie(w http.ResponseWriter, r *http.Request, Username string, id string) {
+	expiration := time.Now().Add(1 * time.Hour)
+	cookie := http.Cookie{Name: Username, Value: id, Expires: expiration}
+	// cookie, _ := r.Cookie("username")
+	http.SetCookie(w, &cookie)
+	fmt.Println(cookie)
+	// fmt.Fprintf((w, cookie))
 }

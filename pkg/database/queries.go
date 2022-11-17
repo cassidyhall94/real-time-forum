@@ -13,7 +13,7 @@ type User struct {
 	LastName  string `json:"lastname,omitempty"`
 	Email     string `json:"email,omitempty"`
 	Password  string `json:"password,omitempty"`
-	LoggedIn  string  `json:"loggedin,omitempty"`
+	LoggedIn  string `json:"loggedin,omitempty"`
 }
 type Post struct {
 	PostID     string    `json:"post_id,omitempty"`
@@ -44,7 +44,7 @@ type Chat struct {
 type Presence struct {
 	ID                string `json:"id"`
 	Nickname          string `json:"nickname"`
-	Online            string   `json:"online"`
+	Online            string `json:"online"`
 	LastContactedTime string `json:"last_contacted_time"`
 }
 
@@ -53,6 +53,19 @@ type Login struct {
 	Password string `json:"password,omitempty"`
 }
 
+// type Cookie struct {
+// 	Name string
+// 	Value string
+// 	Path string
+// 	Domain string
+// 	Expires time.Time
+// 	RawExpires string
+// 	MaxAge int
+// 	Secure bool
+// 	HttpOnly bool
+// 	Raw string
+// 	Unparsed []string
+// }
 
 func GetUsers() ([]User, error) {
 	users := []User{}
@@ -84,7 +97,7 @@ func GetUsers() ([]User, error) {
 			LastName:  lastname,
 			Email:     email,
 			Password:  password,
-			LoggedIn: loggedin,
+			LoggedIn:  loggedin,
 		})
 	}
 	err = rows.Err()
