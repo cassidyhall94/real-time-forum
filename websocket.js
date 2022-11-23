@@ -216,7 +216,7 @@ let loginForm ={
   password:"",
 }
 
-//gets registration form details
+//******************* */gets registration form details*******************************
 function getRegDetails(){
 
     //creates array of gender radio buttons 
@@ -237,14 +237,14 @@ function getRegDetails(){
     //convert data to JSON
     let jsonRegForm = JSON.stringify(registerForm)
     // console.log(jsonRegForm)
+    if(registerForm.password.length <5){
+      registerForm.password = ""
+    }
     
 // SEND DATA TO BACKEND USING FETCH
 console.log(registerForm)
-    if(registerForm.nickname !=""&& registerForm.email !="" &&registerForm.password !=""){
-    
-
-    
-    
+    if(registerForm.nickname !=""&& registerForm.email !="" &&registerForm.password !="" ){
+        
     fetch("/register",{
       headers:{
         'Accept':'application/json',
@@ -252,11 +252,13 @@ console.log(registerForm)
       },
       method: "POST",
       body:jsonRegForm
+
     }).then((response)=>{
       response.text().then(function (jsonRegForm){
         let result = JSON.parse(jsonRegForm)
         console.log(result)
       })
+
     }).catch((error)=>{
       console.log(error)
     })
@@ -266,10 +268,8 @@ console.log(registerForm)
   }
 }
 
-function sendreg(){
-  
-}
 
+// **********************************LOGIN*******************************************
 function loginFormData(){
   loginForm.nickname = document.getElementById('nickname-login').value
   loginForm.password = document.getElementById('password-login').value
@@ -279,7 +279,7 @@ function loginFormData(){
   let loginFormJSON = JSON.stringify(loginForm)
   // console.log(loginFormJSON)
   let logindata = {nickname:"",
-  password:"",}
+                  password:"",}
   // let id = ""
 
   fetch("/login",{
@@ -289,18 +289,20 @@ function loginFormData(){
       },
       method: "POST",
       body:loginFormJSON
+
     }).then((response)=>{
 
       response.text().then(function (loginFormJSON){
         let result = JSON.parse(loginFormJSON)
         console.log("parse",result)
 
+        
         if (result == null){
           alert("incorrect username or password")
 
         } else{
           logindata.nickname = result[0].nickname
-          logindata.password = result[0].password
+          // logindata.password = result[0].password
           user.innerText = `Hello ${document.cookie.match(logindata.nickname)}`
           alert("you are logged in ")
         }
@@ -310,13 +312,11 @@ function loginFormData(){
       console.log(error)
 
     })
-    console.log("logindata",logindata, "hi")
+    // console.log("logindata",logindata, "hi")
     // console.log( Object.keys(logindata).length)
-    console.log(JSON.stringify(logindata))
+    // console.log(JSON.stringify(logindata))
 
   document.getElementById('login-form').reset()
-
-  console.log("cookies",document.cookie)
 
     let user= document.getElementById('welcome')
   // document.getElementById('login-form').reset()

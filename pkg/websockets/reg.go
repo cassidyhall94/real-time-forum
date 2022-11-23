@@ -12,17 +12,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type userData struct {
-	id        string
-	nickname  string
-	age       int
-	gender    string
-	firstName string
-	lastName  string
-	email     string
-	password  string
-}
-
+// ***************************REGISTER**********************************************************8
+// check if pasword meets criteria number length etc, if nickname is not taken
 func Register(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("getting data")
 
@@ -49,18 +40,15 @@ func passwordHash(str string) string {
 	}
 	return string(hashedPw)
 }
+
 func checkPwHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }
 
-func Login(w http.ResponseWriter, r *http.Request) {
 
-	// upgrader = websocket.Upgrader{
-	// 	ReadBufferSize:  1024,
-	// 	WriteBufferSize: 1024,
-	// }
-	// con, _ := upgrader.Upgrade(w, r, nil)
+// *****************************LOGIN ***************************************
+func Login(w http.ResponseWriter, r *http.Request) {
 
 	var user database.Login
 
@@ -72,7 +60,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	var users []database.User
 
 	//selects nickname and password from user database
-	rows, err := database.DB.Query(`SELECT nickname, password,loggedin FROM users`)
+	rows, err := database.DB.Query(`SELECT nickname, password,loggedin, email FROM users`)
 	if err != nil {
 		log.Println(err)
 	}
@@ -80,15 +68,17 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	var nickname string
 	var password string
 	var loggedin string
+	var email string
 
 	for rows.Next() {
-		err := rows.Scan(&nickname, &password, &loggedin)
+		err := rows.Scan(&nickname, &password, &loggedin, &email)
 		if err != nil {
 			log.Fatal(err)
 		}
+		fmt.Println(user.Nickname, nickname, email)
 
 		// compares data with front end, if user nick match, checks pw if match stores value
-		if user.Nickname == nickname {
+		if user.Nickname == nickname || user.Nickname == email{
 			if checkPwHash(user.Password, password) {
 				users = append(users, database.User{
 					Nickname: nickname,
@@ -113,6 +103,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		UpdateUser(user.Nickname, loggedin)
 		var cookieValue =uuid.NewV4()
 		Cookie(w,r, user.Nickname, (cookieValue.String()))
+		
 
 	}
 	//sends data to js front end
@@ -142,9 +133,13 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 //creates cookie
 func Cookie(w http.ResponseWriter, r *http.Request, Username string, id string) {
 	expiration := time.Now().Add(1 * time.Hour)
-	cookie := http.Cookie{Name: Username, Value: id, Expires: expiration}
+	cookie := http.Cookie{Name: Username, Value: id, Expires: expiration, SameSite: http.SameSiteLaxMode}
 	// cookie, _ := r.Cookie("username")
-	http.SetCookie(w, &cookie)
+	http.SetCookie(w, &cookie,)
 	fmt.Println(cookie)
 	// fmt.Fprintf((w, cookie))
+}
+
+func CheckCookies(w http.ResponseWriter, r*http.Request){
+	
 }
