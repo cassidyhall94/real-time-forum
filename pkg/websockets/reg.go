@@ -13,7 +13,7 @@ import (
 )
 
 // ***************************REGISTER**********************************************************8
-// check if pasword meets criteria number length etc, if nickname is not taken
+// check if password meets criteria number length etc, if nickname is not taken
 func Register(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("getting data")
 
