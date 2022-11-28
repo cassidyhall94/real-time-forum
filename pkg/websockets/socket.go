@@ -1,15 +1,17 @@
 package websockets
+
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/websocket"
+	uuid "github.com/satori/go.uuid"
 	"log"
 	"net/http"
 	auth "real-time-forum/pkg/authentication"
 	"runtime/debug"
 	"time"
-	"github.com/gorilla/websocket"
-	uuid "github.com/satori/go.uuid"
 )
+
 type SocketMessage struct {
 	Type messageType `json:"type,omitempty"`
 }
@@ -19,6 +21,7 @@ type socket struct {
 	t        messageType
 	uuid     uuid.UUID
 }
+
 var (
 	t        = time.Now()
 	dateTime = t.Format("1/2/2006, 3:04:05 PM")
@@ -28,6 +31,7 @@ var (
 	}
 	savedSockets = make([]*socket, 0)
 )
+
 func SocketCreate(w http.ResponseWriter, r *http.Request) {
 	c1, err1 := r.Cookie("1st-cookie")
 	if err1 == nil && !auth.Person.Accesslevel {
@@ -160,4 +164,3 @@ func (s *socket) read() ([]byte, error) {
 	}
 	return b, nil
 }
-

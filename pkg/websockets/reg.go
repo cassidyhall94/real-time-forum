@@ -25,8 +25,8 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	fmt.Println(data)
-	fmt.Println(data.LoggedIn)
+	// fmt.Println(data)
+	// fmt.Println(data.LoggedIn)
 
 	data.Password = passwordHash(data.Password)
 	//  data.Password = checkPwHash(r.FormValue("password"), data.Password)
@@ -45,7 +45,6 @@ func checkPwHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }
-
 
 // *****************************LOGIN ***************************************
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -75,10 +74,10 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(user.Nickname, nickname, email)
+		// fmt.Println(user.Nickname, nickname, email)
 
 		// compares data with front end, if user nick match, checks pw if match stores value
-		if user.Nickname == nickname || user.Nickname == email{
+		if user.Nickname == nickname || user.Nickname == email {
 			if checkPwHash(user.Password, password) {
 				users = append(users, database.User{
 					Nickname: nickname,
@@ -95,15 +94,14 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	if len(users) == 0 {
 		fmt.Println("pw mismatch")
 	}
-	fmt.Println(users)
+	// fmt.Println(users)
 
 	//checks len again to stop panic err && updates user logged in to true in DB and creates cookie
 	if len(users) > 0 && users[0].LoggedIn == "true" {
 		var loggedin = "true"
 		UpdateUser(user.Nickname, loggedin)
-		var cookieValue =uuid.NewV4()
-		Cookie(w,r, user.Nickname, (cookieValue.String()))
-		
+		var cookieValue = uuid.NewV4()
+		Cookie(w, r, user.Nickname, (cookieValue.String()))
 
 	}
 	//sends data to js front end
@@ -111,7 +109,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 }
 
-//updates user table 
+//updates user table
 func UpdateUser(nickname, loggedin string) {
 
 	stmt, err := database.DB.Prepare(`UPDATE "users" SET "loggedin" = ? WHERE "nickname" = ?`)
@@ -121,7 +119,6 @@ func UpdateUser(nickname, loggedin string) {
 	stmt.Exec(loggedin, nickname)
 }
 
-
 //logout user NOT WORKING YET
 func Logout(w http.ResponseWriter, r *http.Request) {
 	var name = "test"
@@ -129,17 +126,16 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	UpdateUser(name, loggedin)
 }
 
-
 //creates cookie
 func Cookie(w http.ResponseWriter, r *http.Request, Username string, id string) {
 	expiration := time.Now().Add(1 * time.Hour)
 	cookie := http.Cookie{Name: Username, Value: id, Expires: expiration, SameSite: http.SameSiteLaxMode}
 	// cookie, _ := r.Cookie("username")
-	http.SetCookie(w, &cookie,)
+	http.SetCookie(w, &cookie)
 	fmt.Println(cookie)
 	// fmt.Fprintf((w, cookie))
 }
 
-func CheckCookies(w http.ResponseWriter, r*http.Request){
-	
+func CheckCookies(w http.ResponseWriter, r *http.Request) {
+
 }

@@ -1,14 +1,18 @@
 package websockets
+
 import (
 	"fmt"
 	"real-time-forum/pkg/database"
+
 	uuid "github.com/satori/go.uuid"
 )
+
 type ChatMessage struct {
 	Type          messageType              `json:"type,omitempty"`
 	Timestamp     string                   `json:"timestamp,omitempty"`
 	Conversations []*database.Conversation `json:"conversations"`
 }
+
 func (m *ChatMessage) Broadcast(s *socket) error {
 	if s.t == m.Type {
 		if err := s.con.WriteJSON(m); err != nil {
@@ -19,7 +23,9 @@ func (m *ChatMessage) Broadcast(s *socket) error {
 	}
 	return nil
 }
+
 func (m *ChatMessage) Handle(s *socket) error {
+	fmt.Println(m.Conversations)
 	if len(m.Conversations) == 0 {
 		conversations, err := database.GetPopulatedConversations(nil)
 		if err != nil {
@@ -61,10 +67,14 @@ func (m *ChatMessage) Handle(s *socket) error {
 		return fmt.Errorf("ChatSocket Handle (GetPopulatedConversations) error: %w", err)
 	}
 	m.Conversations = c
-	// b, _ := json.Marshal(m.Conversations)
+	// b, err := json.Marshal(m.Conversations)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
 	// fmt.Println(string(b))
 	return m.Broadcast(s)
 }
+
 func CreateChat(chat database.Chat) (string, error) {
 	stmt, err := database.DB.Prepare("INSERT INTO chats (convoID, chatID, sender, date, body) VALUES (?, ?, ?, ?, ?);")
 	if err != nil {
@@ -85,6 +95,7 @@ func CreateChat(chat database.Chat) (string, error) {
 	}
 	return chat.ChatID, err
 }
+
 func CreateConversation(conversations *database.Conversation) (string, error) {
 	stmt, err := database.DB.Prepare("INSERT INTO conversations (convoID, participants) VALUES (?, ?);")
 	defer stmt.Close()
@@ -102,4 +113,3 @@ func CreateConversation(conversations *database.Conversation) (string, error) {
 	}
 	return conversations.ConvoID, err
 }
-

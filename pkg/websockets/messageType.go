@@ -1,12 +1,15 @@
 package websockets
+
 import (
 	"encoding/json"
 	"fmt"
 )
+
 // messageType is an enum https://www.sohamkamani.com/golang/enums/
 // by using an enum for message types we can guarantee to never have
 // any kinds of message that we don't explicitly create
 type messageType int64
+
 const (
 	unknown messageType = iota
 	chat
@@ -14,6 +17,7 @@ const (
 	content
 	presence
 )
+
 func (m messageType) String() string {
 	switch m {
 	case chat:
@@ -28,6 +32,7 @@ func (m messageType) String() string {
 		return "unknown"
 	}
 }
+
 func ParseMessageType(s string) (messageType, error) {
 	switch s {
 	case "chat":
@@ -42,9 +47,11 @@ func ParseMessageType(s string) (messageType, error) {
 		return unknown, fmt.Errorf("unknown message type %s", s)
 	}
 }
+
 func (m messageType) MarshalJSON() ([]byte, error) {
 	return json.Marshal(m.String())
 }
+
 func (m *messageType) UnmarshalJSON(data []byte) (err error) {
 	var mt string
 	if err := json.Unmarshal(data, &mt); err != nil {
