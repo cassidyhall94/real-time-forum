@@ -3,13 +3,14 @@ package websockets
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/websocket"
-	uuid "github.com/satori/go.uuid"
 	"log"
 	"net/http"
 	auth "real-time-forum/pkg/authentication"
 	"runtime/debug"
 	"time"
+
+	"github.com/gorilla/websocket"
+	uuid "github.com/satori/go.uuid"
 )
 
 type SocketMessage struct {
@@ -74,6 +75,10 @@ func SocketCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	case "/chat":
 		ptrSocket.t = chat
+		// if err := OnChatsConnect(ptrSocket); err != nil {
+		// 	fmt.Println(err)
+		// 	return
+		// }
 	case "/presence":
 		ptrSocket.t = presence
 		// loads the presence list on window load

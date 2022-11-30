@@ -1,6 +1,7 @@
 package websockets
 
 import (
+	"encoding/json"
 	"fmt"
 	"real-time-forum/pkg/database"
 
@@ -25,7 +26,6 @@ func (m *ChatMessage) Broadcast(s *socket) error {
 }
 
 func (m *ChatMessage) Handle(s *socket) error {
-	fmt.Println(m.Conversations)
 	if len(m.Conversations) == 0 {
 		conversations, err := database.GetPopulatedConversations(nil)
 		if err != nil {
@@ -67,11 +67,11 @@ func (m *ChatMessage) Handle(s *socket) error {
 		return fmt.Errorf("ChatSocket Handle (GetPopulatedConversations) error: %w", err)
 	}
 	m.Conversations = c
-	// b, err := json.Marshal(m.Conversations)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// fmt.Println(string(b))
+	b, err := json.Marshal(m.Conversations)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(string(b))
 	return m.Broadcast(s)
 }
 
@@ -113,3 +113,21 @@ func CreateConversation(conversations *database.Conversation) (string, error) {
 	}
 	return conversations.ConvoID, err
 }
+
+// func OnChatsConnect(s *socket) error {
+// 	time.Sleep(1 * time.Second)
+// 	conversations, err := database.GetConversations()
+// 	if err != nil {
+// 		return fmt.Errorf("OnChatsConnect (GetConversations) error: %+v\n", err)
+// 	}
+// 	populatedConversations, err := database.GetPopulatedConversations(conversations)
+// 	if err != nil {
+// 		return fmt.Errorf("OnChatsConnect (GetPopulatedConversations) error: %+v\n", err)
+// 	}
+// 	c := &ChatMessage{
+// 		Type: chat,
+// 		// Timestamp:     "",
+// 		Conversations: populatedConversations,
+// 	}
+// 	return c.Broadcast(s)
+// }

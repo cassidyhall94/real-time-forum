@@ -42,16 +42,12 @@ class MySocket {
     document.getElementById('chatIPT').value = ""
   }
 
-  sendChatContentRequest(e, chat_id = "") {
+  sendChatContentRequest(e, participant_ids) {
     this.mysocket.send(JSON.stringify({
       type: "content",
       resource: e.target.id,
-      chat_id: chat_id,
+      participant_ids: participant_ids,
     }));
-  }
-
-  getClickedParticipantID() {
-
   }
 
   getLoggedInUserID() {
@@ -60,14 +56,12 @@ class MySocket {
 
   chatHandler(text) {
     const m = JSON.parse(text)
-    console.log(m)
     for (let c of m.conversations) {
       for (let p of c.chats) {
         let chat = document.createElement("div");
         chat.className = "submittedchat"
         chat.id = p.chat_id
         chat.innerHTML = "<b>Me: " + p.sender.nickname + "</b>" + "<br>" + "<b>Date: " + "</b>" + p.date + "<br>" + p.body + "<br>";
-        console.log(chat)
         document.getElementById("chatcontainer").appendChild(chat)
       }
     }
@@ -78,11 +72,12 @@ class MySocket {
     for (let p of m.presences) {
       const consp = p
       let user = document.createElement("button");
-      user.addEventListener('click', function (event, chat = consp) {
+      user.addEventListener('click', function (event, user = consp) {
+        console.log(user)
+        console.log(consp)
         event.target.id = "chat"
-        contentSocket.sendChatContentRequest(event, chat.chat_id)
-        // TODO CHAT:
-        contentSocket.getClickedParticipantID()
+        participant_ids = [thevarthatstorestheloggedinuserid, user.id]
+        contentSocket.sendChatContentRequest(event, participant_ids)
       });
       user.id = p.id
       user.innerHTML = p.nickname

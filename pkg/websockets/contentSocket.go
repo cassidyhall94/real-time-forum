@@ -9,13 +9,14 @@ import (
 )
 
 type ContentMessage struct {
-	Type      messageType `json:"type,omitempty"`
-	Body      string      `json:"body,omitempty"`
-	Timestamp string      `json:"timestamp,omitempty"`
-	Nickname  string      `json:"nickname,omitempty"`
-	Resource  string      `json:"resource,omitempty"`
-	PostID    string      `json:"post_id,omitempty"`
-	ConvoID   string      `json:"convo_id,omitempty"`
+	Type           messageType `json:"type,omitempty"`
+	Body           string      `json:"body,omitempty"`
+	Timestamp      string      `json:"timestamp,omitempty"`
+	Nickname       string      `json:"nickname,omitempty"`
+	Resource       string      `json:"resource,omitempty"`
+	PostID         string      `json:"post_id,omitempty"`
+	ConvoID        string      `json:"convo_id,omitempty"`
+	ParticipantIDs []string    `json:"participant_ids,omitempty"`
 }
 
 func (m *ContentMessage) Broadcast(s *socket) error {
@@ -66,11 +67,15 @@ func (m *ContentMessage) Handle(s *socket) error {
 			return fmt.Errorf("loginExecuteTemplate error: %+v\n", err)
 		}
 	case "chat":
+		conversationID, err := database.GetConvoID(m.ParticipantIDs)
+		if err != nil {
+			return fmt.Errorf("Unable to get convoID for participants: %w", err)
+		}
 		chats, err := database.GetChats()
 		if err != nil {
 			return fmt.Errorf("Unable to get chats for chat template: %w", err)
 		}
-		if err := tpl.ExecuteTemplate(sb, "chat.template", database.FilterChatsForConvo(m.ConvoID, chats)); err != nil {
+		if err := tpl.ExecuteTemplate(sb, "chat.template", database.FilterChatsForConvo(conversationID, chats)); err != nil {
 			return fmt.Errorf("Chat ExecuteTemplate error: %+v\n", err)
 		}
 	case "comment":

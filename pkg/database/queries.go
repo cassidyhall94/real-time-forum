@@ -328,7 +328,6 @@ func populateChatsForConversation(conversations []*Conversation) error {
 }
 
 func GetPopulatedConversations(conversations []*Conversation) ([]*Conversation, error) {
-	fmt.Println(conversations)
 	convos, err := GetConversations()
 	if err != nil {
 		return nil, fmt.Errorf("GetPopulatedConversation (GetConversations) error: %+v\n", err)
@@ -382,4 +381,26 @@ func FilterChatsForConvo(convoID string, chats []Chat) []Chat {
 		}
 	}
 	return out
+}
+
+//CHAT TODO: take slice of participants from frontend, (clickedUser and LoggedInUser).
+// getConversations
+// range over allConversations
+// match participant IDs with participantIDs from frontend
+func GetConvoID(participants []string) (string, error) {
+	conversations, err := GetConversations()
+	if err != nil {
+		return "", fmt.Errorf("GetConvoID (GetConversations) error: %+v\n", err)
+	}
+	convoID := ""
+	for _, convo := range conversations {
+		for _, user := range convo.Participants {
+			for _, participant := range participants {
+				if user.ID == participant {
+					convoID = convo.ConvoID
+				}
+			}
+		}
+	}
+	return convoID, nil
 }
