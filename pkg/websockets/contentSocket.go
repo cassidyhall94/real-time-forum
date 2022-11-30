@@ -67,7 +67,11 @@ func (m *ContentMessage) Handle(s *socket) error {
 			return fmt.Errorf("loginExecuteTemplate error: %+v\n", err)
 		}
 	case "chat":
-		conversationID, err := database.GetConvoID(m.ParticipantIDs)
+		conversations, err := database.GetConversations()
+		if err != nil {
+			return fmt.Errorf("Unable to get conversations for chat template: %+v\n", err)
+		}
+		conversationID, err := database.GetConvoID(m.ParticipantIDs, conversations)
 		if err != nil {
 			return fmt.Errorf("Unable to get convoID for participants: %w", err)
 		}

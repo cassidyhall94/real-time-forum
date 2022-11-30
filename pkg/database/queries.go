@@ -2,6 +2,8 @@ package database
 
 import (
 	"fmt"
+	"reflect"
+	"sort"
 )
 
 type User struct {
@@ -383,24 +385,48 @@ func FilterChatsForConvo(convoID string, chats []Chat) []Chat {
 	return out
 }
 
-//CHAT TODO: take slice of participants from frontend, (clickedUser and LoggedInUser).
-// getConversations
-// range over allConversations
-// match participant IDs with participantIDs from frontend
-func GetConvoID(participants []string) (string, error) {
-	conversations, err := GetConversations()
-	if err != nil {
-		return "", fmt.Errorf("GetConvoID (GetConversations) error: %+v\n", err)
+func participantsToIds[T User, R string](collection []T, iteratee func(item T, index int) R) []R {
+	result := []R{}
+
+	for i, item := range collection {
+		result = append(result, iteratee(item, i))
 	}
-	convoID := ""
+
+	return result
+}
+
+func GetConvoID(participants []string, conversations []*Conversation) (string, error) {
+	v := map[string][]string{}
 	for _, convo := range conversations {
-		for _, user := range convo.Participants {
-			for _, participant := range participants {
-				if user.ID == participant {
-					convoID = convo.ConvoID
-				}
-			}
+		v[convo.ConvoID] = participantsToIds(convo.Participants, func(item User, index int) string { return item.ID })
+	}
+	for convoID, vv := range v {
+		// sortedP := sort.Strings(participants)
+		// sortedV := sort.Strings(vv)
+		if reflect.DeepEqual(sort.Strings(participants), sort.Strings(vv)) {
+			return convoID, nil
 		}
 	}
-	return convoID, nil
+	return "", nil
+}
+
+func intersect[T comparable](a []T, b []T) []T {
+	set := make([]T, 0)
+
+	for _, v := range a {
+		if containsGeneric(b, v) {
+			set = append(set, v)
+		}
+	}
+
+	return set
+}
+
+func containsGeneric[T comparable](b []T, e T) bool {
+	for _, v := range b {
+		if v == e {
+			return true
+		}
+	}
+	return false
 }
