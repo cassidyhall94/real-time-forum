@@ -31,7 +31,36 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	data.Password = passwordHash(data.Password)
 	//  data.Password = checkPwHash(r.FormValue("password"), data.Password)
 
-	CreateUser(data)
+	var existingUsers, _ = database.GetUsers()
+	var conflict = false
+
+	//loop througn existing users to check if username or email is taken
+	for i:=0; i < len(existingUsers); i++{
+
+		//if taken  breaks for loop and returns what value is taken and sets conflict to true
+		if existingUsers[i].Nickname == data.Nickname  {
+			json.NewEncoder(w).Encode("username is taken")
+			conflict = true
+			break
+		} 
+		if existingUsers[i].Email == data.Email{
+			json.NewEncoder(w).Encode("email is taken")
+			conflict = true
+			break
+		}
+
+		
+	}
+	
+	//if no conflicts adds user to db and resets conflict bool
+	if !conflict{
+		CreateUser(data)
+		json.NewEncoder(w).Encode("registered")
+		conflict= false
+	}
+	
+
+
 }
 func passwordHash(str string) string {
 	hashedPw, err := bcrypt.GenerateFromPassword([]byte(str), 8)

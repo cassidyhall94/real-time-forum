@@ -243,7 +243,8 @@ function getRegDetails(){
     
 // SEND DATA TO BACKEND USING FETCH
 console.log(registerForm)
-    if(registerForm.nickname !=""&& registerForm.email !="" &&registerForm.password !="" ){
+
+  if(registerForm.nickname !=""&& registerForm.email !="" &&registerForm.password !="" ){
         
     fetch("/register",{
       headers:{
@@ -256,15 +257,23 @@ console.log(registerForm)
     }).then((response)=>{
       response.text().then(function (jsonRegForm){
         let result = JSON.parse(jsonRegForm)
-        console.log(result)
+        // console.log("register", result)
+
+        //cheks result value and only clears form when registered
+        if (result == "registered"){
+           document.getElementById('register').reset()
+           alert("successfully registered")
+        } else{
+          alert(result)
+        }
+
       })
 
     }).catch((error)=>{
       console.log(error)
     })
 
-    document.getElementById('register').reset()
-    alert("successfully registered")
+
   }
 }
 
