@@ -75,10 +75,6 @@ func SocketCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	case "/chat":
 		ptrSocket.t = chat
-		// if err := OnChatsConnect(ptrSocket); err != nil {
-		// 	fmt.Println(err)
-		// 	return
-		// }
 	case "/presence":
 		ptrSocket.t = presence
 		// loads the presence list on window load

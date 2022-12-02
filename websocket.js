@@ -1,5 +1,6 @@
 //TODO: fix const time as it is not formatted correctly and add where time/date is needed
 const time = () => { return new Date().toLocaleString() };
+let loggedInUserID
 
 class MySocket {
   wsType = ""
@@ -50,10 +51,6 @@ class MySocket {
     }));
   }
 
-  getLoggedInUserID() {
-
-  }
-
   chatHandler(text) {
     const m = JSON.parse(text)
     for (let c of m.conversations) {
@@ -73,10 +70,8 @@ class MySocket {
       const consp = p
       let user = document.createElement("button");
       user.addEventListener('click', function (event, user = consp) {
-        console.log(user)
-        console.log(consp)
         event.target.id = "chat"
-        participant_ids = [thevarthatstorestheloggedinuserid, user.id]
+        participant_ids = [loggedInUserID, user.id]
         contentSocket.sendChatContentRequest(event, participant_ids)
       });
       user.id = p.id
@@ -84,6 +79,14 @@ class MySocket {
       user.style.color = 'white'
       user.className = "presence " + p.nickname
       document.getElementById("presencecontainer").appendChild(user)
+    }
+  }
+
+  GetLoggedInUserID(nickname) {
+    // match nickname with correct userID
+    const m = JSON.parse(nickname)
+    for (let user of m.presences) {
+      console.log(user)
     }
   }
 
@@ -285,6 +288,7 @@ function getRegDetails() {
 }
 
 // **********************************LOGIN*******************************************
+
 function loginFormData() {
   loginForm.nickname = document.getElementById('nickname-login').value
   loginForm.password = document.getElementById('password-login').value
@@ -318,7 +322,11 @@ function loginFormData() {
         alert("incorrect username or password")
 
       } else {
-        logindata.nickname = result[0].nickname
+        logindata = result[0]
+        console.log(logindata)
+        loggedInUserID = GetLoggedInUserID(logindata.nickname)
+        console.log(loggedInUserID)
+        // logindata.nickname = result[0].nickname
         // logindata.password = result[0].password
         user.innerText = `Hello ${document.cookie.match(logindata.nickname)}`
         alert("you are logged in ")

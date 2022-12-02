@@ -113,21 +113,3 @@ func CreateConversation(conversations *database.Conversation) (string, error) {
 	}
 	return conversations.ConvoID, err
 }
-
-// func OnChatsConnect(s *socket) error {
-// 	time.Sleep(1 * time.Second)
-// 	conversations, err := database.GetConversations()
-// 	if err != nil {
-// 		return fmt.Errorf("OnChatsConnect (GetConversations) error: %+v\n", err)
-// 	}
-// 	populatedConversations, err := database.GetPopulatedConversations(conversations)
-// 	if err != nil {
-// 		return fmt.Errorf("OnChatsConnect (GetPopulatedConversations) error: %+v\n", err)
-// 	}
-// 	c := &ChatMessage{
-// 		Type: chat,
-// 		// Timestamp:     "",
-// 		Conversations: populatedConversations,
-// 	}
-// 	return c.Broadcast(s)
-// }

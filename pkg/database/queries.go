@@ -3,7 +3,6 @@ package database
 import (
 	"fmt"
 	"reflect"
-	"sort"
 )
 
 type User struct {
@@ -401,32 +400,9 @@ func GetConvoID(participants []string, conversations []*Conversation) (string, e
 		v[convo.ConvoID] = participantsToIds(convo.Participants, func(item User, index int) string { return item.ID })
 	}
 	for convoID, vv := range v {
-		// sortedP := sort.Strings(participants)
-		// sortedV := sort.Strings(vv)
-		if reflect.DeepEqual(sort.Strings(participants), sort.Strings(vv)) {
+		if reflect.DeepEqual(participants, vv) {
 			return convoID, nil
 		}
 	}
 	return "", nil
-}
-
-func intersect[T comparable](a []T, b []T) []T {
-	set := make([]T, 0)
-
-	for _, v := range a {
-		if containsGeneric(b, v) {
-			set = append(set, v)
-		}
-	}
-
-	return set
-}
-
-func containsGeneric[T comparable](b []T, e T) bool {
-	for _, v := range b {
-		if v == e {
-			return true
-		}
-	}
-	return false
 }
