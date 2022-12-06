@@ -61,12 +61,14 @@ https://medium.com/@antoharyanto/make-simple-chat-application-using-golang-webso
 - Logout/Auth:
     - login asks for either nickname OR email with password to login
     - add logout button on the header into the index.html, as it needs to be on the page at all times
+    - once submit login button pressed, update presence list
 - Chat:
     - users organised by online/offline in the presence list, online at the top, with last contacted at the top
     - add date to each chat message
     - add notifications for DMing
     - display 10 chat messages at a time, scroll to see more (throttle)
     - once loggedin, presence needs to updated
+    - presence list must not include user using site
 - Post:
     - fix bug with submitted posts not always rendering when you click the home button
 

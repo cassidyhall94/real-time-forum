@@ -72,7 +72,7 @@ class MySocket {
       let user = document.createElement("button");
       user.addEventListener('click', function (event, user = consp) {
         event.target.id = "chat"
-        participant_ids = [getCookieName(), user.id]
+        participant_ids = [GetLoggedInUserID(text), user.id]
         contentSocket.sendChatContentRequest(event, participant_ids)
       });
       user.id = p.id
@@ -83,11 +83,13 @@ class MySocket {
     }
   }
 
-  GetLoggedInUserID(nickname) {
+  GetLoggedInUserID(text) {
     // match nickname with correct userID
-    const m = JSON.parse(nickname)
+    const m = JSON.parse(text)
     for (let user of m.presences) {
-      console.log(user)
+      if (user.nickname === getCookieName()) {
+        return user.ID
+      }
     }
   }
 

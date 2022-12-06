@@ -66,7 +66,7 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 	_, errCookie := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "cookies" (
 			"sessionID"	TEXT,
-			"userName" 	TEXT REFERENCES users(nickname) UNIQUE,
+			"userName" 	TEXT REFERENCES users(nickname),
 			"expiryTime" TEXT
 		);
 	`)
