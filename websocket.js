@@ -395,3 +395,4 @@ function Logout(){
   
   console.log("hello",document.cookie.split(";")[0].split("=")[1])
   // console.log(cookies[cookies.length-1].split("=")[0])
+

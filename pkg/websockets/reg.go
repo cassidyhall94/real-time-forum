@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/sessions"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -78,13 +77,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	var user database.Login
 
-	// cookie := &http.Cookie{
-	// 	Name: usr.Nickname,
-	// 	Value: "",
-	// 	Path: "",
-	// 	Expires: time.Unix(0,0),
-	// }
-
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		log.Println(err)
@@ -94,15 +86,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	if len(cookies) >= 1 {
 		for i := 0; i < len(cookies); i++ {
-			fmt.Println(cookies[i].Name, user.Nickname)
-			fmt.Printf("%T", cookies[i])
 			if cookies[i].Name != user.Nickname {
 
 				DeleteCookie(w, cookies[i].Name)
 				UpdateUser(cookies[i].Name, "false")
 			}
-			// fmt.Println(cookies[i].)
-
 		}
 	}
 
@@ -121,8 +109,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	var id string
 	var matchID string
 
-	var store = sessions.NewCookieStore([]byte("secret-keys"))
-	store.Options.SameSite = http.SameSiteLaxMode
+	// var store = sessions.NewCookieStore([]byte("secret-keys"))
+	// store.Options.SameSite = http.SameSiteLaxMode
 
 	for rows.Next() {
 		err := rows.Scan(&id, &nickname, &password, &loggedin, &email)
@@ -140,21 +128,19 @@ func Login(w http.ResponseWriter, r *http.Request) {
 					Password: password,
 					LoggedIn: "true",
 				})
+				user.Nickname = nickname
 
 			}
 
 		}
 	}
 
+
 	//if len ==0, no matching user was found
 	if len(users) == 0 {
 		fmt.Println("pw mismatch")
 	}
 	if len(users) > 0 && users[0].LoggedIn == "true" {
-		// session, _ := store.Get(r, "session")
-		// session.Values[nickname] = nickname
-		// session.Save(r, w)
-		// session.Options.SameSite = http.SameSiteLaxMode
 
 		var loggedin = "true"
 		UpdateUser(user.Nickname, loggedin)
@@ -213,7 +199,7 @@ func Cookie(w http.ResponseWriter, r *http.Request, Username string, id string) 
 
 	http.SetCookie(w, &cookie)
 
-	rows, err := database.DB.Prepare(`INSERT INTO cookies(sessionID, userName, expiryTime) VALUES (?,?,?);`)
+	rows, err := database.DB.Prepare(`INSERT or REPLACE INTO cookies(sessionID, userName, expiryTime) VALUES (?,?,?);`)
 	if err != nil {
 		log.Println(err)
 	}
