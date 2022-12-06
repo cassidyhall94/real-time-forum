@@ -16,6 +16,7 @@ type User struct {
 	Password  string `json:"password,omitempty"`
 	LoggedIn  string `json:"loggedin,omitempty"`
 }
+
 type Post struct {
 	PostID     string    `json:"post_id,omitempty"`
 	Nickname   string    `json:"nickname"`
@@ -24,17 +25,20 @@ type Post struct {
 	Body       string    `json:"body,omitempty"`
 	Comments   []Comment `json:"comments,omitempty"`
 }
+
 type Comment struct {
 	CommentID string `json:"comment_id,omitempty"`
 	PostID    string `json:"post_id,omitempty"`
 	Nickname  string `json:"nickname"`
 	Body      string `json:"body,omitempty"`
 }
+
 type Conversation struct {
 	ConvoID      string `json:"convo_id"`
 	Participants []User `json:"participants"`
 	Chats        []Chat `json:"chats"`
 }
+
 type Chat struct {
 	ConvoID string `json:"convo_id"`
 	ChatID  string `json:"chat_id"`
@@ -42,6 +46,7 @@ type Chat struct {
 	Date    string `json:"date,omitempty"`
 	Body    string `json:"body,omitempty"`
 }
+
 type Presence struct {
 	ID                string `json:"id"`
 	Nickname          string `json:"nickname"`
@@ -384,13 +389,11 @@ func FilterChatsForConvo(convoID string, chats []Chat) []Chat {
 	return out
 }
 
-func participantsToIds[T User, R string](collection []T, iteratee func(item T, index int) R) []R {
-	result := []R{}
-
+func participantsToIds(collection []User, iteratee func(item User, index int) string) []string {
+	result := []string{}
 	for i, item := range collection {
 		result = append(result, iteratee(item, i))
 	}
-
 	return result
 }
 
