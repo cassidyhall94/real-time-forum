@@ -331,6 +331,8 @@ function loginFormData(){
   // console.log(t)
 
 }
+
+// ********************************LOGOUT*********************************
 function Logout(){
 
   let logout ={

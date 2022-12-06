@@ -156,7 +156,8 @@ func UpdateUser(nickname, loggedin string) {
 	stmt.Exec(loggedin, nickname)
 }
 
-//logout user NOT WORKING YET
+// ********************************LOGOUT*********************************
+
 func Logout(w http.ResponseWriter, r *http.Request) {
 
 	// fmt.Println(r.Body)
@@ -185,6 +186,9 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		Path: "",
 		Expires: time.Unix(0,0),
 	}
+
+	UpdateUser(usr.Nickname, "false")
+	
 	http.SetCookie(w, cookie)
 
 }
@@ -212,9 +216,3 @@ func Cookie(w http.ResponseWriter, r *http.Request, Username string, id string) 
 
 }
 
-func CheckCookies(w http.ResponseWriter, r *http.Request) {
-
-}
-
-// func makeSession() {
-// }
