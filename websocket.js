@@ -132,7 +132,8 @@ class MySocket {
       timestamp: time(),
       posts: [
         {
-          nickname: e.target.nickname,
+          // nickname: e.target.nickname,
+          nickname: getCookieName(),
           title: document.getElementById('posttitle').value,
           categories: document.getElementById('category').value,
           body: document.getElementById('postbody').value,
@@ -332,7 +333,7 @@ function loginFormData(){
 
 }
 
-// ********************************LOGOUT*********************************
+// ********************************LOGOUT******************************
 function Logout(){
 
   let logout ={
@@ -375,12 +376,22 @@ function Logout(){
 
   function getCookieName(){
     let cookies = document.cookie.split(";")
-    let lastCookieName = cookies[cookies.length].split("=")[0].replace(" ", '')
-    // return lastCookieName
-    console.log("h",lastCookieName)
-    // document.cookie ="username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+    let lastCookieName = cookies[cookies.length -1].split("=")[0].replace(" ", '')
+
+    // console.log("cookie",cookies, "length", cookies.length)
+    return lastCookieName
+    // console.log("h",lastCookieName)
 
   }
+
+
+  function getIdValue (){
+    //     let cookies = document.cookie.split(";")
+    // let lastCookieName = cookies[cookies.length -1].split("=")[1].replace(" ", '')
+    // return lastCookieName
+    return document.cookie.split(";")[0].split("=")[1]
+  }
+  console.log("test,", getIdValue())
   
-  console.log("hello",document.cookie.split(";"))
+  console.log("hello",document.cookie.split(";")[0].split("=")[1])
   // console.log(cookies[cookies.length-1].split("=")[0])
