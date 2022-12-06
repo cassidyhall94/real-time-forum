@@ -1,6 +1,6 @@
 //TODO: fix const time as it is not formatted correctly and add where time/date is needed
 const time = () => { return new Date().toLocaleString() };
-let loggedInUserID
+// let loggedInUserID
 
 class MySocket {
   wsType = ""
@@ -16,6 +16,7 @@ class MySocket {
       timestamp: time(),
       conversations: [
         {
+          //TODO CHAT: replace sender with getCookieName() once the userID is retrieved
           participants: [
             //sender: bar userID
             {
@@ -71,7 +72,7 @@ class MySocket {
       let user = document.createElement("button");
       user.addEventListener('click', function (event, user = consp) {
         event.target.id = "chat"
-        participant_ids = [loggedInUserID, user.id]
+        participant_ids = [getCookieName(), user.id]
         contentSocket.sendChatContentRequest(event, participant_ids)
       });
       user.id = p.id
@@ -156,7 +157,7 @@ class MySocket {
       timestamp: time(),
       posts: [
         {
-          nickname: e.target.nickname,
+          nickname: getCookieName(),
           title: document.getElementById('posttitle').value,
           categories: document.getElementById('category').value,
           body: document.getElementById('postbody').value,
