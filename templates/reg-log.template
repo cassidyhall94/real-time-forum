@@ -11,6 +11,7 @@
   />
   <input type="button" onclick="getLoginDetails()" />
 </form>
+
 <h1>Registration</h1>
 <form action="javascript:void(0)" method="post" id="register" >
   <label for="nickname">Nickname <br>

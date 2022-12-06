@@ -61,8 +61,9 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 	// Create the cookies table
 	_, errCookie := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "cookies" (
-			"name"	TEXT,
-			"sessionID" 	TEXT UNIQUE
+			"sessionID"	TEXT,
+			"userName" 	TEXT REFERENCES users(nickname) UNIQUE,
+			"expiryTime" TEXT
 		);
 	`)
 	if errCookie != nil {
@@ -147,4 +148,6 @@ func insertPlaceholdersInDB() {
 		}
 	}
 }
+
+
 

@@ -70,6 +70,7 @@ func OnPostsConnect(s *socket) error {
 func CreatePost(post *database.Post) (*database.Post, error) {
 	stmt, err := database.DB.Prepare("INSERT INTO posts (postID, nickname, title, categories, body) VALUES (?, ?, ?, ?, ?);")
 	defer stmt.Close()
+	fmt.Println(post.Nickname)
 	if err != nil {
 		return nil, fmt.Errorf("CreatePost DB Prepare error: %+v\n", err)
 	}

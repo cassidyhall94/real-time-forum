@@ -283,13 +283,12 @@ function loginFormData(){
   loginForm.nickname = document.getElementById('nickname-login').value
   loginForm.password = document.getElementById('password-login').value
 
-  // console.log(loginForm)
-
   let loginFormJSON = JSON.stringify(loginForm)
   // console.log(loginFormJSON)
   let logindata = {nickname:"",
                   password:"",}
   // let id = ""
+  getCookieName()
 
   fetch("/login",{
       headers:{
@@ -332,3 +331,54 @@ function loginFormData(){
   // console.log(t)
 
 }
+function Logout(){
+
+  let logout ={
+  nickname:"",
+  }
+  
+   logout.nickname= document.getElementById('welcome')
+   logout.nickname =logout.nickname.textContent.replace("Hello",'')
+    let user= document.getElementById('welcome')
+    user.innerText =""
+
+
+
+  // console.log("logout", user.textContent.replace("Hello", ''))
+   
+  let parseUser = JSON.stringify(logout)
+
+  fetch("/logout",{
+      headers:{
+        'Accept':'application/json',
+        'Content-Type': 'application/json'
+      },
+      method: "POST",
+      body: parseUser
+
+    }).then((response)=>{
+
+      response.text().then(function (parseUser){
+        // let result = JSON.parse(parseUser)
+        // console.log("parse",result)
+
+      })
+
+    }).catch((error)=>{
+      console.log(error)
+
+    })
+    alert("you are now logged out")
+  }
+
+  function getCookieName(){
+    let cookies = document.cookie.split(";")
+    let lastCookieName = cookies[cookies.length-1].split("=")[0].replace(" ", '')
+    // return lastCookieName
+    console.log("h",lastCookieName)
+    // document.cookie ="username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+
+  }
+  
+  console.log("hello",document.cookie.split(";"))
+  // console.log(cookies[cookies.length-1].split("=")[0])
