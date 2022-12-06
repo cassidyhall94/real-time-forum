@@ -1,10 +1,13 @@
 //TODO: fix const time as it is not formatted correctly and add where time/date is needed
 const time = () => { return new Date().toLocaleString() };
+let loggedInUserID
+
 class MySocket {
   wsType = ""
   constructor() {
     this.mysocket = null;
   }
+
   // TODO: insert user ID variable, participants needs to be filled
   sendNewChatRequest() {
     console.log("new chat request")
@@ -39,17 +42,15 @@ class MySocket {
     this.mysocket.send(JSON.stringify(m));
     document.getElementById('chatIPT').value = ""
   }
-  keypress(e) {
-    if (e.keyCode == 13) {
-      this.wsType = e.target.id.slice(0, -3)
-      if (this.wsType = 'chat') {
-        this.sendNewChatRequest()
-      }
-    }
+
+  sendChatContentRequest(e, participant_ids) {
+    this.mysocket.send(JSON.stringify({
+      type: "content",
+      resource: e.target.id,
+      participant_ids: participant_ids,
+    }));
   }
-  // registerHandler(text){
-  //   console.log("register handler")
-  // }
+
   chatHandler(text) {
     const m = JSON.parse(text)
     for (let c of m.conversations) {
@@ -62,26 +63,47 @@ class MySocket {
       }
     }
   }
-  contentHandler(text) {
-    const c = JSON.parse(text)
-    document.getElementById("content").innerHTML = c.body;
-  }
+
   presenceHandler(text) {
     const m = JSON.parse(text)
     for (let p of m.presences) {
       const consp = p
       let user = document.createElement("button");
-      user.addEventListener('click', function (event, chat = consp) {
+      user.addEventListener('click', function (event, user = consp) {
         event.target.id = "chat"
-        contentSocket.sendChatContentRequest(event, chat.chat_id)
+        participant_ids = [loggedInUserID, user.id]
+        contentSocket.sendChatContentRequest(event, participant_ids)
       });
       user.id = p.id
       user.innerHTML = p.nickname
       user.style.color = 'white'
-      user.className = "presence " + p.nickname 
+      user.className = "presence " + p.nickname
       document.getElementById("presencecontainer").appendChild(user)
     }
   }
+
+  GetLoggedInUserID(nickname) {
+    // match nickname with correct userID
+    const m = JSON.parse(nickname)
+    for (let user of m.presences) {
+      console.log(user)
+    }
+  }
+
+  keypress(e) {
+    if (e.keyCode == 13) {
+      this.wsType = e.target.id.slice(0, -3)
+      if (this.wsType = 'chat') {
+        this.sendNewChatRequest()
+      }
+    }
+  }
+
+  contentHandler(text) {
+    const c = JSON.parse(text)
+    document.getElementById("content").innerHTML = c.body;
+  }
+
   postHandler(text) {
     const m = JSON.parse(text)
     for (let p of m.posts) {
@@ -98,10 +120,11 @@ class MySocket {
         contentSocket.sendContentRequest(event, post.post_id)
       });
       post.appendChild(button)
-      console.log(document.getElementById("submittedposts"))
+      // console.log(document.getElementById("submittedposts"))
       document.getElementById("submittedposts").appendChild(post)
     }
   }
+
   sendNewCommentRequest(e) {
     let post = document.getElementById('postcontainerforcomments')
     for (const child of post.children) {
@@ -126,6 +149,7 @@ class MySocket {
       }
     }
   }
+
   sendNewPostRequest(e) {
     let m = {
       type: 'post',
@@ -144,11 +168,13 @@ class MySocket {
     document.getElementById('category').value = ""
     document.getElementById('postbody').value = ""
   }
+
   sendSubmittedPostsRequest() {
     this.mysocket.send(JSON.stringify({
       type: "post",
     }));
   }
+
   sendContentRequest(e, post_id = "") {
     this.mysocket.send(JSON.stringify({
       type: "content",
@@ -156,13 +182,7 @@ class MySocket {
       post_id: post_id,
     }));
   }
-  sendChatContentRequest(e, chat_id = "") {
-    this.mysocket.send(JSON.stringify({
-      type: "content",
-      resource: e.target.id,
-      chat_id: chat_id,
-    }));
-  }
+
   connectSocket(URI, handler) {
     if (URI === 'chat') {
       this.wsType = 'chat'
@@ -193,15 +213,14 @@ class MySocket {
       // console.log("socket closed");
     };
   }
-
 }
 function containsNumber(str) {
   return /[0-9]/.test(str);
 }
-  
+
 //object to store form data
 let registerForm = {
-  nickname : "",
+  nickname: "",
   age: "",
   gender: "",
   fName: "",
@@ -211,176 +230,144 @@ let registerForm = {
   loggedin: "false",
 }
 
-let loginForm ={
-  nickname:"",
-  password:"",
+let loginForm = {
+  nickname: "",
+  password: "",
 }
 
 //******************* */gets registration form details*******************************
-function getRegDetails(){
-
-    //creates array of gender radio buttons 
-  let genderRadios = Array.from (document.getElementsByName('gender'))
-  for(let i=0; i <genderRadios.length; i ++){
+function getRegDetails() {
+  //creates array of gender radio buttons 
+  let genderRadios = Array.from(document.getElementsByName('gender'))
+  for (let i = 0; i < genderRadios.length; i++) {
     // console.log(genderRadios[i].checked)
-    if(genderRadios[i].checked){ //stores checked value
+    if (genderRadios[i].checked) { //stores checked value
       registerForm.gender = genderRadios[i].value
     }
   }
-// POPULATE REGISTER FORM WITH FORM VALUES
-    registerForm.nickname = document.getElementById('nickname').value 
-    registerForm.age = document.getElementById('age').value
-    registerForm.firstname = document.getElementById('fname').value
-    registerForm.lastname = document.getElementById('lname').value
-    registerForm.email = document.getElementById('email').value
-    registerForm.password = document.getElementById('password').value
-    //convert data to JSON
-    let jsonRegForm = JSON.stringify(registerForm)
-    // console.log(jsonRegForm)
-    if(registerForm.password.length <5){
-      registerForm.password = ""
-    }
-    
-// SEND DATA TO BACKEND USING FETCH
-console.log(registerForm)
+  // POPULATE REGISTER FORM WITH FORM VALUES
+  registerForm.nickname = document.getElementById('nickname').value
+  registerForm.age = document.getElementById('age').value
+  registerForm.firstname = document.getElementById('fname').value
+  registerForm.lastname = document.getElementById('lname').value
+  registerForm.email = document.getElementById('email').value
+  registerForm.password = document.getElementById('password').value
+  //convert data to JSON
+  let jsonRegForm = JSON.stringify(registerForm)
+  // console.log(jsonRegForm)
+  if (registerForm.password.length < 5) {
+    registerForm.password = ""
+  }
 
-  if(registerForm.nickname !=""&& registerForm.email !="" &&registerForm.password !="" ){
-        
-    fetch("/register",{
-      headers:{
-        'Accept':'application/json',
+  // SEND DATA TO BACKEND USING FETCH
+  console.log(registerForm)
+  if (registerForm.nickname != "" && registerForm.email != "" && registerForm.password != "") {
+
+    fetch("/register", {
+      headers: {
+        'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
       method: "POST",
-      body:jsonRegForm
-
-    }).then((response)=>{
-      response.text().then(function (jsonRegForm){
+      body: jsonRegForm
+    }).then((response) => {
+      response.text().then(function (jsonRegForm) {
         let result = JSON.parse(jsonRegForm)
         // console.log("register", result)
-
         //cheks result value and only clears form when registered
-        if (result == "registered"){
-           document.getElementById('register').reset()
-           alert("successfully registered")
-        } else{
+        if (result == "registered") {
+          document.getElementById('register').reset()
+          alert("successfully registered")
+        } else {
           alert(result)
         }
-
       })
-
-    }).catch((error)=>{
+    }).catch((error) => {
       console.log(error)
     })
-
-
   }
 }
-
-
 // **********************************LOGIN*******************************************
-function loginFormData(){
+function loginFormData() {
   loginForm.nickname = document.getElementById('nickname-login').value
   loginForm.password = document.getElementById('password-login').value
-
   let loginFormJSON = JSON.stringify(loginForm)
   // console.log(loginFormJSON)
-  let logindata = {nickname:"",
-                  password:"",}
+  let logindata = {
+    nickname: "",
+    password: "",
+  }
   // let id = ""
   getCookieName()
+  fetch("/login", {
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    method: "POST",
+    body: loginFormJSON
+  }).then((response) => {
+    response.text().then(function (loginFormJSON) {
+      let result = JSON.parse(loginFormJSON)
+      console.log("parse", result)
 
-  fetch("/login",{
-      headers:{
-        'Accept':'application/json',
-        'Content-Type': 'application/json'
-      },
-      method: "POST",
-      body:loginFormJSON
-
-    }).then((response)=>{
-
-      response.text().then(function (loginFormJSON){
-        let result = JSON.parse(loginFormJSON)
-        console.log("parse",result)
-
-        
-        if (result == null){
-          alert("incorrect username or password")
-
-        } else{
-          logindata.nickname = result[0].nickname
-          // logindata.password = result[0].password
-          user.innerText = `Hello ${document.cookie.match(logindata.nickname)}`
-          alert("you are logged in ")
-        }
-      })
-
-    }).catch((error)=>{
-      console.log(error)
-
+      if (result == null) {
+        alert("incorrect username or password")
+      } else {
+        logindata.nickname = result[0].nickname
+        // logindata.password = result[0].password
+        user.innerText = `Hello ${document.cookie.match(logindata.nickname)}`
+        alert("you are logged in ")
+      }
     })
-    // console.log("logindata",logindata, "hi")
-    // console.log( Object.keys(logindata).length)
-    // console.log(JSON.stringify(logindata))
-
+  }).catch((error) => {
+    console.log(error)
+  })
+  // console.log("logindata",logindata, "hi")
+  // console.log( Object.keys(logindata).length)
+  // console.log(JSON.stringify(logindata))
   document.getElementById('login-form').reset()
-
-    let user= document.getElementById('welcome')
+  let user = document.getElementById('welcome')
   // document.getElementById('login-form').reset()
   // console.log(t)
+}
+// ********************************LOGOUT*********************************
+function Logout() {
+  let logout = {
+    nickname: "",
+  }
 
+  logout.nickname = document.getElementById('welcome')
+  logout.nickname = logout.nickname.textContent.replace("Hello", '')
+  let user = document.getElementById('welcome')
+  user.innerText = ""
+  // console.log("logout", user.textContent.replace("Hello", ''))
+
+  let parseUser = JSON.stringify(logout)
+  fetch("/logout", {
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    method: "POST",
+    body: parseUser
+  }).then((response) => {
+    response.text().then(function (parseUser) {
+      // let result = JSON.parse(parseUser)
+      // console.log("parse",result)
+    })
+  }).catch((error) => {
+    console.log(error)
+  })
+  alert("you are now logged out")
+}
+function getCookieName() {
+  let cookies = document.cookie.split(";")
+  let lastCookieName = cookies[cookies.length-1].split("=")[0].replace(" ", '')
+  return lastCookieName
+  // console.log("h", lastCookieName)
+  // document.cookie ="username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
 }
 
-// ********************************LOGOUT*********************************
-function Logout(){
-
-  let logout ={
-  nickname:"",
-  }
-  
-   logout.nickname= document.getElementById('welcome')
-   logout.nickname =logout.nickname.textContent.replace("Hello",'')
-    let user= document.getElementById('welcome')
-    user.innerText =""
-
-
-
-  // console.log("logout", user.textContent.replace("Hello", ''))
-   
-  let parseUser = JSON.stringify(logout)
-
-  fetch("/logout",{
-      headers:{
-        'Accept':'application/json',
-        'Content-Type': 'application/json'
-      },
-      method: "POST",
-      body: parseUser
-
-    }).then((response)=>{
-
-      response.text().then(function (parseUser){
-        // let result = JSON.parse(parseUser)
-        // console.log("parse",result)
-
-      })
-
-    }).catch((error)=>{
-      console.log(error)
-
-    })
-    alert("you are now logged out")
-  }
-
-  function getCookieName(){
-    let cookies = document.cookie.split(";")
-    let lastCookieName = cookies[cookies.length].split("=")[0].replace(" ", '')
-    // return lastCookieName
-    console.log("h",lastCookieName)
-    // document.cookie ="username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
-
-  }
-  
-  console.log("hello",document.cookie.split(";"))
-  // console.log(cookies[cookies.length-1].split("=")[0])
+console.log("hello", document.cookie.split(";"))
+// console.log(cookies[cookies.length-1].split("=")[0])

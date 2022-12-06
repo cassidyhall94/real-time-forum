@@ -59,14 +59,14 @@ TODO:
 https://medium.com/@antoharyanto/make-simple-chat-application-using-golang-websocket-and-vanilla-js-f600e8020961
 
 - Logout/Auth:
-    - finish login/register page, link up to the database
-    - login asks for either nickname OR email with password to login, so ensure the funcs allow for this
+    - login asks for either nickname OR email with password to login
     - add logout button on the header into the index.html, as it needs to be on the page at all times
 - Chat:
     - users organised by online/offline in the presence list, online at the top, with last contacted at the top
     - add date to each chat message
     - add notifications for DMing
     - display 10 chat messages at a time, scroll to see more (throttle)
+    - once loggedin, presence needs to updated
 - Post:
     - fix bug with submitted posts not always rendering when you click the home button
 
