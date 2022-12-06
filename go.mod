@@ -13,5 +13,7 @@ require (
 require (
 	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
+	github.com/gorilla/sessions v1.2.1 // indirect
+	golang.org/x/exp v0.0.0-20221205204356-47842c84f3db // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )

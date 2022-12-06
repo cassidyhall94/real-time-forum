@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"net/http"
 	"os"
 	"real-time-forum/pkg/database"
 	socket "real-time-forum/pkg/websockets"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 const databaseFilePath string = "sqlite-database.db"
