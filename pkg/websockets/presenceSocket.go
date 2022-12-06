@@ -1,18 +1,15 @@
 package websockets
-
 import (
 	"fmt"
 	"real-time-forum/pkg/database"
 	"sort"
 	"time"
 )
-
 type PresenceMessage struct {
 	Type      messageType         `json:"type"`
 	Timestamp string              `json:"timestamp"`
 	Presences []database.Presence `json:"presences"`
 }
-
 func (m *PresenceMessage) Broadcast(s *socket) error {
 	if s.t == m.Type {
 		if err := s.con.WriteJSON(m); err != nil {
@@ -23,14 +20,11 @@ func (m *PresenceMessage) Broadcast(s *socket) error {
 	}
 	return nil
 }
-
 func (m *PresenceMessage) Handle(s *socket) error {
 	return m.Broadcast(s)
 }
-
 func GetPresences() ([]database.Presence, error) {
 	presences := []database.Presence{}
-
 	users, err := database.GetUsers()
 	if err != nil {
 		return nil, fmt.Errorf("GetUsers (getPresences) error: %+v\n", err)
@@ -39,16 +33,18 @@ func GetPresences() ([]database.Presence, error) {
 		return users[i].Nickname < users[j].Nickname
 	})
 	for _, user := range users {
-		presences = append(presences, database.Presence{
-			ID:       user.ID,
-			Nickname: user.Nickname,
-			// Online:            bool,
-			// LastContactedTime: created,
-		})
+		if user.LoggedIn =="true"{
+			presences = append(presences, database.Presence{
+				ID:       user.ID,
+				Nickname: user.Nickname,
+				// Online:            bool,
+				// LastContactedTime: created,
+			})
+
+		}
 	}
 	return presences, nil
 }
-
 func OnPresenceConnect(s *socket) error {
 	time.Sleep(1 * time.Second)
 	presences, err := GetPresences()
@@ -62,7 +58,6 @@ func OnPresenceConnect(s *socket) error {
 	}
 	return c.Broadcast(s)
 }
-
 // func (data *Forum) GetSessions() ([]Session, error) {
 // 	session := []Session{}
 // 	rows, err := data.DB.Query(`SELECT * FROM session`)
