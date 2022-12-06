@@ -168,10 +168,10 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	fmt.Println("current user logging out",usr)
-	fmt.Println(usr.Nickname)
+	// fmt.Println("current user logging out",usr)
+	// fmt.Println(usr.Nickname)
 	usr.Nickname = strings.TrimSpace(usr.Nickname)
-		fmt.Println(usr.Nickname)
+		// fmt.Println(usr.Nickname)
 
 
 	_, err = database.DB.Exec("DELETE FROM cookies where userName = '"+ usr.Nickname+ "'")
@@ -179,15 +179,14 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		log.Fatal()
 	}
 
-	// cookie, err := r.Cookie("jerry")
-	// if err !=nil{
-	// 	log.Fatal(err)
-	// }
-	// fmt.Println("logout cookie", cookie)
+	cookie := &http.Cookie{
+		Name: usr.Nickname,
+		Value: "",
+		Path: "",
+		Expires: time.Unix(0,0),
+	}
+	http.SetCookie(w, cookie)
 
-	// var name = "test"
-	// var loggedin = "false"
-	// UpdateUser(name, loggedin)
 }
 
 //creates cookie

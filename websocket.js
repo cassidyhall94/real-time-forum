@@ -373,7 +373,7 @@ function Logout(){
 
   function getCookieName(){
     let cookies = document.cookie.split(";")
-    let lastCookieName = cookies[cookies.length-1].split("=")[0].replace(" ", '')
+    let lastCookieName = cookies[cookies.length].split("=")[0].replace(" ", '')
     // return lastCookieName
     console.log("h",lastCookieName)
     // document.cookie ="username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
