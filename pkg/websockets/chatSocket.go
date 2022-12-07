@@ -84,8 +84,10 @@ func CreateChat(chat database.Chat) (string, error) {
 	if chat.ChatID == "" {
 		chat.ChatID = uuid.NewV4().String()
 	}
+	fmt.Printf("sender userID: %+v\n", chat.Sender.ID)
 	// TODO: remove placeholder nickname once login/sessions are working
 	if chat.Sender.ID == "" {
+		fmt.Printf("sender userID is blank, inserting foo's userID")
 		//this is foo's userID in the database
 		chat.Sender.ID = "6d01e668-2642-4e55-af73-46f057b731f9"
 	}

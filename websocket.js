@@ -1,6 +1,7 @@
 //TODO: fix const time as it is not formatted correctly and add where time/date is needed
 const time = () => { return new Date().toLocaleString() };
 // let loggedInUserID
+let clickedParticipantID
 
 class MySocket {
   wsType = ""
@@ -20,11 +21,13 @@ class MySocket {
           participants: [
             //sender: bar userID
             {
-              id: "975496ca-9bfc-4d71-8736-da4b6383a575",
+              // id: "975496ca-9bfc-4d71-8736-da4b6383a575",
+              id: getIdValue(),
             },
             //other participants (receiver): foo userID
             {
-              id: "6d01e668-2642-4e55-af73-46f057b731f9",
+              // id: "6d01e668-2642-4e55-af73-46f057b731f9",
+              id: clickedParticipantID,
             }
           ],
           chats: [
@@ -32,7 +35,8 @@ class MySocket {
               sender: {
                 // TODO: this is just the first placeholder above, once the user is logged in and their ID is stored client side this ID should represent the logged in user
                 // bar userID
-                id: "975496ca-9bfc-4d71-8736-da4b6383a575",
+                // id: "975496ca-9bfc-4d71-8736-da4b6383a575",
+                id: getIdValue(),
               },
               body: document.getElementById('chatIPT').value,
             }
@@ -71,8 +75,11 @@ class MySocket {
       const consp = p
       let user = document.createElement("button");
       user.addEventListener('click', function (event, user = consp) {
+        clickedParticipantID = user.id
+        console.log("clickedParticipantID: ", clickedParticipantID)
+        console.log("currentUserID: ", getIdValue())
         event.target.id = "chat"
-        participant_ids = [GetLoggedInUserID(text), user.id]
+        let participant_ids = [getIdValue(), user.id]
         contentSocket.sendChatContentRequest(event, participant_ids)
       });
       user.id = p.id
@@ -83,15 +90,15 @@ class MySocket {
     }
   }
 
-  GetLoggedInUserID(text) {
-    // match nickname with correct userID
-    const m = JSON.parse(text)
-    for (let user of m.presences) {
-      if (user.nickname === getCookieName()) {
-        return user.ID
-      }
-    }
-  }
+  // GetLoggedInUserID(text) {
+  //   // match nickname with correct userID
+  //   const m = JSON.parse(text)
+  //   for (let user of m.presences) {
+  //     if (user.nickname === getCookieName()) {
+  //       return user.ID
+  //     }
+  //   }
+  // }
 
   keypress(e) {
     if (e.keyCode == 13) {
@@ -378,7 +385,7 @@ function getIdValue() {
   // return lastCookieName
   return document.cookie.split(";")[0].split("=")[1]
 }
-console.log("test,", getIdValue())
+// console.log("test,", getIdValue())
 
-console.log("hello", document.cookie.split(";")[0].split("=")[1])
+// console.log("hello", document.cookie.split(";")[0].split("=")[1])
 // console.log(cookies[cookies.length-1].split("=")[0])
