@@ -386,6 +386,7 @@ func FilterChatsForConvo(convoID string, chats []Chat) []Chat {
 			out = append(out, c)
 		}
 	}
+	fmt.Println(out)
 	return out
 }
 

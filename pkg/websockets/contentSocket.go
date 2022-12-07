@@ -84,7 +84,7 @@ func (m *ContentMessage) Handle(s *socket) error {
 		}
 	case "comment":
 		if m.PostID == "" {
-			return fmt.Errorf("Empty post ID when requesting comments")
+			return fmt.Errorf("Empty postID when requesting comments")
 		}
 		comments, err := database.GetComments()
 		if err != nil {

@@ -33,6 +33,25 @@ var (
 	savedSockets = make([]*socket, 0)
 )
 
+// BroadcastPresences loops over savedSockets and sends messages with updated presence data
+func BroadcastPresences() {
+	for {
+		presences, err := GetPresences()
+		if err != nil {
+			fmt.Printf("BroadcastPresences (GetPresences) error: %+v\n", err)
+		}
+		c := &PresenceMessage{
+			Type:      presence,
+			Timestamp: time.Now().String(),
+			Presences: presences,
+		}
+		for _, ss := range savedSockets {
+			c.Broadcast(ss)
+		}
+		time.Sleep(1 * time.Second)
+	}
+}
+
 func SocketCreate(w http.ResponseWriter, r *http.Request) {
 	c1, err1 := r.Cookie("1st-cookie")
 	if err1 == nil && !auth.Person.Accesslevel {

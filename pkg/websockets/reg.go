@@ -22,8 +22,8 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	fmt.Println(data)
-	fmt.Println(data.LoggedIn)
+	// fmt.Println(data)
+	// fmt.Println(data.LoggedIn)
 	data.Password = passwordHash(data.Password)
 	//  data.Password = checkPwHash(r.FormValue("password"), data.Password)
 	existingUsers, _ := database.GetUsers()
@@ -79,8 +79,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	cookies := r.Cookies()
 	if len(cookies) >= 1 {
 		for i := 0; i < len(cookies); i++ {
-			fmt.Println(cookies[i].Name, user.Nickname)
-			fmt.Printf("%T", cookies[i])
+			// fmt.Println(cookies[i].Name, user.Nickname)
+			// fmt.Printf("%T", cookies[i])
 			if cookies[i].Name != user.Nickname {
 				DeleteCookie(w, cookies[i].Name)
 				UpdateUser(cookies[i].Name, "false")
@@ -107,7 +107,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(user.Nickname, nickname, email)
+		// fmt.Println(user.Nickname, nickname, email)
 		// compares data with front end, if user nick match, checks pw if match stores value
 		if user.Nickname == nickname || user.Nickname == email {
 			if checkPwHash(user.Password, password) {

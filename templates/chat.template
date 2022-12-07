@@ -5,6 +5,8 @@
             <br>
             Nickname: {{.Sender.Nickname}}
             <br>
+            {{.Date}}
+            <br>
             {{.Body}}
             <br>
         </div>

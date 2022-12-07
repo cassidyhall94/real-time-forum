@@ -9,6 +9,29 @@ class MySocket {
     this.mysocket = null;
   }
 
+  presenceHandler(text) {
+    const m = JSON.parse(text)
+    for (let p of m.presences) {
+      const consp = p
+      if (p.id !== getIdValue()) {
+        let user = document.createElement("button");
+        user.addEventListener('click', function (event, user = consp) {
+          clickedParticipantID = user.id
+          // console.log("clickedParticipantID: ", clickedParticipantID)
+          // console.log("currentUserID: ", getIdValue())
+          event.target.id = "chat"
+          let participant_ids = [getIdValue(), clickedParticipantID]
+          contentSocket.sendChatContentRequest(event, participant_ids)
+        });
+        user.id = p.id
+        user.innerHTML = p.nickname
+        user.style.color = 'white'
+        user.className = "presence " + p.nickname
+        document.getElementById("presencecontainer").appendChild(user)
+      }
+    }
+  }
+
   // TODO: insert user ID variable, participants needs to be filled
   sendNewChatRequest() {
     console.log("new chat request")
@@ -17,27 +40,22 @@ class MySocket {
       timestamp: time(),
       conversations: [
         {
-          //TODO CHAT: replace sender with getCookieName() once the userID is retrieved
           participants: [
-            //sender: bar userID
+            //sender:
             {
-              // id: "975496ca-9bfc-4d71-8736-da4b6383a575",
               id: getIdValue(),
             },
-            //other participants (receiver): foo userID
+            //other participant/s:
             {
-              // id: "6d01e668-2642-4e55-af73-46f057b731f9",
               id: clickedParticipantID,
             }
           ],
           chats: [
             {
               sender: {
-                // TODO: this is just the first placeholder above, once the user is logged in and their ID is stored client side this ID should represent the logged in user
-                // bar userID
-                // id: "975496ca-9bfc-4d71-8736-da4b6383a575",
                 id: getIdValue(),
               },
+              date: time(),
               body: document.getElementById('chatIPT').value,
             }
           ]
@@ -59,6 +77,7 @@ class MySocket {
   chatHandler(text) {
     const m = JSON.parse(text)
     for (let c of m.conversations) {
+      console.log(c.chats)
       for (let p of c.chats) {
         let chat = document.createElement("div");
         chat.className = "submittedchat"
@@ -68,37 +87,6 @@ class MySocket {
       }
     }
   }
-
-  presenceHandler(text) {
-    const m = JSON.parse(text)
-    for (let p of m.presences) {
-      const consp = p
-      let user = document.createElement("button");
-      user.addEventListener('click', function (event, user = consp) {
-        clickedParticipantID = user.id
-        console.log("clickedParticipantID: ", clickedParticipantID)
-        console.log("currentUserID: ", getIdValue())
-        event.target.id = "chat"
-        let participant_ids = [getIdValue(), user.id]
-        contentSocket.sendChatContentRequest(event, participant_ids)
-      });
-      user.id = p.id
-      user.innerHTML = p.nickname
-      user.style.color = 'white'
-      user.className = "presence " + p.nickname
-      document.getElementById("presencecontainer").appendChild(user)
-    }
-  }
-
-  // GetLoggedInUserID(text) {
-  //   // match nickname with correct userID
-  //   const m = JSON.parse(text)
-  //   for (let user of m.presences) {
-  //     if (user.nickname === getCookieName()) {
-  //       return user.ID
-  //     }
-  //   }
-  // }
 
   keypress(e) {
     if (e.keyCode == 13) {
@@ -271,7 +259,7 @@ function getRegDetails() {
   }
 
   // SEND DATA TO BACKEND USING FETCH
-  console.log(registerForm)
+  // console.log(registerForm)
   if (registerForm.nickname != "" && registerForm.email != "" && registerForm.password != "") {
 
     fetch("/register", {
@@ -320,7 +308,7 @@ function loginFormData() {
   }).then((response) => {
     response.text().then(function (loginFormJSON) {
       let result = JSON.parse(loginFormJSON)
-      console.log("parse", result)
+      // console.log("parse", result)
 
       if (result == null) {
         alert("incorrect username or password")

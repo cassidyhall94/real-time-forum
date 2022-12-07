@@ -42,8 +42,9 @@ func GetPresences() ([]database.Presence, error) {
 			presences = append(presences, database.Presence{
 				ID:       user.ID,
 				Nickname: user.Nickname,
-				// Online:            bool,
+				Online:   user.LoggedIn,
 				// LastContactedTime: created,
+				//TODO CHAT: create a getLastContactedTime() func for getting the timestamp of the last message sent to clickedParticipantID by currentUserID to organise presence list and chat messages
 			})
 
 		}
@@ -59,7 +60,7 @@ func OnPresenceConnect(s *socket) error {
 	}
 	c := &PresenceMessage{
 		Type:      presence,
-		Timestamp: "",
+		Timestamp: time.Now().String(),
 		Presences: presences,
 	}
 	return c.Broadcast(s)

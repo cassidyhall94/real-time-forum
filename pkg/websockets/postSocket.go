@@ -2,9 +2,10 @@ package websockets
 
 import (
 	"fmt"
-	uuid "github.com/satori/go.uuid"
 	"real-time-forum/pkg/database"
 	"time"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 type PostMessage struct {
@@ -46,6 +47,7 @@ func (m PostMessage) Handle(s *socket) error {
 	}
 	return nil
 }
+
 func (m *PostMessage) Broadcast(s *socket) error {
 	if s.t == m.Type {
 		if err := s.con.WriteJSON(m); err != nil {
@@ -57,7 +59,6 @@ func (m *PostMessage) Broadcast(s *socket) error {
 	return nil
 }
 
-// TODO: add timestamp in the PostMessage struct; c
 func OnPostsConnect(s *socket) error {
 	time.Sleep(1 * time.Second)
 	p, err := database.GetPopulatedPosts()
@@ -66,7 +67,7 @@ func OnPostsConnect(s *socket) error {
 	}
 	c := &PostMessage{
 		Type:      post,
-		Timestamp: "",
+		Timestamp: time.Now().String(),
 		Posts:     p,
 	}
 	return c.Broadcast(s)
@@ -74,7 +75,7 @@ func OnPostsConnect(s *socket) error {
 func CreatePost(post *database.Post) (*database.Post, error) {
 	stmt, err := database.DB.Prepare("INSERT INTO posts (postID, nickname, title, categories, body) VALUES (?, ?, ?, ?, ?);")
 	defer stmt.Close()
-	fmt.Println(post.Nickname)
+	// fmt.Println(post.Nickname)
 	if err != nil {
 		return nil, fmt.Errorf("CreatePost DB Prepare error: %+v\n", err)
 	}
@@ -83,7 +84,8 @@ func CreatePost(post *database.Post) (*database.Post, error) {
 	}
 	// TODO: remove placeholder nickname once login/sessions are working, and hook up the real user who is logged in
 	if post.Nickname == "" {
-		post.Nickname = "Cassidy"
+		fmt.Println("post.Nickname is empty")
+		// post.Nickname = "Cassidy"
 	}
 	_, err = stmt.Exec(post.PostID, post.Nickname, post.Title, post.Categories, post.Body)
 	if err != nil {
@@ -102,7 +104,8 @@ func CreateComment(comment database.Comment) (database.Comment, error) {
 	}
 	// TODO: remove placeholder nickname once login/sessions are working
 	if comment.Nickname == "" {
-		comment.Nickname = "Cassidy"
+		fmt.Println("comment.Nickname is empty")
+		// comment.Nickname = "Cassidy"
 	}
 	_, err = stmt.Exec(comment.CommentID, comment.PostID, comment.Nickname, comment.Body)
 	if err != nil {

@@ -89,7 +89,7 @@ func CreateChat(chat database.Chat) (string, error) {
 	if chat.Sender.ID == "" {
 		fmt.Printf("sender userID is blank, inserting foo's userID")
 		//this is foo's userID in the database
-		chat.Sender.ID = "6d01e668-2642-4e55-af73-46f057b731f9"
+		// chat.Sender.ID = "6d01e668-2642-4e55-af73-46f057b731f9"
 	}
 	_, err = stmt.Exec(chat.ConvoID, chat.ChatID, chat.Sender.ID, chat.Date, chat.Body)
 	if err != nil {
