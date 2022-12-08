@@ -25,17 +25,9 @@ func CheckLoggedIn(r *http.Request) (bool, string){
 		var sess, _ = database.GetSessionsFromDB()
 		for i := 0; i < len(sess); i++ {
 			if cookies[0].Name == sess[i].UserName{
-				// fmt.Println("username", sess[i].UserName)
-				// fmt.Println("id", sess[i].SessionID)
-				// fmt.Println("expiry", sess[i].ExpiryTime)
-				// fmt.Println(cookies[0].SameSite)
-
 				return true, sess[i].UserName
-
 			}
-
 		}
-
 	} 
 	//returns false if cookie expired
 return false, ""
