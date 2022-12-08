@@ -391,3 +391,9 @@ function Logout(){
   console.log("hello",document.cookie.split(";")[0].split("=")[1])
   // console.log(cookies[cookies.length-1].split("=")[0])
 
+init()
+  function init(){
+    let user= document.getElementById('welcome')
+    
+    user.innerHTML = "Hello " + getCookieName()
+  }
