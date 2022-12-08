@@ -57,6 +57,10 @@ func SocketCreate(w http.ResponseWriter, r *http.Request) {
 	case "/content":
 		ptrSocket.t = content
 		// loads the home page (which contains the posts form)
+		var loggedIn, name = CheckLoggedIn(r)
+		fmt.Println(loggedIn,name)
+		ptrSocket.nickname = name
+		
 		if err := OnContentConnect(ptrSocket); err != nil {
 			fmt.Println(err)
 			return

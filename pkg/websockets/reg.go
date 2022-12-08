@@ -12,6 +12,36 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// *******************************************************CHECK IF SESSION********************************888
+func CheckLoggedIn(r *http.Request) (bool, string){
+	var cookies = getCookies(r)
+	// get cookie
+	// compare with db if value exists
+	// if exists start websocket connection?
+	
+	if len(cookies) > 0 {
+		fmt.Println(database.GetSessionsFromDB())
+		// // sess = &[]database.Session{}
+		var sess, _ = database.GetSessionsFromDB()
+		for i := 0; i < len(sess); i++ {
+			if cookies[0].Name == sess[i].UserName{
+				// fmt.Println("username", sess[i].UserName)
+				// fmt.Println("id", sess[i].SessionID)
+				// fmt.Println("expiry", sess[i].ExpiryTime)
+				// fmt.Println(cookies[0].SameSite)
+
+				return true, sess[i].UserName
+
+			}
+
+		}
+
+	} 
+	//returns false if cookie expired
+return false, ""
+
+}
+
 // ***************************REGISTER**********************************************************8
 // check if pasword meets criteria number length etc, if nickname is not taken
 func Register(w http.ResponseWriter, r *http.Request) {
@@ -82,7 +112,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 
-	var cookies = r.Cookies()
+	// var cookies = r.Cookies()
+	var cookies = getCookies(r)
 
 	if len(cookies) >= 1 {
 		for i := 0; i < len(cookies); i++ {
@@ -134,7 +165,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 		}
 	}
-
 
 	//if len ==0, no matching user was found
 	if len(users) == 0 {
@@ -190,9 +220,9 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// *************************** COOKIE***********************
+// *************************** COOKIES***********************
 //creates cookie
-func Cookie(w http.ResponseWriter, r *http.Request, Username string, id string) {
+func Cookie(w http.ResponseWriter,  r *http.Request, Username string, id string) {
 
 	expiration := time.Now().Add(1 * time.Hour)
 	cookie := http.Cookie{Name: Username, Value: id, Expires: expiration, SameSite: http.SameSiteLaxMode}
@@ -214,6 +244,10 @@ func Cookie(w http.ResponseWriter, r *http.Request, Username string, id string) 
 
 }
 
+func getCookies(r *http.Request) []*http.Cookie {
+	return r.Cookies()
+}
+
 //delete cookie
 func DeleteCookie(w http.ResponseWriter, username string) {
 
@@ -224,5 +258,9 @@ func DeleteCookie(w http.ResponseWriter, username string) {
 		Expires: time.Unix(0, 0),
 	}
 	http.SetCookie(w, cookie)
+
+}
+
+func CheckExpiredCookies(){
 
 }

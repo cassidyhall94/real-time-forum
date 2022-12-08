@@ -362,8 +362,6 @@ function Logout(){
     }).then((response)=>{
 
       response.text().then(function (parseUser){
-        // let result = JSON.parse(parseUser)
-        // console.log("parse",result)
 
       })
 
@@ -386,9 +384,6 @@ function Logout(){
 
 
   function getIdValue (){
-    //     let cookies = document.cookie.split(";")
-    // let lastCookieName = cookies[cookies.length -1].split("=")[1].replace(" ", '')
-    // return lastCookieName
     return document.cookie.split(";")[0].split("=")[1]
   }
   console.log("test,", getIdValue())
