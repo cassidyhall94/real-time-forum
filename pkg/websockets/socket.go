@@ -52,16 +52,17 @@ func SocketCreate(w http.ResponseWriter, r *http.Request) {
 		con:  con,
 		uuid: uuid.NewV4(),
 	}
+	
 	// add new case here when added to main.go for handlers
 	switch r.RequestURI {
 	case "/content":
-		ptrSocket.t = content
-		// loads the home page (which contains the posts form)
 		var loggedIn, name = CheckLoggedIn(r)
-		fmt.Println(loggedIn,name)
+		fmt.Println("logged in?",loggedIn,name)
 		if loggedIn {
 			ptrSocket.nickname = name
 		}
+		ptrSocket.t = content
+		// loads the home page (which contains the posts form)
 
 		if err := OnContentConnect(ptrSocket); err != nil {
 			fmt.Println(err)
@@ -79,6 +80,7 @@ func SocketCreate(w http.ResponseWriter, r *http.Request) {
 	case "/presence":
 		ptrSocket.t = presence
 		// loads the presence list on window load
+		fmt.Println("hello")
 		if err := OnPresenceConnect(ptrSocket); err != nil {
 			fmt.Println(err)
 			return

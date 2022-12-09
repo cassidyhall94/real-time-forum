@@ -248,6 +248,7 @@ func DeleteCookie(w http.ResponseWriter, username string) {
 		Value:   "",
 		Path:    "",
 		Expires: time.Unix(0, 0),
+		SameSite: http.SameSiteLaxMode,
 	}
 	http.SetCookie(w, cookie)
 

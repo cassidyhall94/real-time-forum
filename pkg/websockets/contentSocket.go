@@ -53,6 +53,7 @@ func (m *ContentMessage) Handle(s *socket) error {
 			return fmt.Errorf("Home ExecuteTemplate error: %w", err)
 		}
 	case "profile":
+
 		if err := tpl.ExecuteTemplate(sb, "profile.template", nil); err != nil {
 			return fmt.Errorf("Profile ExecuteTemplate error: %w", err)
 		}

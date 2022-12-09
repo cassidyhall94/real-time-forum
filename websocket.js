@@ -68,6 +68,12 @@ class MySocket {
   }
   presenceHandler(text) {
     const m = JSON.parse(text)
+    console.log("handler",m)
+    let presences = document.getElementById("presencecontainer")
+    let arr = Array.from(presences.childNodes)
+
+
+
     for (let p of m.presences) {
       const consp = p
       let user = document.createElement("button");
@@ -75,11 +81,19 @@ class MySocket {
         event.target.id = "chat"
         contentSocket.sendChatContentRequest(event, chat.chat_id)
       });
-      user.id = p.id
-      user.innerHTML = p.nickname
-      user.style.color = 'white'
-      user.className = "presence " + p.nickname 
-      document.getElementById("presencecontainer").appendChild(user)
+
+     let existingPresences = (arr.filter(item =>item.textContent === p.nickname))
+      
+     if( existingPresences.length <1){
+
+       user.id = p.id
+       user.innerHTML = p.nickname
+       user.style.color = 'white'
+       user.className = "presence " + p.nickname 
+
+       presences.appendChild(user)
+     }
+
     }
   }
   postHandler(text) {
@@ -125,6 +139,27 @@ class MySocket {
         document.getElementById('commentbody').value = ""
       }
     }
+  }
+  sendNewPresenceUpdate(e){
+    let m ={
+      type: 'presence',
+      timestamp: time(),
+      presences: [
+        {
+          // nickname: e.target.nickname,
+          id: getCookieName(),
+          nickname: getCookieName(),
+          online: "hello",
+          last_contacted_time: "0",
+          
+        }
+      ]
+    }
+    // this.mysocket.send(JSON.stringify(m))
+    console.log("asking for update")
+    this.mysocket.send(JSON.stringify(m))
+    console.log(m)
+    console.log("asked for update")
   }
   sendNewPostRequest(e) {
     let m = {
@@ -184,7 +219,7 @@ class MySocket {
     var socket = new WebSocket("ws://localhost:8080/" + URI);
     this.mysocket = socket;
     socket.onmessage = (e) => {
-      // console.log("socket message")
+      // console.log("socket message",e)
       handler(e.data, false);
     };
     socket.onopen = () => {
@@ -278,7 +313,6 @@ console.log(registerForm)
   }
 }
 
-
 // **********************************LOGIN*******************************************
 function loginFormData(){
   loginForm.nickname = document.getElementById('nickname-login').value
@@ -303,7 +337,7 @@ function loginFormData(){
 
       response.text().then(function (loginFormJSON){
         let result = JSON.parse(loginFormJSON)
-        console.log("parse",result)
+        // console.log("parse",result)
 
         
         if (result == null){
@@ -369,6 +403,7 @@ function Logout(){
       console.log(error)
 
     })
+
     alert("you are now logged out")
   }
 
@@ -386,14 +421,14 @@ function Logout(){
   function getIdValue (){
     return document.cookie.split(";")[0].split("=")[1]
   }
-  console.log("test,", getIdValue())
-  
-  console.log("hello",document.cookie.split(";")[0].split("=")[1])
-  // console.log(cookies[cookies.length-1].split("=")[0])
 
-init()
   function init(){
-    let user= document.getElementById('welcome')
-    
-    user.innerHTML = "Hello " + getCookieName()
+    if( getCookieName() != ""){
+      let user= document.getElementById('welcome')
+      user.innerHTML = "Hello " + getCookieName()
+    }
   }
+
+  
+  init()
+
