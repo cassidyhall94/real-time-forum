@@ -68,19 +68,22 @@ func (m *ContentMessage) Handle(s *socket) error {
 			return fmt.Errorf("loginExecuteTemplate error: %+v\n", err)
 		}
 	case "chat":
-		conversations, err := database.GetConversations()
-		if err != nil {
-			return fmt.Errorf("Unable to get conversations for chat template: %+v\n", err)
-		}
-		conversationID, err := database.GetConvoID(m.ParticipantIDs, conversations)
-		if err != nil {
-			return fmt.Errorf("Unable to get convoID for participants: %w", err)
-		}
-		chats, err := database.GetChats()
-		if err != nil {
-			return fmt.Errorf("Unable to get chats for chat template: %w", err)
-		}
-		if err := tpl.ExecuteTemplate(sb, "chat.template", database.FilterChatsForConvo(conversationID, chats)); err != nil {
+		// conversations, err := database.GetConversations()
+		// if err != nil {
+		// 	return fmt.Errorf("Unable to get conversations for chat template: %+v\n", err)
+		// }
+		// conversationID, err := database.GetConvoID(m.ParticipantIDs, conversations)
+		// if err != nil {
+		// 	return fmt.Errorf("Unable to get convoID for participants: %w", err)
+		// }
+		// chats, err := database.GetChats()
+		// // fmt.Println("chats in Content Socket: ", chats)
+		// if err != nil {
+		// 	return fmt.Errorf("Unable to get chats for chat template: %w", err)
+		// }
+		// c := database.FilterChatsForConvo(conversationID, chats)
+		// fmt.Printf("%+v", c)
+		if err := tpl.ExecuteTemplate(sb, "chat.template", nil); err != nil {
 			return fmt.Errorf("Chat ExecuteTemplate error: %+v\n", err)
 		}
 	case "comment":

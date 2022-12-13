@@ -411,7 +411,6 @@ func populateUsersForChats(chats []Chat) ([]Chat, error) {
 		}
 		outChats = append(outChats, newChat)
 	}
-	// fmt.Println(outChats)
 	return outChats, nil
 }
 
@@ -422,25 +421,25 @@ func FilterChatsForConvo(convoID string, chats []Chat) []Chat {
 			out = append(out, c)
 		}
 	}
-	fmt.Println(out)
+	// fmt.Printf("FilterChatsForConvo Chats: %+v\n", chats)
 	return out
 }
 
-func participantsToIds(collection []User, iteratee func(item User, index int) string) []string {
+func ParticipantsToIds(users []User) []string {
 	result := []string{}
-	for i, item := range collection {
-		result = append(result, iteratee(item, i))
+	for _, item := range users {
+		result = append(result, item.ID)
 	}
 	return result
 }
 
-func GetConvoID(participants []string, conversations []*Conversation) (string, error) {
+func GetConvoID(participantIDs []string, conversations []*Conversation) (string, error) {
 	v := map[string][]string{}
 	for _, convo := range conversations {
-		v[convo.ConvoID] = participantsToIds(convo.Participants, func(item User, index int) string { return item.ID })
+		v[convo.ConvoID] = ParticipantsToIds(convo.Participants)
 	}
 	for convoID, vv := range v {
-		if reflect.DeepEqual(participants, vv) {
+		if reflect.DeepEqual(participantIDs, vv) {
 			return convoID, nil
 		}
 	}

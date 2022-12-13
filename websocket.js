@@ -9,42 +9,20 @@ class MySocket {
     this.mysocket = null;
   }
 
-  // presenceHandler(text) {
-  //   const m = JSON.parse(text)
-  //   for (let p of m.presences) {
-  //     const consp = p
-  //     console.log("p.id: ", p.id, "getIDValue: ", getIdValue())
-  //     if (p.id !== getIdValue()) {
-  //       let user = document.createElement("button");
-  //       user.addEventListener('click', function (event, user = consp) {
-  //         clickedParticipantID = user.id
-  //         event.target.id = "chat"
-  //         let participant_ids = [getIdValue(), clickedParticipantID]
-  //         contentSocket.sendChatContentRequest(event, participant_ids)
-  //       });
-  //       user.id = p.id
-  //       user.innerHTML = p.nickname
-  //       user.style.color = 'white'
-  //       user.className = "presence " + p.nickname
-  //       document.getElementById("presencecontainer").appendChild(user)
-  //     }
-  //   }
-  // }
-
   presenceHandler(text) {
     const m = JSON.parse(text)
     let presences = document.getElementById("presencecontainer")
     let arr = Array.from(presences.childNodes)
     for (let p of m.presences) {
       const consp = p
-      console.log("p.id: ", p.id, "getIDValue: ", getIdValue())
       if (p.id !== getIdValue()) {
         let user = document.createElement("button");
-        user.addEventListener('click', function (event, chat = consp) {
+        user.addEventListener('click', async function (event, chat = consp) {
           clickedParticipantID = user.id
           event.target.id = "chat"
           let participant_ids = [getIdValue(), clickedParticipantID]
-          contentSocket.sendChatContentRequest(event, participant_ids)
+          await contentSocket.sendChatContentRequest(event, participant_ids)
+          chatSocket.sendNewChatRequest(event, "", participant_ids)
         });
 
         let existingPresences = (arr.filter(item => item.textContent === p.nickname))
@@ -62,33 +40,32 @@ class MySocket {
     }
   }
 
-  // TODO: insert user ID variable, participants needs to be filled
-  sendNewChatRequest() {
-    console.log("new chat request")
+  sendNewChatRequest(event, inputText = "", participant_ids = []) {
+    console.log("new chat request " + inputText)
+    let chats = []
+    if (inputText !== "") {
+      chats = [
+        {
+          sender: {
+            id: getIdValue(),
+          },
+          date: time(),
+          body: inputText,
+        }
+      ]
+    }
+
+    let participants = []
+    for (let p of participant_ids) {
+      participants.push({id: p})
+    }
     let m = {
       type: 'chat',
       timestamp: time(),
       conversations: [
         {
-          participants: [
-            //sender:
-            {
-              id: getIdValue(),
-            },
-            //other participant/s:
-            {
-              id: clickedParticipantID,
-            }
-          ],
-          chats: [
-            {
-              sender: {
-                id: getIdValue(),
-              },
-              date: time(),
-              body: document.getElementById('chatIPT').value,
-            }
-          ]
+          participants: participants,
+          chats: chats
         }
       ]
     }
@@ -96,7 +73,7 @@ class MySocket {
     document.getElementById('chatIPT').value = ""
   }
 
-  sendChatContentRequest(e, participant_ids) {
+  async sendChatContentRequest(e, participant_ids) {
     this.mysocket.send(JSON.stringify({
       type: "content",
       resource: e.target.id,
@@ -106,14 +83,19 @@ class MySocket {
 
   chatHandler(text) {
     const m = JSON.parse(text)
+    console.log(m)
+
     for (let c of m.conversations) {
-      console.log(c.chats)
+
       for (let p of c.chats) {
+
         let chat = document.createElement("div");
         chat.className = "submittedchat"
         chat.id = p.chat_id
-        chat.innerHTML = "<b>Me: " + p.sender.nickname + "</b>" + "<br>" + "<b>Date: " + "</b>" + p.date + "<br>" + p.body + "<br>";
-        document.getElementById("chatcontainer").appendChild(chat)
+        chat.innerHTML = "<b>Me: " + p.sender.nickname + "</b>" + "<br>" + "<b>Date: " + "</b>" + p.date + "<br>" + p.body + "<br><br>";
+        console.log(chat)
+        console.log(document.getElementById("chatcontainer"))
+        document.getElementById("submittedchats").appendChild(chat)
       }
     }
   }
@@ -122,13 +104,14 @@ class MySocket {
     if (e.keyCode == 13) {
       this.wsType = e.target.id.slice(0, -3)
       if (this.wsType = 'chat') {
-        this.sendNewChatRequest()
+        this.sendNewChatRequest(document.getElementById('chatIPT').value)
       }
     }
   }
 
   contentHandler(text) {
     const c = JSON.parse(text)
+    console.log(c)
     document.getElementById("content").innerHTML = c.body;
   }
 

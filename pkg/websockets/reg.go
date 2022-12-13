@@ -20,7 +20,7 @@ func CheckLoggedIn(r *http.Request) (bool, string){
 	// if exists start websocket connection?
 	
 	if len(cookies) > 0 {
-		fmt.Println(database.GetSessionsFromDB())
+		// fmt.Println(database.GetSessionsFromDB())
 		// // sess = &[]database.Session{}
 		var sess, _ = database.GetSessionsFromDB()
 		for i := 0; i < len(sess); i++ {

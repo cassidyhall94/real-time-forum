@@ -1,7 +1,6 @@
 package websockets
 
 import (
-	"encoding/json"
 	"fmt"
 	"real-time-forum/pkg/database"
 
@@ -26,6 +25,7 @@ func (m *ChatMessage) Broadcast(s *socket) error {
 }
 
 func (m *ChatMessage) Handle(s *socket) error {
+	// fmt.Printf("\nm: %+v\n", *m.Conversations[0])
 	if len(m.Conversations) == 0 {
 		conversations, err := database.GetPopulatedConversations(nil)
 		if err != nil {
@@ -37,14 +37,28 @@ func (m *ChatMessage) Handle(s *socket) error {
 		}
 		return c.Broadcast(s)
 	}
+
+	allConversations, err := database.GetConversations()
+	if err != nil {
+		return err
+	}
+
 	for i, convo := range m.Conversations {
 		// creates a new conversation if the convoID is missing
-		if convo.ConvoID == "" {
-			newConvoID, err := CreateConversation(convo)
+		if len(convo.ConvoID) == 0 {
+			id, err := database.GetConvoID(database.ParticipantsToIds(convo.Participants), allConversations)
 			if err != nil {
-				return fmt.Errorf("ChatSocket Handle (CreateConversation) error: %w", err)
+				fmt.Printf("ChatSocket Handle (GetConvoID) error: %+v\n", err)
 			}
-			convo.ConvoID = newConvoID
+			if err != nil || id == "" {
+				newConvoID, err := CreateConversation(convo)
+				if err != nil {
+					return fmt.Errorf("ChatSocket Handle (CreateConversation) error: %w", err)
+				}
+				convo.ConvoID = newConvoID
+			} else {
+				convo.ConvoID = id
+			}
 		}
 		for j, chat := range convo.Chats {
 			// for new chats, the chat.ConvoID is given the conversation's convoID if it is missing
@@ -67,11 +81,11 @@ func (m *ChatMessage) Handle(s *socket) error {
 		return fmt.Errorf("ChatSocket Handle (GetPopulatedConversations) error: %w", err)
 	}
 	m.Conversations = c
-	b, err := json.Marshal(m.Conversations)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(string(b))
+	// b, err := json.Marshal(m.Conversations)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// fmt.Println("ChatSocket Handle (Convos): ", string(b))
 	return m.Broadcast(s)
 }
 

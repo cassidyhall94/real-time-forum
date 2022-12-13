@@ -1,18 +1,7 @@
 <div id="chatcontainer">
-    <div>
-        {{ range . }}
-        <div id="submittedchats">
-            <br>
-            Nickname: {{.Sender.Nickname}}
-            <br>
-            {{.Date}}
-            <br>
-            {{.Body}}
-            <br>
-        </div>
-        {{ end }}
-        <br>
+    <div id="submittedchats">
     </div>
+    <br>
 
     <br>
 
