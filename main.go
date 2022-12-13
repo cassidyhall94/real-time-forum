@@ -49,7 +49,7 @@ func main() {
 	// myhttp.HandleFunc("/home", mainHandler)
 
 	// daemonised functions
-	go socket.BroadcastPresences()
+	// go socket.BroadcastPresences()
 
 	fmt.Println("http://localhost:8080")
 	err := http.ListenAndServe(":8080", myhttp)

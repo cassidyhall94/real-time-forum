@@ -34,26 +34,26 @@ var (
 )
 
 // BroadcastPresences loops over savedSockets and sends messages with updated presence data
-func BroadcastPresences() {
-	for {
-		presences, err := GetPresences()
-		if err != nil {
-			fmt.Printf("BroadcastPresences (GetPresences) error: %+v\n", err)
-			continue
-		}
-		c := &PresenceMessage{
-			Type:      presence,
-			Timestamp: time.Now().String(),
-			Presences: presences,
-		}
-		for _, ss := range savedSockets {
-			// TODO: Handle me
-			// ss.t ?
-			_ = c.Broadcast(ss)
-		}
-		time.Sleep(1 * time.Second)
-	}
-}
+// func BroadcastPresences() {
+// 	for {
+// 		presences, err := GetPresences()
+// 		if err != nil {
+// 			fmt.Printf("BroadcastPresences (GetPresences) error: %+v\n", err)
+// 			continue
+// 		}
+// 		c := &PresenceMessage{
+// 			Type:      presence,
+// 			Timestamp: time.Now().String(),
+// 			Presences: presences,
+// 		}
+// 		for _, ss := range savedSockets {
+// 			// TODO: Handle me
+// 			// ss.t ?
+// 			_ = c.Broadcast(ss)
+// 		}
+// 		time.Sleep(1 * time.Second)
+// 	}
+// }
 
 func SocketCreate(w http.ResponseWriter, r *http.Request) {
 	c1, err1 := r.Cookie("1st-cookie")
@@ -79,12 +79,12 @@ func SocketCreate(w http.ResponseWriter, r *http.Request) {
 		con:  con,
 		uuid: uuid.NewV4(),
 	}
-	
+
 	// add new case here when added to main.go for handlers
 	switch r.RequestURI {
 	case "/content":
 		var loggedIn, name = CheckLoggedIn(r)
-		fmt.Println("logged in?",loggedIn,name)
+		fmt.Println("logged in?", loggedIn, name)
 		if loggedIn {
 			ptrSocket.nickname = name
 		}
@@ -107,7 +107,6 @@ func SocketCreate(w http.ResponseWriter, r *http.Request) {
 	case "/presence":
 		ptrSocket.t = presence
 		// loads the presence list on window load
-		fmt.Println("hello")
 		if err := OnPresenceConnect(ptrSocket); err != nil {
 			fmt.Println(err)
 			return

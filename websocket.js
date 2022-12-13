@@ -9,25 +9,55 @@ class MySocket {
     this.mysocket = null;
   }
 
+  // presenceHandler(text) {
+  //   const m = JSON.parse(text)
+  //   for (let p of m.presences) {
+  //     const consp = p
+  //     console.log("p.id: ", p.id, "getIDValue: ", getIdValue())
+  //     if (p.id !== getIdValue()) {
+  //       let user = document.createElement("button");
+  //       user.addEventListener('click', function (event, user = consp) {
+  //         clickedParticipantID = user.id
+  //         event.target.id = "chat"
+  //         let participant_ids = [getIdValue(), clickedParticipantID]
+  //         contentSocket.sendChatContentRequest(event, participant_ids)
+  //       });
+  //       user.id = p.id
+  //       user.innerHTML = p.nickname
+  //       user.style.color = 'white'
+  //       user.className = "presence " + p.nickname
+  //       document.getElementById("presencecontainer").appendChild(user)
+  //     }
+  //   }
+  // }
+
   presenceHandler(text) {
     const m = JSON.parse(text)
+    let presences = document.getElementById("presencecontainer")
+    let arr = Array.from(presences.childNodes)
     for (let p of m.presences) {
       const consp = p
+      console.log("p.id: ", p.id, "getIDValue: ", getIdValue())
       if (p.id !== getIdValue()) {
         let user = document.createElement("button");
-        user.addEventListener('click', function (event, user = consp) {
+        user.addEventListener('click', function (event, chat = consp) {
           clickedParticipantID = user.id
-          // console.log("clickedParticipantID: ", clickedParticipantID)
-          // console.log("currentUserID: ", getIdValue())
           event.target.id = "chat"
           let participant_ids = [getIdValue(), clickedParticipantID]
           contentSocket.sendChatContentRequest(event, participant_ids)
         });
-        user.id = p.id
-        user.innerHTML = p.nickname
-        user.style.color = 'white'
-        user.className = "presence " + p.nickname
-        document.getElementById("presencecontainer").appendChild(user)
+
+        let existingPresences = (arr.filter(item => item.textContent === p.nickname))
+
+        if (existingPresences.length < 1) {
+
+          user.id = p.id
+          user.innerHTML = p.nickname
+          user.style.color = 'white'
+          user.className = "presence " + p.nickname
+
+          presences.appendChild(user)
+        }
       }
     }
   }
@@ -101,40 +131,7 @@ class MySocket {
     const c = JSON.parse(text)
     document.getElementById("content").innerHTML = c.body;
   }
-<<<<<<< HEAD
 
-=======
-  presenceHandler(text) {
-    const m = JSON.parse(text)
-    console.log("handler",m)
-    let presences = document.getElementById("presencecontainer")
-    let arr = Array.from(presences.childNodes)
-
-
-
-    for (let p of m.presences) {
-      const consp = p
-      let user = document.createElement("button");
-      user.addEventListener('click', function (event, chat = consp) {
-        event.target.id = "chat"
-        contentSocket.sendChatContentRequest(event, chat.chat_id)
-      });
-
-     let existingPresences = (arr.filter(item =>item.textContent === p.nickname))
-      
-     if( existingPresences.length <1){
-
-       user.id = p.id
-       user.innerHTML = p.nickname
-       user.style.color = 'white'
-       user.className = "presence " + p.nickname 
-
-       presences.appendChild(user)
-     }
-
-    }
-  }
->>>>>>> karolis-new
   postHandler(text) {
     const m = JSON.parse(text)
     for (let p of m.posts) {
@@ -180,11 +177,9 @@ class MySocket {
       }
     }
   }
-<<<<<<< HEAD
 
-=======
-  sendNewPresenceUpdate(e){
-    let m ={
+  sendNewPresenceUpdate(e) {
+    let m = {
       type: 'presence',
       timestamp: time(),
       presences: [
@@ -194,7 +189,7 @@ class MySocket {
           nickname: getCookieName(),
           online: "hello",
           last_contacted_time: "0",
-          
+
         }
       ]
     }
@@ -204,7 +199,7 @@ class MySocket {
     console.log(m)
     console.log("asked for update")
   }
->>>>>>> karolis-new
+
   sendNewPostRequest(e) {
     let m = {
       type: 'post',
@@ -270,6 +265,7 @@ class MySocket {
     };
   }
 }
+
 function containsNumber(str) {
   return /[0-9]/.test(str);
 }
@@ -316,7 +312,7 @@ function getRegDetails() {
   }
 
   // SEND DATA TO BACKEND USING FETCH
-  // console.log(registerForm)
+  console.log(registerForm)
   if (registerForm.nickname != "" && registerForm.email != "" && registerForm.password != "") {
 
     fetch("/register", {
@@ -343,10 +339,7 @@ function getRegDetails() {
     })
   }
 }
-<<<<<<< HEAD
-=======
 
->>>>>>> karolis-new
 // **********************************LOGIN*******************************************
 function loginFormData() {
   loginForm.nickname = document.getElementById('nickname-login').value
@@ -359,7 +352,6 @@ function loginFormData() {
   }
   // let id = ""
   getCookieName()
-<<<<<<< HEAD
   fetch("/login", {
     headers: {
       'Accept': 'application/json',
@@ -370,7 +362,7 @@ function loginFormData() {
   }).then((response) => {
     response.text().then(function (loginFormJSON) {
       let result = JSON.parse(loginFormJSON)
-      // console.log("parse", result)
+      // console.log("parse",result)
 
       if (result == null) {
         alert("incorrect username or password")
@@ -380,38 +372,6 @@ function loginFormData() {
         user.innerText = `Hello ${document.cookie.match(logindata.nickname)}`
         alert("you are logged in ")
       }
-=======
-
-  fetch("/login",{
-      headers:{
-        'Accept':'application/json',
-        'Content-Type': 'application/json'
-      },
-      method: "POST",
-      body:loginFormJSON
-
-    }).then((response)=>{
-
-      response.text().then(function (loginFormJSON){
-        let result = JSON.parse(loginFormJSON)
-        // console.log("parse",result)
-
-        
-        if (result == null){
-          alert("incorrect username or password")
-
-        } else{
-          logindata.nickname = result[0].nickname
-          // logindata.password = result[0].password
-          user.innerText = `Hello ${document.cookie.match(logindata.nickname)}`
-          alert("you are logged in ")
-        }
-      })
-
-    }).catch((error)=>{
-      console.log(error)
-
->>>>>>> karolis-new
     })
   }).catch((error) => {
     console.log(error)
@@ -424,6 +384,7 @@ function loginFormData() {
   // document.getElementById('login-form').reset()
   // console.log(t)
 }
+
 // ********************************LOGOUT******************************
 function Logout() {
   let logout = {
@@ -435,28 +396,6 @@ function Logout() {
   let user = document.getElementById('welcome')
   user.innerText = ""
   // console.log("logout", user.textContent.replace("Hello", ''))
-<<<<<<< HEAD
-=======
-   
-  let parseUser = JSON.stringify(logout)
-
-  fetch("/logout",{
-      headers:{
-        'Accept':'application/json',
-        'Content-Type': 'application/json'
-      },
-      method: "POST",
-      body: parseUser
-
-    }).then((response)=>{
-
-      response.text().then(function (parseUser){
-
-      })
-
-    }).catch((error)=>{
-      console.log(error)
->>>>>>> karolis-new
 
   let parseUser = JSON.stringify(logout)
   fetch("/logout", {
@@ -468,15 +407,13 @@ function Logout() {
     body: parseUser
   }).then((response) => {
     response.text().then(function (parseUser) {
-      // let result = JSON.parse(parseUser)
-      // console.log("parse",result)
     })
-<<<<<<< HEAD
   }).catch((error) => {
     console.log(error)
   })
   alert("you are now logged out")
 }
+
 function getCookieName() {
   let cookies = document.cookie.split(";")
   let lastCookieName = cookies[cookies.length - 1].split("=")[0].replace(" ", '')
@@ -484,44 +421,16 @@ function getCookieName() {
   return lastCookieName
   // console.log("h",lastCookieName)
 }
+
 function getIdValue() {
-  //     let cookies = document.cookie.split(";")
-  // let lastCookieName = cookies[cookies.length -1].split("=")[1].replace(" ", '')
-  // return lastCookieName
   return document.cookie.split(";")[0].split("=")[1]
 }
-// console.log("test,", getIdValue())
 
-// console.log("hello", document.cookie.split(";")[0].split("=")[1])
-// console.log(cookies[cookies.length-1].split("=")[0])
-=======
-
-    alert("you are now logged out")
+function init() {
+  if (getCookieName() != "") {
+    let user = document.getElementById('welcome')
+    user.innerHTML = "Hello " + getCookieName()
   }
+}
 
-  function getCookieName(){
-    let cookies = document.cookie.split(";")
-    let lastCookieName = cookies[cookies.length -1].split("=")[0].replace(" ", '')
-
-    // console.log("cookie",cookies, "length", cookies.length)
-    return lastCookieName
-    // console.log("h",lastCookieName)
-
-  }
-
-
-  function getIdValue (){
-    return document.cookie.split(";")[0].split("=")[1]
-  }
-
-  function init(){
-    if( getCookieName() != ""){
-      let user= document.getElementById('welcome')
-      user.innerHTML = "Hello " + getCookieName()
-    }
-  }
-
-  
-  init()
-
->>>>>>> karolis-new
+init()

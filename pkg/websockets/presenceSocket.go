@@ -14,10 +14,10 @@ type PresenceMessage struct {
 }
 
 func (m *PresenceMessage) Broadcast(s *socket) error {
-	fmt.Println("hi broadcast")
+	// fmt.Println("hi broadcast")
 	if s.t == m.Type {
-		m.Presences,_= GetPresences()
-		fmt.Println("GetPresences()", m.Presences)
+		m.Presences, _ = GetPresences()
+		// fmt.Println("GetPresences()", m.Presences)
 		if err := s.con.WriteJSON(m); err != nil {
 			return fmt.Errorf("unable to send (presence) message: %w", err)
 		}
@@ -33,7 +33,7 @@ func (m *PresenceMessage) Handle(s *socket) error {
 }
 
 func GetPresences() ([]database.Presence, error) {
-	fmt.Println("hi get presences")
+	// fmt.Println("hi get presences")
 	presences := []database.Presence{}
 	users, err := database.GetUsers()
 	if err != nil {
@@ -43,8 +43,8 @@ func GetPresences() ([]database.Presence, error) {
 		return users[i].Nickname < users[j].Nickname
 	})
 	for _, user := range users {
-		if user.LoggedIn =="true"{
-			fmt.Println("testing", user.Nickname)
+		if user.LoggedIn == "true" {
+			// fmt.Println("testing", user.Nickname)
 			presences = append(presences, database.Presence{
 				ID:       user.ID,
 				Nickname: user.Nickname,
@@ -60,11 +60,10 @@ func GetPresences() ([]database.Presence, error) {
 }
 
 func OnPresenceConnect(s *socket) error {
-	fmt.Println("hguefgsuyuufygsyegfgefuag8efga8gef87aef87aef78ef")
-	
+	// fmt.Println("hguefgsuyuufygsyegfgefuag8efga8gef87aef87aef78ef")
+
 	time.Sleep(1 * time.Second)
 	presences, err := GetPresences()
-	fmt.Println(presences)
 	if err != nil {
 		return fmt.Errorf("OnPresenceConnect (GetPresences) error: %+v\n", err)
 	}
