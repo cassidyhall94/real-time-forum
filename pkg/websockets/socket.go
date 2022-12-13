@@ -39,6 +39,7 @@ func BroadcastPresences() {
 		presences, err := GetPresences()
 		if err != nil {
 			fmt.Printf("BroadcastPresences (GetPresences) error: %+v\n", err)
+			continue
 		}
 		c := &PresenceMessage{
 			Type:      presence,
@@ -46,7 +47,9 @@ func BroadcastPresences() {
 			Presences: presences,
 		}
 		for _, ss := range savedSockets {
-			c.Broadcast(ss)
+			// TODO: Handle me
+			// ss.t ?
+			_ = c.Broadcast(ss)
 		}
 		time.Sleep(1 * time.Second)
 	}
