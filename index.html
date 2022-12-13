@@ -10,10 +10,10 @@
 <body>
     <header>01 Founders
         <button id="post"
-            onclick="contentSocket.sendContentRequest(event); postSocket.sendSubmittedPostsRequest()">Home</button>
-        <button id="login" onclick="contentSocket.sendContentRequest(event)">Login/Register</button>
-        <button id="profile" onclick="contentSocket.sendContentRequest(event)">Profile</button>
-        <button id="logout" onclick="Logout()">Logout</button>
+            onclick="contentSocket.sendContentRequest(event); postSocket.sendSubmittedPostsRequest(); presenceSocket.sendNewPresenceUpdate()">Home</button>
+        <button id="login" onclick="contentSocket.sendContentRequest(event);presenceSocket.sendNewPresenceUpdate()">Login/Register</button>
+        <button id="profile" onclick="contentSocket.sendContentRequest(event);presenceSocket.sendNewPresenceUpdate()">Profile</button>
+        <button id="logout" onclick="Logout();presenceSocket.sendNewPresenceUpdate()">Logout</button>
 
         <h5 id="welcome"></h5>
     </header>

@@ -9,9 +9,30 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/sessions"
 	"golang.org/x/crypto/bcrypt"
 )
+
+// *******************************************************CHECK IF SESSION********************************888
+func CheckLoggedIn(r *http.Request) (bool, string){
+	var cookies = getCookies(r)
+	// get cookie
+	// compare with db if value exists
+	// if exists start websocket connection?
+	
+	if len(cookies) > 0 {
+		fmt.Println(database.GetSessionsFromDB())
+		// // sess = &[]database.Session{}
+		var sess, _ = database.GetSessionsFromDB()
+		for i := 0; i < len(sess); i++ {
+			if cookies[0].Name == sess[i].UserName{
+				return true, sess[i].UserName
+			}
+		}
+	} 
+	//returns false if cookie expired
+return false, ""
+
+}
 
 // ***************************REGISTER**********************************************************8
 // check if pasword meets criteria number length etc, if nickname is not taken
@@ -66,26 +87,20 @@ func checkPwHash(password, hash string) bool {
 // *****************************LOGIN ***************************************
 func Login(w http.ResponseWriter, r *http.Request) {
 	var user database.Login
-	// cookie := &http.Cookie{
-	// 	Name: usr.Nickname,
-	// 	Value: "",
-	// 	Path: "",
-	// 	Expires: time.Unix(0,0),
-	// }
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		log.Println(err)
 	}
-	cookies := r.Cookies()
+
+	// var cookies = r.Cookies()
+	var cookies = getCookies(r)
+
 	if len(cookies) >= 1 {
 		for i := 0; i < len(cookies); i++ {
-			// fmt.Println(cookies[i].Name, user.Nickname)
-			// fmt.Printf("%T", cookies[i])
 			if cookies[i].Name != user.Nickname {
 				DeleteCookie(w, cookies[i].Name)
 				UpdateUser(cookies[i].Name, "false")
 			}
-			// fmt.Println(cookies[i].)
 		}
 	}
 	var users []database.User
@@ -100,8 +115,10 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	var email string
 	var id string
 	var matchID string
-	store := sessions.NewCookieStore([]byte("secret-keys"))
-	store.Options.SameSite = http.SameSiteLaxMode
+
+	// var store = sessions.NewCookieStore([]byte("secret-keys"))
+	// store.Options.SameSite = http.SameSiteLaxMode
+
 	for rows.Next() {
 		err := rows.Scan(&id, &nickname, &password, &loggedin, &email)
 		if err != nil {
@@ -117,6 +134,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 					Password: password,
 					LoggedIn: "true",
 				})
+				user.Nickname = nickname
+
 			}
 		}
 	}
@@ -125,11 +144,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("pw mismatch")
 	}
 	if len(users) > 0 && users[0].LoggedIn == "true" {
-		// session, _ := store.Get(r, "session")
-		// session.Values[nickname] = nickname
-		// session.Save(r, w)
-		// session.Options.SameSite = http.SameSiteLaxMode
-		loggedin := "true"
+
+		var loggedin = "true"
 		UpdateUser(user.Nickname, loggedin)
 		// Cookie(w, r, user.Nickname, (cookieValue.String()))
 		Cookie(w, r, user.Nickname, matchID)
@@ -166,13 +182,15 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	UpdateUser(usr.Nickname, "false")
 }
 
-// *************************** COOKIE***********************
-// creates cookie
-func Cookie(w http.ResponseWriter, r *http.Request, Username string, id string) {
+// *************************** COOKIES***********************
+//creates cookie
+func Cookie(w http.ResponseWriter,  r *http.Request, Username string, id string) {
+
 	expiration := time.Now().Add(1 * time.Hour)
 	cookie := http.Cookie{Name: Username, Value: id, Expires: expiration, SameSite: http.SameSiteLaxMode}
 	http.SetCookie(w, &cookie)
-	rows, err := database.DB.Prepare(`INSERT INTO cookies(sessionID, userName, expiryTime) VALUES (?,?,?);`)
+
+	rows, err := database.DB.Prepare(`INSERT or REPLACE INTO cookies(sessionID, userName, expiryTime) VALUES (?,?,?);`)
 	if err != nil {
 		log.Println(err)
 	}
@@ -184,13 +202,22 @@ func Cookie(w http.ResponseWriter, r *http.Request, Username string, id string) 
 	// fmt.Println(cookie)
 }
 
-// delete cookie
+func getCookies(r *http.Request) []*http.Cookie {
+	return r.Cookies()
+}
+
+//delete cookie
 func DeleteCookie(w http.ResponseWriter, username string) {
 	cookie := &http.Cookie{
 		Name:    username,
 		Value:   "",
 		Path:    "",
 		Expires: time.Unix(0, 0),
+		SameSite: http.SameSiteLaxMode,
 	}
 	http.SetCookie(w, cookie)
+}
+
+func CheckExpiredCookies(){
+
 }

@@ -59,6 +59,12 @@ type Login struct {
 	Password string `json:"password,omitempty"`
 }
 
+type Session struct {
+	SessionID  string
+	UserName   string
+	ExpiryTime string
+}
+
 // type Cookie struct {
 // 	Name string
 // 	Value string
@@ -142,6 +148,36 @@ func GetPosts() ([]*Post, error) {
 		return posts, err
 	}
 	return posts, nil
+}
+
+func GetSessionsFromDB() ([]*Session, error) {
+	sessions := []*Session{}
+
+	rows, err := DB.Query(` SELECT * FROM cookies`)
+	if err != nil {
+		return sessions, fmt.Errorf("GetSessions DB Query error: %+v\n", err)
+	}
+
+	var sessionID string
+	var userName string
+	var expiryTime string
+
+	for rows.Next() {
+		err := rows.Scan(&sessionID, &userName, &expiryTime)
+		if err != nil {
+			return sessions, fmt.Errorf("GetSessions rows.Scan error: %+v\n", err)
+		}
+		sessions = append(sessions, &Session{
+			SessionID:  sessionID,
+			UserName:   userName,
+			ExpiryTime: expiryTime,
+		})
+	}
+	err = rows.Err()
+	if err != nil {
+		return sessions, err
+	}
+	return sessions, nil
 }
 
 func GetPostForComment(c Comment) (Post, error) {

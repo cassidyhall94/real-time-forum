@@ -101,7 +101,40 @@ class MySocket {
     const c = JSON.parse(text)
     document.getElementById("content").innerHTML = c.body;
   }
+<<<<<<< HEAD
 
+=======
+  presenceHandler(text) {
+    const m = JSON.parse(text)
+    console.log("handler",m)
+    let presences = document.getElementById("presencecontainer")
+    let arr = Array.from(presences.childNodes)
+
+
+
+    for (let p of m.presences) {
+      const consp = p
+      let user = document.createElement("button");
+      user.addEventListener('click', function (event, chat = consp) {
+        event.target.id = "chat"
+        contentSocket.sendChatContentRequest(event, chat.chat_id)
+      });
+
+     let existingPresences = (arr.filter(item =>item.textContent === p.nickname))
+      
+     if( existingPresences.length <1){
+
+       user.id = p.id
+       user.innerHTML = p.nickname
+       user.style.color = 'white'
+       user.className = "presence " + p.nickname 
+
+       presences.appendChild(user)
+     }
+
+    }
+  }
+>>>>>>> karolis-new
   postHandler(text) {
     const m = JSON.parse(text)
     for (let p of m.posts) {
@@ -147,7 +180,31 @@ class MySocket {
       }
     }
   }
+<<<<<<< HEAD
 
+=======
+  sendNewPresenceUpdate(e){
+    let m ={
+      type: 'presence',
+      timestamp: time(),
+      presences: [
+        {
+          // nickname: e.target.nickname,
+          id: getCookieName(),
+          nickname: getCookieName(),
+          online: "hello",
+          last_contacted_time: "0",
+          
+        }
+      ]
+    }
+    // this.mysocket.send(JSON.stringify(m))
+    console.log("asking for update")
+    this.mysocket.send(JSON.stringify(m))
+    console.log(m)
+    console.log("asked for update")
+  }
+>>>>>>> karolis-new
   sendNewPostRequest(e) {
     let m = {
       type: 'post',
@@ -202,7 +259,7 @@ class MySocket {
     var socket = new WebSocket("ws://localhost:8080/" + URI);
     this.mysocket = socket;
     socket.onmessage = (e) => {
-      // console.log("socket message")
+      // console.log("socket message",e)
       handler(e.data, false);
     };
     socket.onopen = () => {
@@ -286,6 +343,10 @@ function getRegDetails() {
     })
   }
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> karolis-new
 // **********************************LOGIN*******************************************
 function loginFormData() {
   loginForm.nickname = document.getElementById('nickname-login').value
@@ -298,6 +359,7 @@ function loginFormData() {
   }
   // let id = ""
   getCookieName()
+<<<<<<< HEAD
   fetch("/login", {
     headers: {
       'Accept': 'application/json',
@@ -318,6 +380,38 @@ function loginFormData() {
         user.innerText = `Hello ${document.cookie.match(logindata.nickname)}`
         alert("you are logged in ")
       }
+=======
+
+  fetch("/login",{
+      headers:{
+        'Accept':'application/json',
+        'Content-Type': 'application/json'
+      },
+      method: "POST",
+      body:loginFormJSON
+
+    }).then((response)=>{
+
+      response.text().then(function (loginFormJSON){
+        let result = JSON.parse(loginFormJSON)
+        // console.log("parse",result)
+
+        
+        if (result == null){
+          alert("incorrect username or password")
+
+        } else{
+          logindata.nickname = result[0].nickname
+          // logindata.password = result[0].password
+          user.innerText = `Hello ${document.cookie.match(logindata.nickname)}`
+          alert("you are logged in ")
+        }
+      })
+
+    }).catch((error)=>{
+      console.log(error)
+
+>>>>>>> karolis-new
     })
   }).catch((error) => {
     console.log(error)
@@ -341,6 +435,28 @@ function Logout() {
   let user = document.getElementById('welcome')
   user.innerText = ""
   // console.log("logout", user.textContent.replace("Hello", ''))
+<<<<<<< HEAD
+=======
+   
+  let parseUser = JSON.stringify(logout)
+
+  fetch("/logout",{
+      headers:{
+        'Accept':'application/json',
+        'Content-Type': 'application/json'
+      },
+      method: "POST",
+      body: parseUser
+
+    }).then((response)=>{
+
+      response.text().then(function (parseUser){
+
+      })
+
+    }).catch((error)=>{
+      console.log(error)
+>>>>>>> karolis-new
 
   let parseUser = JSON.stringify(logout)
   fetch("/logout", {
@@ -355,6 +471,7 @@ function Logout() {
       // let result = JSON.parse(parseUser)
       // console.log("parse",result)
     })
+<<<<<<< HEAD
   }).catch((error) => {
     console.log(error)
   })
@@ -377,3 +494,34 @@ function getIdValue() {
 
 // console.log("hello", document.cookie.split(";")[0].split("=")[1])
 // console.log(cookies[cookies.length-1].split("=")[0])
+=======
+
+    alert("you are now logged out")
+  }
+
+  function getCookieName(){
+    let cookies = document.cookie.split(";")
+    let lastCookieName = cookies[cookies.length -1].split("=")[0].replace(" ", '')
+
+    // console.log("cookie",cookies, "length", cookies.length)
+    return lastCookieName
+    // console.log("h",lastCookieName)
+
+  }
+
+
+  function getIdValue (){
+    return document.cookie.split(";")[0].split("=")[1]
+  }
+
+  function init(){
+    if( getCookieName() != ""){
+      let user= document.getElementById('welcome')
+      user.innerHTML = "Hello " + getCookieName()
+    }
+  }
+
+  
+  init()
+
+>>>>>>> karolis-new
