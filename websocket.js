@@ -1,7 +1,7 @@
 //TODO: fix const time as it is not formatted correctly and add where time/date is needed
 const time = () => { return new Date().toLocaleString() };
-// let loggedInUserID
 let clickedParticipantID
+// let participant_ids
 
 class MySocket {
   wsType = ""
@@ -14,15 +14,14 @@ class MySocket {
     let presences = document.getElementById("presencecontainer")
     let arr = Array.from(presences.childNodes)
     for (let p of m.presences) {
-      const consp = p
       if (p.id !== getIdValue()) {
         let user = document.createElement("button");
-        user.addEventListener('click', async function (event, chat = consp) {
+        user.addEventListener('click', async function (event) {
           clickedParticipantID = user.id
           event.target.id = "chat"
           let participant_ids = [getIdValue(), clickedParticipantID]
           await contentSocket.sendChatContentRequest(event, participant_ids)
-          chatSocket.sendNewChatRequest(event, "", participant_ids)
+          // chatSocket.sendNewChatRequest(inputText, participant_ids)
         });
 
         let existingPresences = (arr.filter(item => item.textContent === p.nickname))
@@ -40,7 +39,7 @@ class MySocket {
     }
   }
 
-  sendNewChatRequest(event, inputText = "", participant_ids = []) {
+  sendNewChatRequest(inputText) {
     console.log("new chat request " + inputText)
     let chats = []
     if (inputText !== "") {
@@ -54,11 +53,12 @@ class MySocket {
         }
       ]
     }
-
+    let participantsIDs = [getIdValue(), clickedParticipantID]
     let participants = []
-    for (let p of participant_ids) {
-      participants.push({id: p})
+    for (let p of participantsIDs) {
+      participants.push({ id: p })
     }
+    console.log("sendNewChatRequest participants: ", participants)
     let m = {
       type: 'chat',
       timestamp: time(),
@@ -74,6 +74,7 @@ class MySocket {
   }
 
   async sendChatContentRequest(e, participant_ids) {
+    console.log("sendChatContentRequest participants_ids: ", participant_ids)
     this.mysocket.send(JSON.stringify({
       type: "content",
       resource: e.target.id,
@@ -83,18 +84,12 @@ class MySocket {
 
   chatHandler(text) {
     const m = JSON.parse(text)
-    console.log(m)
-
     for (let c of m.conversations) {
-
       for (let p of c.chats) {
-
         let chat = document.createElement("div");
         chat.className = "submittedchat"
         chat.id = p.chat_id
         chat.innerHTML = "<b>Me: " + p.sender.nickname + "</b>" + "<br>" + "<b>Date: " + "</b>" + p.date + "<br>" + p.body + "<br><br>";
-        console.log(chat)
-        console.log(document.getElementById("chatcontainer"))
         document.getElementById("submittedchats").appendChild(chat)
       }
     }
@@ -104,14 +99,13 @@ class MySocket {
     if (e.keyCode == 13) {
       this.wsType = e.target.id.slice(0, -3)
       if (this.wsType = 'chat') {
-        this.sendNewChatRequest(document.getElementById('chatIPT').value)
+        this.sendNewChatRequest(e.target.value)
       }
     }
   }
 
   contentHandler(text) {
     const c = JSON.parse(text)
-    console.log(c)
     document.getElementById("content").innerHTML = c.body;
   }
 
@@ -131,7 +125,6 @@ class MySocket {
         contentSocket.sendContentRequest(event, post.post_id)
       });
       post.appendChild(button)
-      // console.log(document.getElementById("submittedposts"))
       document.getElementById("submittedposts").appendChild(post)
     }
   }

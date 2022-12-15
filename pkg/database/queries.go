@@ -44,7 +44,7 @@ type Chat struct {
 	ChatID  string `json:"chat_id"`
 	Sender  User   `json:"sender"`
 	Date    string `json:"date,omitempty"`
-	Body    string `json:"body,omitempty"`
+	Body    string `json:"body"`
 }
 
 type Presence struct {

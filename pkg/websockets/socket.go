@@ -147,6 +147,11 @@ func (s *socket) pollSocket() {
 			switch sm.Type {
 			case chat:
 				m := &ChatMessage{}
+				// c, err := json.Marshal(b)
+				// if err != nil {
+				// 	fmt.Println(err)
+				// }
+				fmt.Println(string(b))
 				if err := json.Unmarshal(b, m); err != nil {
 					panic(err)
 				}
