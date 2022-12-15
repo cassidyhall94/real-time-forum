@@ -20,8 +20,10 @@ class MySocket {
           clickedParticipantID = user.id
           event.target.id = "chat"
           let participant_ids = [getIdValue(), clickedParticipantID]
+          console.log("presence: ", participant_ids)
+          // TODO: pull participant_ids out of this function
           await contentSocket.sendChatContentRequest(event, participant_ids)
-          // chatSocket.sendNewChatRequest(inputText, participant_ids)
+          chatSocket.sendNewChatRequest(event, "", participant_ids)
         });
 
         let existingPresences = (arr.filter(item => item.textContent === p.nickname))
@@ -39,7 +41,7 @@ class MySocket {
     }
   }
 
-  sendNewChatRequest(inputText) {
+  sendNewChatRequest(event, inputText = "", participant_ids = []) {
     console.log("new chat request " + inputText)
     let chats = []
     if (inputText !== "") {
@@ -53,9 +55,8 @@ class MySocket {
         }
       ]
     }
-    let participantsIDs = [getIdValue(), clickedParticipantID]
     let participants = []
-    for (let p of participantsIDs) {
+    for (let p of participant_ids) {
       participants.push({ id: p })
     }
     console.log("sendNewChatRequest participants: ", participants)
@@ -73,7 +74,7 @@ class MySocket {
     document.getElementById('chatIPT').value = ""
   }
 
-  async sendChatContentRequest(e, participant_ids) {
+  sendChatContentRequest(e, participant_ids) {
     console.log("sendChatContentRequest participants_ids: ", participant_ids)
     this.mysocket.send(JSON.stringify({
       type: "content",
@@ -99,7 +100,7 @@ class MySocket {
     if (e.keyCode == 13) {
       this.wsType = e.target.id.slice(0, -3)
       if (this.wsType = 'chat') {
-        this.sendNewChatRequest(e.target.value)
+        this.sendNewChatRequest(e, e.target.value, [getIdValue(), clickedParticipantID])
       }
     }
   }

@@ -80,13 +80,17 @@ func (m *ChatMessage) Handle(s *socket) error {
 	if err != nil {
 		return fmt.Errorf("ChatSocket Handle (GetPopulatedConversations) error: %w", err)
 	}
-	m.Conversations = c
-	// b, err := json.Marshal(m.Conversations)
+	cm := &ChatMessage{
+		Type:          chat,
+		Conversations: c,
+	}
+
+	// b, err := json.Marshal(cm.Conversations)
 	// if err != nil {
 	// 	fmt.Println(err)
 	// }
 	// fmt.Println("ChatSocket Handle (Convos): ", string(b))
-	return m.Broadcast(s)
+	return cm.Broadcast(s)
 }
 
 func CreateChat(chat database.Chat) (string, error) {
