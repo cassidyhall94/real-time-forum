@@ -1,68 +1,99 @@
 package authentication
 
 import (
-	"database/sql"
 	"fmt"
+	"net/http"
+	"real-time-forum/pkg/database"
+	"time"
 
-	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
-var Person UserDetails
-
-type UserDetails struct {
-	ID                     string
-	Email                  string
-	Nickname               string
-	Password               string
-	Accesslevel            bool
-	CookieChecker          bool
-	Attempted              bool
-	RegistrationAttempted  bool
-	FailedRegister         bool
-	SuccessfulRegistration bool
-	PostAdded              bool
-}
-
-//register
-func newUser(nickname string, email string, password string, db *sql.DB) {
-	hash, err := HashPassword(password)
+// parseRegForm attempts to parse a form from the request and returns a database.User containing the form data
+func parseAuthForm(r *http.Request) (database.User, error) {
+	// Parse the form data
+	err := r.ParseForm()
 	if err != nil {
-		fmt.Println("Error hasing the password", err)
+		return database.User{}, fmt.Errorf("unable to parse reg form: %w", err)
 	}
-	u1 := uuid.NewV4()
-	_, errNewUser := db.Exec("INSERT INTO users (ID, email, nickname, password) VALUES (?, ?, ?, ?)", u1, email, nickname, hash)
-	if errNewUser != nil {
-		fmt.Printf("The error is %v", errNewUser.Error())
-	}
+
+	return database.User{
+		Nickname:  r.Form.Get("nickname"),
+		Age:       r.Form.Get("age"),
+		Gender:    r.Form.Get("gender"),
+		FirstName: r.Form.Get("fname"),
+		LastName:  r.Form.Get("lname"),
+		Email:     r.Form.Get("email"),
+		Password:  r.Form.Get("password"),
+	}, nil
 }
 
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
+// requestIsLoggedIn validates sessions from a http.Request
+func RequestIsLoggedIn(r *http.Request) bool {
+	return cookieIsLoggedIn(extractSessionCookie(r))
 }
 
-// store user details in database
-// login
-// create a cookie and a sessionID on login
-// check login info against database
-func Register(nickname string, email string, password string, db *sql.DB) {
-	rows, err := db.Query("SELECT email FROM users WHERE email = ?", email)
+// cookieIsLoggedIn validates sessions from a http.Cookie
+func cookieIsLoggedIn(c *http.Cookie) bool {
+	if c == nil {
+		return false
+	}
+
+	sess, err := database.GetSessionsFromDB()
 	if err != nil {
-		fmt.Println("Registration Error - selecting email from database")
+		return false
 	}
-	count := 0
-	for rows.Next() {
-		count++
+
+	if validateSessCookie(c, sess) {
+		return true
 	}
-	rows2, err2 := db.Query("SELECT nickname FROM users WHERE nickname = ?", nickname)
-	if err2 != nil {
-		fmt.Println("Registration Error - selecting email from database")
+	return false
+}
+
+func extractSessionCookie(r *http.Request) *http.Cookie {
+	for _, c := range r.Cookies() {
+		if c.Name == database.SessionCookieName {
+			return c
+		}
 	}
-	count2 := 0
-	for rows2.Next() {
-		count2++
+	return nil
+}
+
+func validateSessCookie(c *http.Cookie, sess []*database.Session) bool {
+	if c == nil || len(sess) == 0 {
+		return false
 	}
-	if count == 0 && count2 == 0 {
+	for _, s := range sess {
+		if s.SessionID == c.Value {
+			return !isCookieExpired(s)
+		}
 	}
+
+	return false
+}
+
+func isCookieExpired(sess *database.Session) bool {
+	expirationTime, err := time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", sess.ExpiryTime)
+	if err != nil {
+		fmt.Printf("unable to validate expiry time on session cookie: %+v\n", sess)
+		return true
+	}
+	if expirationTime.Before(time.Now()) {
+		return true
+	}
+	return false
+}
+
+func passwordHash(str string) string {
+	hashedPw, err := bcrypt.GenerateFromPassword([]byte(str), 8)
+	if err != nil {
+		fmt.Println("unable to hash password")
+		return ""
+	}
+	return string(hashedPw)
+}
+
+func checkPwHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }

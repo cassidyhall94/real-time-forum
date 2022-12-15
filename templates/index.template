@@ -1,19 +1,20 @@
+{{define "toContent"}}
 <!DOCTYPE html>
 <html>
 
 <head>
-    <link rel="stylesheet" href="styles/styles.css" type="text/css">
-    <link rel="shortcut icon" href="./images/favicon/favicon-32x32.png" type="image/x-icon">
+    <link rel="stylesheet" href="static/styles/styles.css" type="text/css">
+    <link rel="shortcut icon" href="static/images/favicon/favicon-32x32.png" type="image/x-icon">
     <title>Real Time Forum</title>
 </head>
 
 <body>
     <header>01 Founders
         <button id="post"
-            onclick="contentSocket.sendContentRequest(event); postSocket.sendSubmittedPostsRequest(); presenceSocket.sendNewPresenceUpdate()">Home</button>
-        <button id="login" onclick="contentSocket.sendContentRequest(event);presenceSocket.sendNewPresenceUpdate()">Login/Register</button>
+            onclick="contentSocket.sendContentRequest(event); postSocket.sendSubmittedPostsRequest()">Home</button>
+        <button id="login" onclick="contentSocket.sendContentRequest(event)">Login/Register</button>
         <button id="profile" onclick="contentSocket.sendContentRequest(event);presenceSocket.sendNewPresenceUpdate()">Profile</button>
-        <button id="logout" onclick="Logout();presenceSocket.sendNewPresenceUpdate()">Logout</button>
+        <button id="logout" onclick="Logout()">Logout</button>
 
         <h5 id="welcome"></h5>
     </header>
@@ -41,6 +42,8 @@
         </article>
         <section>
             <div id="content">
+{{end}}
+{{define "fromContent"}}
             </div>
         </section>
         <aside>
@@ -49,21 +52,38 @@
         </aside>
     </div>
     <footer></footer>
-    <script src="websocket.js"></script>
-    <!-- <script src="test.js"></script> -->
+    <script src="static/websocket.js"></script>
     <script>
-        let contentSocket = new MySocket()
-        contentSocket.connectSocket("content", contentSocket.contentHandler);
-        let postSocket = new MySocket()
-        postSocket.connectSocket("post", postSocket.postHandler);
-        let chatSocket = new MySocket()
-        chatSocket.connectSocket("chat", chatSocket.chatHandler);
-        let presenceSocket = new MySocket()
-        presenceSocket.connectSocket("presence", presenceSocket.presenceHandler);
-        // let registerSocket = new MySocket()
-        // registerSocket.connectSocket("register", registerSocket.registerHandler)
+        const getSessionCookie = () => {
+            var cookieString = document.cookie;
+            var cookies = cookieString.split(";");
+
+            var cookie = cookies.find(function (cookie) {
+                return cookie.trim().startsWith("forum-session=");
+            });
+
+            if (cookie) {
+                return cookie.split("=")[1];
+            }
+            return ""
+        }
+        while (true) {
+            if (getSessionCookie() !== "") {
+                let contentSocket = new MySocket();
+                contentSocket.connectSocket("content", contentSocket.contentHandler);
+                let postSocket = new MySocket();
+                postSocket.connectSocket("post", postSocket.postHandler);
+                let chatSocket = new MySocket();
+                chatSocket.connectSocket("chat", chatSocket.chatHandler);
+                let presenceSocket = new MySocket();
+                presenceSocket.connectSocket("presence", presenceSocket.presenceHandler);
+            }
+        }
     </script>
 
 </body>
 
 </html>
+{{end}}
+{{ template "toContent" }}
+{{ template "fromContent" }}

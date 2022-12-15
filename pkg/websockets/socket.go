@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	auth "real-time-forum/pkg/authentication"
 	"runtime/debug"
 	"time"
 
@@ -56,23 +55,8 @@ var (
 // }
 
 func SocketCreate(w http.ResponseWriter, r *http.Request) {
-	c1, err1 := r.Cookie("1st-cookie")
-	if err1 == nil && !auth.Person.Accesslevel {
-		// first home page access
-		c1.MaxAge = -1
-		http.SetCookie(w, c1)
-	}
-	_, err := r.Cookie("1st-cookie")
-	if err != nil && auth.Person.Accesslevel {
-		// logged in and on 2nd browser
-		auth.Person.CookieChecker = false
-	} else if err == nil && auth.Person.Accesslevel {
-		// Original browser and logged in
-		auth.Person.CookieChecker = true
-	} else {
-		// not logged in yet
-		auth.Person.CookieChecker = false
-	}
+	// TODO: validate sessions
+
 	fmt.Println("Socket Request on " + r.RequestURI)
 	con, _ := upgrader.Upgrade(w, r, nil)
 	ptrSocket := &socket{
@@ -83,11 +67,6 @@ func SocketCreate(w http.ResponseWriter, r *http.Request) {
 	// add new case here when added to main.go for handlers
 	switch r.RequestURI {
 	case "/content":
-		var loggedIn, name = CheckLoggedIn(r)
-		fmt.Println("logged in?", loggedIn, name)
-		if loggedIn {
-			ptrSocket.nickname = name
-		}
 		ptrSocket.t = content
 		// loads the home page (which contains the posts form)
 

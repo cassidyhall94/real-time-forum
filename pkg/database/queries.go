@@ -2,7 +2,12 @@ package database
 
 import (
 	"fmt"
+	"net/http"
 	"reflect"
+	"time"
+
+	uuid "github.com/satori/go.uuid"
+	_ "golang.org/x/exp/constraints"
 )
 
 type User struct {
@@ -14,7 +19,6 @@ type User struct {
 	LastName  string `json:"lastname,omitempty"`
 	Email     string `json:"email,omitempty"`
 	Password  string `json:"password,omitempty"`
-	LoggedIn  string `json:"loggedin,omitempty"`
 }
 
 type Post struct {
@@ -50,7 +54,7 @@ type Chat struct {
 type Presence struct {
 	ID                string `json:"id"`
 	Nickname          string `json:"nickname"`
-	Online            string `json:"online"`
+	Online            bool   `json:"online"`
 	LastContactedTime string `json:"last_contacted_time"`
 }
 
@@ -61,7 +65,7 @@ type Login struct {
 
 type Session struct {
 	SessionID  string
-	UserName   string
+	Nickname   string
 	ExpiryTime string
 }
 
@@ -93,10 +97,9 @@ func GetUsers() ([]User, error) {
 	var lastname string
 	var email string
 	var password string
-	var loggedin string
 
 	for rows.Next() {
-		err := rows.Scan(&id, &nickname, &age, &gender, &firstname, &lastname, &email, &password, &loggedin)
+		err := rows.Scan(&id, &nickname, &age, &gender, &firstname, &lastname, &email, &password)
 		if err != nil {
 			return users, fmt.Errorf("GetUsers rows.Scan error: %+v\n", err)
 		}
@@ -109,7 +112,6 @@ func GetUsers() ([]User, error) {
 			LastName:  lastname,
 			Email:     email,
 			Password:  password,
-			LoggedIn:  loggedin,
 		})
 	}
 	err = rows.Err()
@@ -159,17 +161,17 @@ func GetSessionsFromDB() ([]*Session, error) {
 	}
 
 	var sessionID string
-	var userName string
+	var nickname string
 	var expiryTime string
 
 	for rows.Next() {
-		err := rows.Scan(&sessionID, &userName, &expiryTime)
+		err := rows.Scan(&sessionID, &nickname, &expiryTime)
 		if err != nil {
 			return sessions, fmt.Errorf("GetSessions rows.Scan error: %+v\n", err)
 		}
 		sessions = append(sessions, &Session{
 			SessionID:  sessionID,
-			UserName:   userName,
+			Nickname:   nickname,
 			ExpiryTime: expiryTime,
 		})
 	}
@@ -444,4 +446,117 @@ func GetConvoID(participantIDs []string, conversations []*Conversation) (string,
 		}
 	}
 	return "", nil
+}
+
+// (u User) compare diffs two user structs and returns a slice of conflicting keys. Passwords never conflict
+func (u User) Compare(t User) []string {
+	o := []string{}
+	uv, tv := reflect.ValueOf(u), reflect.ValueOf(t)
+
+	for i := 0; i < uv.NumField(); i++ {
+		if uv.Type().Field(i).Name == "Password" {
+			continue
+		}
+		if uv.Field(i).String() == tv.Field(i).String() {
+			o = append(o, uv.Type().Field(i).Name)
+		}
+	}
+
+	return o
+}
+
+func CreatePost(post *Post) (*Post, error) {
+	stmt, err := DB.Prepare("INSERT INTO posts (postID, nickname, title, categories, body) VALUES (?, ?, ?, ?, ?);")
+	defer stmt.Close()
+	// fmt.Println(post.Nickname)
+	if err != nil {
+		return nil, fmt.Errorf("CreatePost DB Prepare error: %+v\n", err)
+	}
+	if post.PostID == "" {
+		post.PostID = uuid.NewV4().String()
+	}
+	// TODO: remove placeholder nickname once login/sessions are working, and hook up the real user who is logged in
+	if post.Nickname == "" {
+		fmt.Println("post.Nickname is empty")
+		// post.Nickname = "Cassidy"
+	}
+	_, err = stmt.Exec(post.PostID, post.Nickname, post.Title, post.Categories, post.Body)
+	if err != nil {
+		return nil, fmt.Errorf("CreatePost Exec error: %+v\n", err)
+	}
+	return post, err
+}
+
+func CreateComment(comment Comment) (Comment, error) {
+	stmt, err := DB.Prepare("INSERT INTO comments (commentID, postID, nickname, body) VALUES (?, ?, ?, ?);")
+	defer stmt.Close()
+	if err != nil {
+		return comment, fmt.Errorf("CreateComment DB Prepare error: %+v\n", err)
+	}
+	if comment.CommentID == "" {
+		comment.CommentID = uuid.NewV4().String()
+	}
+	// TODO: remove placeholder nickname once login/sessions are working
+	if comment.Nickname == "" {
+		fmt.Println("comment.Nickname is empty")
+		// comment.Nickname = "Cassidy"
+	}
+	_, err = stmt.Exec(comment.CommentID, comment.PostID, comment.Nickname, comment.Body)
+	if err != nil {
+		return comment, fmt.Errorf("CreateComment Exec error: %+v\n", err)
+	}
+	return comment, err
+}
+
+func CreateUser(user User) (User, error) {
+	stmt, err := DB.Prepare("INSERT INTO users (ID, nickname, age, gender, firstname, lastname, email, password) VALUES (?,?,?,?,?,?,?,?)")
+	defer stmt.Close()
+	if err != nil {
+		return user, fmt.Errorf("Create User DB Prepare error: %+v\n", err)
+	}
+	if user.ID == "" {
+		user.ID = uuid.NewV4().String()
+	}
+	_, err = stmt.Exec(user.ID, user.Nickname, user.Age, user.Gender, user.FirstName, user.LastName, user.Email, user.Password)
+	if err != nil {
+		return user, fmt.Errorf("Create User Exec error: %+v\n", err)
+	}
+	return user, err
+}
+
+func GetUserByNickname(user User) (User, error) {
+	if user.Nickname == "" {
+		return User{}, fmt.Errorf("user must contain a nickname")
+	}
+
+	users, err := GetUsers()
+	if err != nil {
+		return User{}, fmt.Errorf("unable to get users for filtering user: %w", err)
+	}
+
+	for _, u := range users {
+		if user.Nickname == u.Nickname {
+			return u, nil
+		}
+	}
+	return User{}, fmt.Errorf("unable to find user for %+v", err)
+}
+
+const SessionCookieName string = "forum-session"
+
+func CreateSession(user User) (*http.Cookie, *Session, error) {
+	sessionID := uuid.NewV4().String()
+	expiration := time.Now().Add(1 * time.Hour)
+	cookie := &http.Cookie{Name: SessionCookieName, Value: sessionID, Expires: expiration, SameSite: http.SameSiteLaxMode}
+
+	rows, err := DB.Prepare(`INSERT or REPLACE INTO sessions(sessionID, userID, expiryTime) VALUES (?,?,?);`)
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to prepare insertion into sessions: %w", err)
+	}
+	defer rows.Close()
+	_, err = rows.Exec(sessionID, user.ID, expiration)
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to execute sessions insertion statement: %w", err)
+	}
+	return cookie, &Session{SessionID: sessionID, Nickname: user.Nickname, ExpiryTime: expiration.String()}, nil
 }

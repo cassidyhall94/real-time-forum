@@ -40,8 +40,7 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 			"firstname" TEXT,
 			"lastname" TEXT,
 			"email" 	TEXT UNIQUE,
-			"password"	TEXT UNIQUE,
-			"loggedin" 	TEXT 
+			"password"	TEXT UNIQUE
 		);
 	`)
 	if errTbl != nil {
@@ -62,17 +61,17 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 		fmt.Println("POST ERROR")
 		log.Fatal(errPosts.Error())
 	}
-	// Create the cookies table
-	_, errCookie := sqliteDatabase.Exec(`
-		CREATE TABLE IF NOT EXISTS "cookies" (
+	// Create the sessions table
+	_, errSess := sqliteDatabase.Exec(`
+		CREATE TABLE IF NOT EXISTS "sessions" (
 			"sessionID"	TEXT,
 			"userName" 	TEXT REFERENCES users(nickname),
 			"expiryTime" TEXT
 		);
 	`)
-	if errCookie != nil {
+	if errSess != nil {
 		fmt.Println("TABLE ERROR")
-		log.Fatal(errCookie.Error())
+		log.Fatal(errSess.Error())
 	}
 	// Create the table for each user
 	_, errComments := sqliteDatabase.Exec(`
@@ -128,8 +127,9 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 
 func insertPlaceholdersInDB() {
 	queries := map[string]string{
-		"fake user 1":    fmt.Sprintf(`INSERT INTO users values ("975496ca-9bfc-4d71-8736-da4b6383a575", "bar", "22", "female", "foodie", "barry", "foo@bar.com", "s0fj489fhjsof", "true")`),
-		"fake user 2":    fmt.Sprintf(`INSERT INTO users values ("6d01e668-2642-4e55-af73-46f057b731f9", "foo", "30", "male", "barry", "fool", "bar@foo.com", "03444f89fsof", "true")`),
+		"fake user 1":    fmt.Sprintf(`INSERT INTO users values ("975496ca-9bfc-4d71-8736-da4b6383a575", "bar", "22", "female", "barriette", "tick", "foo@bar.com", "s0fj489fhjsof")`),
+		"fake user 2":    fmt.Sprintf(`INSERT INTO users values ("6d01e668-2642-4e55-af73-46f057b731f9", "foo", "30", "male", "barry", "fool", "bar@foo.com", "03444f89fsof")`),
+		"fake user 3":    fmt.Sprintf(`INSERT INTO users values ("6d01e668-2643-4e55-af73-46f057b731f9", "faz", "36", "male", "garry", "took", "bar@fook.com", "03444f89fsok")`),
 		"fake post 1":    fmt.Sprintf(`INSERT INTO posts values ("9b4bc963-ecb2-4767-a79b-b09cd102ce4a", "bar", "golang", "Best Coding Language ever", "Golang is really the best!")`),
 		"fake post 2":    fmt.Sprintf(`INSERT INTO posts values ("16f94e48-82bc-4884-96b3-c847d37f069c", "foo", "javascript", "I love Javascript!", "JS is really neat!")`),
 		"fake comment 1": fmt.Sprintf(`INSERT INTO comments values ("49f89e2f-4d7d-4b03-beb6-8def55652d4a", "9b4bc963-ecb2-4767-a79b-b09cd102ce4a", "Cassidy", "I like it too!")`),

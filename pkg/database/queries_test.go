@@ -1,6 +1,9 @@
 package database
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestGetConvoID(t *testing.T) {
 	type args struct {
@@ -53,6 +56,74 @@ func TestGetConvoID(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("GetConvoID() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestUser_compare(t *testing.T) {
+	type fields struct {
+		ID        string
+		Nickname  string
+		Age       string
+		Gender    string
+		FirstName string
+		LastName  string
+		Email     string
+		Password  string
+	}
+	type args struct {
+		t User
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   []string
+	}{
+		{
+			name: "works",
+			fields: fields{
+				ID:        "7777777777",
+				Nickname:  "nickname",
+				Age:       "age",
+				Gender:    "gender",
+				FirstName: "fname",
+				LastName:  "lname",
+				Email:     "email",
+				Password:  "password",
+			},
+			args: args{
+				t: User{
+					ID:        "7777777778",
+					Nickname:  "nickname",
+					Age:       "age",
+					Gender:    "gender",
+					FirstName: "fname",
+					LastName:  "lname",
+					Email:     "email",
+					Password:  "password",
+				},
+			},
+			want: []string{
+				"Nickname", "Age", "Gender", "FirstName", "LastName", "Email",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			u := User{
+				ID:        tt.fields.ID,
+				Nickname:  tt.fields.Nickname,
+				Age:       tt.fields.Age,
+				Gender:    tt.fields.Gender,
+				FirstName: tt.fields.FirstName,
+				LastName:  tt.fields.LastName,
+				Email:     tt.fields.Email,
+				Password:  tt.fields.Password,
+			}
+			if got := u.Compare(tt.args.t); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("User.compare() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -20,9 +20,8 @@ class MySocket {
           clickedParticipantID = user.id
           event.target.id = "chat"
           let participant_ids = [getIdValue(), clickedParticipantID]
-          console.log("presence: ", participant_ids)
           // TODO: pull participant_ids out of this function
-          await contentSocket.sendChatContentRequest(event, participant_ids)
+          await contentSocket.sendChatContentRequest(event)
           chatSocket.sendNewChatRequest(event, "", participant_ids)
         });
 
@@ -74,24 +73,24 @@ class MySocket {
     document.getElementById('chatIPT').value = ""
   }
 
-  sendChatContentRequest(e, participant_ids) {
-    console.log("sendChatContentRequest participants_ids: ", participant_ids)
+  sendChatContentRequest(e) {
     this.mysocket.send(JSON.stringify({
       type: "content",
       resource: e.target.id,
-      participant_ids: participant_ids,
     }));
   }
 
   chatHandler(text) {
-    const m = JSON.parse(text)
+    const m = JSON.parse(text);
+    const submittedchats = document.getElementById("submittedchats");
+    submittedchats.textContent = '';
     for (let c of m.conversations) {
       for (let p of c.chats) {
         let chat = document.createElement("div");
-        chat.className = "submittedchat"
-        chat.id = p.chat_id
+        chat.className = "submittedchat";
+        chat.id = p.chat_id;
         chat.innerHTML = "<b>Me: " + p.sender.nickname + "</b>" + "<br>" + "<b>Date: " + "</b>" + p.date + "<br>" + p.body + "<br><br>";
-        document.getElementById("submittedchats").appendChild(chat)
+        submittedchats.appendChild(chat);
       }
     }
   }
@@ -283,38 +282,33 @@ function getRegDetails() {
   registerForm.password = document.getElementById('password').value
   //convert data to JSON
   let jsonRegForm = JSON.stringify(registerForm)
-  // console.log(jsonRegForm)
-  if (registerForm.password.length < 5) {
-    registerForm.password = ""
-  }
 
   // SEND DATA TO BACKEND USING FETCH
   console.log(registerForm)
-  if (registerForm.nickname != "" && registerForm.email != "" && registerForm.password != "") {
 
-    fetch("/register", {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      method: "POST",
-      body: jsonRegForm
-    }).then((response) => {
-      response.text().then(function (jsonRegForm) {
-        let result = JSON.parse(jsonRegForm)
-        // console.log("register", result)
-        //cheks result value and only clears form when registered
-        if (result == "registered") {
-          document.getElementById('register').reset()
-          alert("successfully registered")
-        } else {
-          alert(result)
-        }
-      })
-    }).catch((error) => {
-      console.log(error)
+  fetch("/register", {
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    method: "POST",
+    body: jsonRegForm
+  }).then((response) => {
+    response.text().then(function (jsonRegForm) {
+      let result = JSON.parse(jsonRegForm)
+      // console.log("register", result)
+      //cheks result value and only clears form when registered
+      if (result == "registered") {
+        document.getElementById('register').reset()
+        alert("successfully registered")
+      } else {
+        alert(result)
+      }
     })
-  }
+  }).catch((error) => {
+    console.log(error)
+  })
+
 }
 
 // **********************************LOGIN*******************************************

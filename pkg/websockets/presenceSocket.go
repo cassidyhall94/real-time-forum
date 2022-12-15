@@ -42,19 +42,19 @@ func GetPresences() ([]database.Presence, error) {
 	sort.SliceStable(users[:], func(i, j int) bool {
 		return users[i].Nickname < users[j].Nickname
 	})
-	for _, user := range users {
-		if user.LoggedIn == "true" {
-			// fmt.Println("testing", user.Nickname)
-			presences = append(presences, database.Presence{
-				ID:       user.ID,
-				Nickname: user.Nickname,
-				Online:   user.LoggedIn,
-				// LastContactedTime: created,
-				//TODO CHAT: create a getLastContactedTime() func for getting the timestamp of the last message sent to clickedParticipantID by currentUserID to organise presence list and chat messages
-			})
+	// for _, user := range users {
+	// 	if user.LoggedIn {
+	// 		// fmt.Println("testing", user.Nickname)
+	// 		presences = append(presences, database.Presence{
+	// 			ID:       user.ID,
+	// 			Nickname: user.Nickname,
+	// 			Online:   user.LoggedIn,
+	// 			// LastContactedTime: created,
+	// 			//TODO CHAT: create a getLastContactedTime() func for getting the timestamp of the last message sent to clickedParticipantID by currentUserID to organise presence list and chat messages
+	// 		})
 
-		}
-	}
+	// 	}
+	// }
 	// fmt.Println("get presences", presences)
 	return presences, nil
 }

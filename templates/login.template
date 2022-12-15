@@ -1,16 +1,17 @@
+{{define "login"}}
 <br>
 <h1 style="text-align: center;">LOGIN</h1>
 
-<form action="javascript:void(0)" method="post" id="login-form">
+<form action="/login" method="POST" id="login-form">
   <br>
-    <input type="text" name="nickname" id="nickname-login" class="login-form-field" placeholder="Nickname"> <br> <br>
-    <input type="password" name="password" id="password-login" class="login-form-field" placeholder="Password"> <br> <br>
-  <button onclick="loginFormData();presenceSocket.sendNewPresenceUpdate()">Submit</button>
+    <input type="text" name="nickname" id="nickname" class="login-form-field" placeholder="Nickname"> <br> <br>
+    <input type="password" name="password" id="password" class="login-form-field" placeholder="Password"> <br> <br>
+  <input type="button" value="submit"/>
 </form>
+
 <h1 style="text-align: center;">REGISTRATION FORM</h1>
 
-<form action="javascript:void(0)" method="post" id="register">
-  <!-- <form action="" method="POST" id="register" > -->
+<form action="/register" method="POST" id="register">
   <label for="nickname">Nickname <br>
     <input type="text" id="nickname" name="nickname" required minlength="3" class="registrationForm"> <br>
   </label>
@@ -43,8 +44,7 @@
     <input type="password" name="password" id="password" required minlength="5" class="registrationForm"> <br>
   </label>
   <br>
-  <!-- <input type="button" value="submit"/> -->
-  <button onclick="getRegDetails()">Submit</button>
+  <input type="button" value="submit"/>
 </form>
-
-</html>
+{{end}}
+{{template "login"}}
