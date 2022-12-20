@@ -18,7 +18,7 @@ type User struct {
 	FirstName string `json:"firstname,omitempty"`
 	LastName  string `json:"lastname,omitempty"`
 	Email     string `json:"email,omitempty"`
-	Password  string `json:"password,omitempty"`
+	Password  string `json:"-"`
 }
 
 type Post struct {
@@ -52,10 +52,9 @@ type Chat struct {
 }
 
 type Presence struct {
-	ID                string `json:"id"`
-	Nickname          string `json:"nickname"`
-	Online            bool   `json:"online"`
-	LastContactedTime string `json:"last_contacted_time"`
+	User              *User     `json:"user,omitempty"`
+	Online            bool      `json:"online,omitempty"`
+	LastContactedTime time.Time `json:"last_contacted_time,omitempty"`
 }
 
 type Login struct {
@@ -65,7 +64,7 @@ type Login struct {
 
 type Session struct {
 	SessionID  string
-	Nickname   string
+	UserID     string
 	ExpiryTime string
 }
 
@@ -152,26 +151,26 @@ func GetPosts() ([]*Post, error) {
 	return posts, nil
 }
 
-func GetSessionsFromDB() ([]*Session, error) {
+func GetSessions() ([]*Session, error) {
 	sessions := []*Session{}
 
-	rows, err := DB.Query(` SELECT * FROM cookies`)
+	rows, err := DB.Query(` SELECT * FROM sessions`)
 	if err != nil {
 		return sessions, fmt.Errorf("GetSessions DB Query error: %+v\n", err)
 	}
 
 	var sessionID string
-	var nickname string
+	var userID string
 	var expiryTime string
 
 	for rows.Next() {
-		err := rows.Scan(&sessionID, &nickname, &expiryTime)
+		err := rows.Scan(&sessionID, &userID, &expiryTime)
 		if err != nil {
 			return sessions, fmt.Errorf("GetSessions rows.Scan error: %+v\n", err)
 		}
 		sessions = append(sessions, &Session{
 			SessionID:  sessionID,
-			Nickname:   nickname,
+			UserID:     userID,
 			ExpiryTime: expiryTime,
 		})
 	}
@@ -180,6 +179,105 @@ func GetSessionsFromDB() ([]*Session, error) {
 		return sessions, err
 	}
 	return sessions, nil
+}
+
+// GetPresences marries users and sessions to create map of users split by their being logged in or out of the forum
+func GetPresencesForUser(user *User) ([]*Presence, error) {
+	users, err := GetUsers()
+	if err != nil {
+		return nil, fmt.Errorf("unable to get users for presenses: %w", err)
+	}
+	sessions, err := GetSessions()
+	if err != nil {
+		return nil, fmt.Errorf("unable to get sessions for presenses: %w", err)
+	}
+
+	out := []*Presence{}
+	for _, u := range users {
+		lc, err := GetLastContactedForUsers(user.ID, u.ID)
+		if err != nil {
+			return nil, fmt.Errorf("error looking for last contacted between '%s' and '%s': %w", user.ID, u.ID, err)
+		}
+		if lc == nil {
+			lc = &time.Time{}
+		}
+		k := u
+		p := &Presence{
+			User:              &k,
+			Online:            false,
+			LastContactedTime: *lc,
+		}
+		for _, s := range sessions {
+			if s.UserID == u.ID {
+				p.Online = true
+			}
+		}
+		out = append(out, p)
+	}
+
+	return out, nil
+}
+
+func GetUserFromSessionID(sess *Session) (*User, error) {
+	users, err := GetUsers()
+	if err != nil {
+		return nil, fmt.Errorf("unable to get users for GetUserFromSessionID: %w", err)
+	}
+	sessions, err := GetSessions()
+	if err != nil {
+		return nil, fmt.Errorf("unable to get sessions for GetUserFromSessionID: %w", err)
+	}
+
+	for _, u := range users {
+		for _, s := range sessions {
+			if u.ID == s.UserID {
+				return &u, nil
+			}
+		}
+	}
+
+	return nil, fmt.Errorf("unable to find user from sessionID '%s'", sess.SessionID)
+}
+
+func GetLastContactedForUsers(userIDs ...string) (*time.Time, error) {
+	convos, err := GetConversations()
+	if err != nil {
+		return nil, fmt.Errorf("unable to get conversations: %w", err)
+	}
+	cid, err := GetConvoID(userIDs, convos)
+	if err != nil {
+		return nil, fmt.Errorf("unable to get convoid: %w", err)
+	}
+
+	var convo *Conversation = nil
+	for _, c := range convos {
+		if c.ConvoID == cid {
+			convo = c
+			if err := populateChatsForConversation(c); err != nil {
+				return nil, fmt.Errorf("unable to populate chats in convo '%s': %w", cid, err)
+			}
+		}
+	}
+	if convo == nil {
+		return nil, nil
+	}
+
+
+	var d *time.Time = &time.Time{}
+	for i, ch := range convo.Chats {
+		t, err := time.Parse("2006-01-02 15:04:05-07:00", ch.Date)
+		if err != nil {
+			return d, fmt.Errorf("unable to parse time for chat '%s': %w", ch.ChatID, err)
+		}
+		if i == 0 {
+			d = &t
+		}
+		if t.Before(*d) {
+			d = &t
+		}
+	}
+
+	return d, nil
 }
 
 func GetPostForComment(c Comment) (Post, error) {
@@ -354,7 +452,7 @@ func GetChats() ([]Chat, error) {
 	return populateUsersForChats(chats)
 }
 
-func populateChatsForConversation(conversations []*Conversation) error {
+func populateChatsForConversation(conversations ...*Conversation) error {
 	chats, err := GetChats()
 	if err != nil {
 		return err
@@ -387,7 +485,7 @@ func GetPopulatedConversations(conversations []*Conversation) ([]*Conversation, 
 			}
 		}
 	}
-	if err := populateChatsForConversation(conversations); err != nil {
+	if err := populateChatsForConversation(conversations...); err != nil {
 		return nil, fmt.Errorf("GetPopulatedConversation (populateChatForConversation) error: %+v\n", err)
 	}
 	// b, err := json.Marshal(conversations)
@@ -448,13 +546,15 @@ func GetConvoID(participantIDs []string, conversations []*Conversation) (string,
 	return "", nil
 }
 
-// (u User) compare diffs two user structs and returns a slice of conflicting keys. Passwords never conflict
+var fieldsThatNeverConflict map[string]bool = map[string]bool{"Password": true, "Gender": true}
+
+// (u User) compare diffs two user structs and returns a slice of conflicting keys.
 func (u User) Compare(t User) []string {
 	o := []string{}
 	uv, tv := reflect.ValueOf(u), reflect.ValueOf(t)
 
 	for i := 0; i < uv.NumField(); i++ {
-		if uv.Type().Field(i).Name == "Password" {
+		if _, ok := fieldsThatNeverConflict[uv.Type().Field(i).Name]; ok {
 			continue
 		}
 		if uv.Field(i).String() == tv.Field(i).String() {
@@ -539,7 +639,7 @@ func GetUserByNickname(user User) (User, error) {
 			return u, nil
 		}
 	}
-	return User{}, fmt.Errorf("unable to find user for %+v", err)
+	return User{}, fmt.Errorf("unable to find user for '%s'", user.Nickname)
 }
 
 const SessionCookieName string = "forum-session"
@@ -558,5 +658,5 @@ func CreateSession(user User) (*http.Cookie, *Session, error) {
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to execute sessions insertion statement: %w", err)
 	}
-	return cookie, &Session{SessionID: sessionID, Nickname: user.Nickname, ExpiryTime: expiration.String()}, nil
+	return cookie, &Session{SessionID: sessionID, UserID: user.ID, ExpiryTime: expiration.String()}, nil
 }

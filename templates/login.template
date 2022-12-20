@@ -2,16 +2,16 @@
 <br>
 <h1 style="text-align: center;">LOGIN</h1>
 
-<form action="/login" method="POST" id="login-form">
+<form action="/login" method="POST" id="login-form" target="dummyframe">
   <br>
-    <input type="text" name="nickname" id="nickname" class="login-form-field" placeholder="Nickname"> <br> <br>
-    <input type="password" name="password" id="password" class="login-form-field" placeholder="Password"> <br> <br>
-  <input type="button" value="submit"/>
+    <input type="text" name="nickname" id="login-nickname" class="login-form-field" placeholder="Nickname"> <br> <br>
+    <input type="password" name="password" id="login-password" class="login-form-field" placeholder="Password"> <br> <br>
+  <input type="submit" value="submit"/>
 </form>
 
 <h1 style="text-align: center;">REGISTRATION FORM</h1>
 
-<form action="/register" method="POST" id="register">
+<form action="/register" method="POST" id="register" target="dummyframe">
   <label for="nickname">Nickname <br>
     <input type="text" id="nickname" name="nickname" required minlength="3" class="registrationForm"> <br>
   </label>
@@ -44,7 +44,7 @@
     <input type="password" name="password" id="password" required minlength="5" class="registrationForm"> <br>
   </label>
   <br>
-  <input type="button" value="submit"/>
+  <input type="submit" value="submit"/>
 </form>
 {{end}}
 {{template "login"}}

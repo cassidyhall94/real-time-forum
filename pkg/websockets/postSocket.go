@@ -47,6 +47,10 @@ func (m PostMessage) Handle(s *socket) error {
 }
 
 func (m *PostMessage) Broadcast(s *socket) error {
+	if s.IsTimedOut() {
+		return &socketTimeoutError{}
+	}
+
 	if s.t == m.Type {
 		if err := s.con.WriteJSON(m); err != nil {
 			return fmt.Errorf("unable to send (post) message: %w", err)

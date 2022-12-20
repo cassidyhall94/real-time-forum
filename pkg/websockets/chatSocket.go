@@ -14,6 +14,10 @@ type ChatMessage struct {
 }
 
 func (m *ChatMessage) Broadcast(s *socket) error {
+	if s.IsTimedOut() {
+		return &socketTimeoutError{}
+	}
+
 	if s.t == m.Type {
 		if err := s.con.WriteJSON(m); err != nil {
 			return fmt.Errorf("unable to send (chat) message: %w", err)

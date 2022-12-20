@@ -5,64 +5,82 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"runtime/debug"
+	"real-time-forum/pkg/authentication"
+	"real-time-forum/pkg/database"
 	"time"
 
 	"github.com/gorilla/websocket"
 	uuid "github.com/satori/go.uuid"
+	"golang.org/x/sync/errgroup"
 )
 
 type SocketMessage struct {
 	Type messageType `json:"type,omitempty"`
 }
+
 type socket struct {
-	con      *websocket.Conn
-	nickname string
-	t        messageType
-	uuid     uuid.UUID
+	con     *websocket.Conn
+	user    *database.User
+	t       messageType
+	uuid    uuid.UUID
+	created time.Time
+}
+
+type socketTimeoutError struct {
+	Message string
+}
+
+func (s *socketTimeoutError) Error() string {
+	if s.Message == "" {
+		return "socket timed out mate"
+	}
+	return s.Message
 }
 
 var (
-	t        = time.Now()
-	dateTime = t.Format("1/2/2006, 3:04:05 PM")
 	upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 	}
-	savedSockets = make([]*socket, 0)
+	savedSockets    = make([]*socket, 0)
+	timeoutDuration = 1 * time.Hour
 )
 
-// BroadcastPresences loops over savedSockets and sends messages with updated presence data
-// func BroadcastPresences() {
-// 	for {
-// 		presences, err := GetPresences()
-// 		if err != nil {
-// 			fmt.Printf("BroadcastPresences (GetPresences) error: %+v\n", err)
-// 			continue
-// 		}
-// 		c := &PresenceMessage{
-// 			Type:      presence,
-// 			Timestamp: time.Now().String(),
-// 			Presences: presences,
-// 		}
-// 		for _, ss := range savedSockets {
-// 			// TODO: Handle me
-// 			// ss.t ?
-// 			_ = c.Broadcast(ss)
-// 		}
-// 		time.Sleep(1 * time.Second)
-// 	}
-// }
-
 func SocketCreate(w http.ResponseWriter, r *http.Request) {
-	// TODO: validate sessions
-
 	fmt.Println("Socket Request on " + r.RequestURI)
-	con, _ := upgrader.Upgrade(w, r, nil)
-	ptrSocket := &socket{
-		con:  con,
-		uuid: uuid.NewV4(),
+	if !authentication.RequestIsLoggedIn(r) {
+		fmt.Println("unauthorised socket creation request")
+		w.WriteHeader(http.StatusUnauthorized)
+		return
 	}
+
+	u, err := authentication.GetUserFromRequest(r)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	con, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	ptrSocket := &socket{
+		con:     con,
+		user:    u,
+		uuid:    uuid.NewV4(),
+		created: time.Now(),
+	}
+	defer func() {
+		for i, so := range savedSockets {
+			if so.uuid == ptrSocket.uuid {
+				savedSockets = removeFromSlice(savedSockets, i)
+				fmt.Printf("removed '%s' socket (ID: '%s') belonging to '%s (ID: %s)'\n", ptrSocket.t.String(), ptrSocket.uuid, ptrSocket.user.Nickname, ptrSocket.user.ID)
+			}
+		}
+	}()
 
 	// add new case here when added to main.go for handlers
 	switch r.RequestURI {
@@ -93,80 +111,78 @@ func SocketCreate(w http.ResponseWriter, r *http.Request) {
 	default:
 		ptrSocket.t = unknown
 	}
+
 	savedSockets = append(savedSockets, ptrSocket)
-	ptrSocket.pollSocket()
-	for i, so := range savedSockets {
-		if so.uuid == ptrSocket.uuid {
-			ret := make([]*socket, 0)
-			ret = append(ret, savedSockets[:i]...)
-			savedSockets = append(ret, savedSockets[i+1:]...)
-		}
+	w.Write([]byte{})
+	if err := ptrSocket.pollSocket(); err != nil {
+		fmt.Println(err)
+		return
 	}
 }
-func (s *socket) pollSocket() {
-	go func() {
-		defer func() {
-			err := recover()
-			if err != nil {
-				fmt.Printf("recovered panic in %s socket: %+v\n%s\n", s.t.String(), err, string(debug.Stack()))
-			}
-		}()
+func (s *socket) pollSocket() error {
+	eg := errgroup.Group{}
+
+	eg.Go(func() error {
 		for {
+			if s.IsTimedOut() {
+				return &socketTimeoutError{}
+			}
 			b, err := s.read()
 			if err != nil {
-				panic(err)
+				return fmt.Errorf("error reading from socket '%s': %w", s.uuid, err)
 			} else if b == nil {
-				fmt.Println(s.t.String() + " socket closed")
-				return
+				return fmt.Errorf("socket '%s' closed", s.uuid)
 			}
 			sm := &SocketMessage{}
 			if err := json.Unmarshal(b, sm); err != nil {
-				panic(err)
+				return fmt.Errorf("error unmarshalling message in socket '%s': %w", s.uuid, err)
 			}
 			switch sm.Type {
 			case chat:
 				m := &ChatMessage{}
-				// c, err := json.Marshal(b)
-				// if err != nil {
-				// 	fmt.Println(err)
-				// }
-				fmt.Println(string(b))
 				if err := json.Unmarshal(b, m); err != nil {
-					panic(err)
+					return fmt.Errorf("error unmarshalling chatMessage in socket '%s': %w", s.uuid, err)
 				}
 				if err := m.Handle(s); err != nil {
-					panic(err)
+					return fmt.Errorf("error handling chatMessage in socket '%s': %w", s.uuid, err)
 				}
 			case post:
 				m := &PostMessage{}
 				if err := json.Unmarshal(b, m); err != nil {
-					panic(err)
+					return fmt.Errorf("error unmarshalling postMessage in socket '%s': %w", s.uuid, err)
 				}
 				if err := m.Handle(s); err != nil {
-					panic(err)
+					return fmt.Errorf("error handling postMessage in socket '%s': %w", s.uuid, err)
 				}
 			case content:
 				m := &ContentMessage{}
 				if err := json.Unmarshal(b, m); err != nil {
-					panic(err)
+					return fmt.Errorf("error unmarshalling contentMessage in socket '%s': %w", s.uuid, err)
 				}
 				if err := m.Handle(s); err != nil {
-					panic(err)
+					return fmt.Errorf("error handling contentMessage in socket '%s': %w", s.uuid, err)
 				}
 			case presence:
 				m := &PresenceMessage{}
 				if err := json.Unmarshal(b, m); err != nil {
-					panic(err)
+					return fmt.Errorf("error unmarshalling presenceMessage in socket '%s': %w", s.uuid, err)
 				}
 				if err := m.Handle(s); err != nil {
-					panic(err)
+					return fmt.Errorf("error handling presenceMessage in socket '%s': %w", s.uuid, err)
 				}
 			default:
 				panic(fmt.Errorf("unable to determine message type for '%s'", string(b)))
 			}
 		}
-	}()
+	})
+
+	if err := eg.Wait(); err != nil {
+		return fmt.Errorf("encountered error when polling socket %+v: %w", *s, err)
+	}
+
+	return nil
 }
+
 func (s *socket) read() ([]byte, error) {
 	_, b, err := s.con.ReadMessage()
 	if err != nil {
@@ -177,4 +193,23 @@ func (s *socket) read() ([]byte, error) {
 		return nil, fmt.Errorf("unable to read message from socket, got: '%s', %w", string(b), err)
 	}
 	return b, nil
+}
+
+func removeFromSlice[T any](slice []T, index int) []T {
+	// Check that the index is within the bounds of the slice
+	if index < 0 || index >= len(slice) {
+		return slice
+	}
+
+	// Remove the value at the specified index by replacing it with the
+	// last value in the slice and then slicing off the last element
+	slice[index] = slice[len(slice)-1]
+	return slice[:len(slice)-1]
+}
+
+func (s *socket) IsTimedOut() bool {
+	if s.created.Add(timeoutDuration).After(time.Now()) {
+		return false
+	}
+	return true
 }

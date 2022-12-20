@@ -66,18 +66,26 @@
             }
             return ""
         }
-        while (true) {
+
+        let contentSocket = new MySocket();
+        let postSocket = new MySocket();
+        let chatSocket = new MySocket();
+        let presenceSocket = new MySocket();
+        const socketSetup = () => {
+            contentSocket.connectSocket("content", contentSocket.contentHandler);
+            postSocket.connectSocket("post", postSocket.postHandler);
+            chatSocket.connectSocket("chat", chatSocket.chatHandler);
+            presenceSocket.connectSocket("presence", presenceSocket.presenceHandler);
+        }
+
+        const connectSocketOnLogin = () => {
             if (getSessionCookie() !== "") {
-                let contentSocket = new MySocket();
-                contentSocket.connectSocket("content", contentSocket.contentHandler);
-                let postSocket = new MySocket();
-                postSocket.connectSocket("post", postSocket.postHandler);
-                let chatSocket = new MySocket();
-                chatSocket.connectSocket("chat", chatSocket.chatHandler);
-                let presenceSocket = new MySocket();
-                presenceSocket.connectSocket("presence", presenceSocket.presenceHandler);
+                socketSetup()
+                clearInterval(setupInterval)
             }
         }
+        
+        const setupInterval = setInterval(connectSocketOnLogin, 1000)
     </script>
 
 </body>

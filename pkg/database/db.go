@@ -65,7 +65,7 @@ func InitialiseDB(path string, insertPlaceholders bool) {
 	_, errSess := sqliteDatabase.Exec(`
 		CREATE TABLE IF NOT EXISTS "sessions" (
 			"sessionID"	TEXT,
-			"userName" 	TEXT REFERENCES users(nickname),
+			"userID" 	TEXT REFERENCES users(ID),
 			"expiryTime" TEXT
 		);
 	`)

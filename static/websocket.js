@@ -4,7 +4,8 @@ let clickedParticipantID
 // let participant_ids
 
 class MySocket {
-  wsType = ""
+  wsType;
+  handler;
   constructor() {
     this.mysocket = null;
   }
@@ -25,14 +26,14 @@ class MySocket {
           chatSocket.sendNewChatRequest(event, "", participant_ids)
         });
 
-        let existingPresences = (arr.filter(item => item.textContent === p.nickname))
+        let existingPresences = (arr.filter(item => item.textContent === p.user.nickname))
 
         if (existingPresences.length < 1) {
 
-          user.id = p.id
-          user.innerHTML = p.nickname
+          user.id = p.user.id
+          user.innerHTML = p.user.nickname
           user.style.color = 'white'
-          user.className = "presence " + p.nickname
+          user.className = "presence " + p.user.nickname
 
           presences.appendChild(user)
         }
@@ -125,6 +126,7 @@ class MySocket {
         contentSocket.sendContentRequest(event, post.post_id)
       });
       post.appendChild(button)
+      checkAndAppendDiv("submittedposts", "content")
       document.getElementById("submittedposts").appendChild(post)
     }
   }
@@ -165,7 +167,6 @@ class MySocket {
           nickname: getCookieName(),
           online: "hello",
           last_contacted_time: "0",
-
         }
       ]
     }
@@ -227,18 +228,25 @@ class MySocket {
       this.wsType = 'presence'
       console.log("Presence Websocket Connected");
     }
-    var socket = new WebSocket("ws://localhost:8080/" + URI);
+    const socket = new WebSocket("ws://localhost:8080/" + URI);
     this.mysocket = socket;
+    this.handler = handler
     socket.onmessage = (e) => {
-      // console.log("socket message",e)
+      // console.log("socket message", e)
       handler(e.data, false);
     };
     socket.onopen = () => {
       // console.log("socket opened");
     };
     socket.onclose = () => {
+      // TODO: make this not so nuts
       // console.log("socket closed");
+      // this.connectSocket(this.wsType, this.handler)
     };
+    socket.onerror = (event) => {
+      console.error(event)
+      this.connectSocket(this.wsType, this.handler)
+    }
   }
 }
 
@@ -246,162 +254,18 @@ function containsNumber(str) {
   return /[0-9]/.test(str);
 }
 
-//object to store form data
-let registerForm = {
-  nickname: "",
-  age: "",
-  gender: "",
-  fName: "",
-  lName: "",
-  email: "",
-  password: "",
-  loggedin: "false",
-}
-
-let loginForm = {
-  nickname: "",
-  password: "",
-}
-
-//******************* */gets registration form details*******************************
-function getRegDetails() {
-  //creates array of gender radio buttons 
-  let genderRadios = Array.from(document.getElementsByName('gender'))
-  for (let i = 0; i < genderRadios.length; i++) {
-    // console.log(genderRadios[i].checked)
-    if (genderRadios[i].checked) { //stores checked value
-      registerForm.gender = genderRadios[i].value
-    }
-  }
-  // POPULATE REGISTER FORM WITH FORM VALUES
-  registerForm.nickname = document.getElementById('nickname').value
-  registerForm.age = document.getElementById('age').value
-  registerForm.firstname = document.getElementById('fname').value
-  registerForm.lastname = document.getElementById('lname').value
-  registerForm.email = document.getElementById('email').value
-  registerForm.password = document.getElementById('password').value
-  //convert data to JSON
-  let jsonRegForm = JSON.stringify(registerForm)
-
-  // SEND DATA TO BACKEND USING FETCH
-  console.log(registerForm)
-
-  fetch("/register", {
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-    method: "POST",
-    body: jsonRegForm
-  }).then((response) => {
-    response.text().then(function (jsonRegForm) {
-      let result = JSON.parse(jsonRegForm)
-      // console.log("register", result)
-      //cheks result value and only clears form when registered
-      if (result == "registered") {
-        document.getElementById('register').reset()
-        alert("successfully registered")
-      } else {
-        alert(result)
-      }
-    })
-  }).catch((error) => {
-    console.log(error)
-  })
-
-}
-
-// **********************************LOGIN*******************************************
-function loginFormData() {
-  loginForm.nickname = document.getElementById('nickname-login').value
-  loginForm.password = document.getElementById('password-login').value
-  let loginFormJSON = JSON.stringify(loginForm)
-  // console.log(loginFormJSON)
-  let logindata = {
-    nickname: "",
-    password: "",
-  }
-  // let id = ""
-  getCookieName()
-  fetch("/login", {
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-    method: "POST",
-    body: loginFormJSON
-  }).then((response) => {
-    response.text().then(function (loginFormJSON) {
-      let result = JSON.parse(loginFormJSON)
-      // console.log("parse",result)
-
-      if (result == null) {
-        alert("incorrect username or password")
-      } else {
-        logindata.nickname = result[0].nickname
-        // logindata.password = result[0].password
-        user.innerText = `Hello ${document.cookie.match(logindata.nickname)}`
-        alert("you are logged in ")
-      }
-    })
-  }).catch((error) => {
-    console.log(error)
-  })
-  // console.log("logindata",logindata, "hi")
-  // console.log( Object.keys(logindata).length)
-  // console.log(JSON.stringify(logindata))
-  document.getElementById('login-form').reset()
-  let user = document.getElementById('welcome')
-  // document.getElementById('login-form').reset()
-  // console.log(t)
-}
-
-// ********************************LOGOUT******************************
-function Logout() {
-  let logout = {
-    nickname: "",
-  }
-
-  logout.nickname = document.getElementById('welcome')
-  logout.nickname = logout.nickname.textContent.replace("Hello", '')
-  let user = document.getElementById('welcome')
-  user.innerText = ""
-  // console.log("logout", user.textContent.replace("Hello", ''))
-
-  let parseUser = JSON.stringify(logout)
-  fetch("/logout", {
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-    method: "POST",
-    body: parseUser
-  }).then((response) => {
-    response.text().then(function (parseUser) {
-    })
-  }).catch((error) => {
-    console.log(error)
-  })
-  alert("you are now logged out")
-}
-
-function getCookieName() {
-  let cookies = document.cookie.split(";")
-  let lastCookieName = cookies[cookies.length - 1].split("=")[0].replace(" ", '')
-  // console.log("cookie",cookies, "length", cookies.length)
-  return lastCookieName
-  // console.log("h",lastCookieName)
-}
-
 function getIdValue() {
   return document.cookie.split(";")[0].split("=")[1]
 }
 
-function init() {
-  if (getCookieName() != "") {
-    let user = document.getElementById('welcome')
-    user.innerHTML = "Hello " + getCookieName()
+function checkAndAppendDiv(divId, targetId) {
+  // Check if the div element with the specified id exists in the DOM
+  let div = document.getElementById(divId);
+
+  // If the div element does not exist, create it and append it to the target element
+  if (!div) {
+    div = document.createElement("div");
+    div.id = divId;
+    document.getElementById(targetId).appendChild(div);
   }
 }
-
-init()

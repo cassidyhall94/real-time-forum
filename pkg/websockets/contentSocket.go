@@ -20,6 +20,10 @@ type ContentMessage struct {
 }
 
 func (m *ContentMessage) Broadcast(s *socket) error {
+	if s.IsTimedOut() {
+		return &socketTimeoutError{}
+	}
+
 	if s.t == m.Type {
 		if err := s.con.WriteJSON(m); err != nil {
 			return fmt.Errorf("unable to send (content) message: %w", err)
@@ -54,35 +58,23 @@ func (m *ContentMessage) Handle(s *socket) error {
 	}
 	sb := &strings.Builder{}
 	switch m.Resource {
+	case "home":
+		fallthrough
 	case "post":
 		if err := tpl.ExecuteTemplate(sb, "home.template", nil); err != nil {
 			return fmt.Errorf("Home ExecuteTemplate error: %w", err)
 		}
 	case "profile":
-
 		if err := tpl.ExecuteTemplate(sb, "profile.template", nil); err != nil {
 			return fmt.Errorf("Profile ExecuteTemplate error: %w", err)
 		}
+	case "logout":
+		fallthrough
 	case "login":
 		if err := tpl.ExecuteTemplate(sb, "login.template", nil); err != nil {
 			return fmt.Errorf("loginExecuteTemplate error: %+v\n", err)
 		}
 	case "chat":
-		// conversations, err := database.GetConversations()
-		// if err != nil {
-		// 	return fmt.Errorf("Unable to get conversations for chat template: %+v\n", err)
-		// }
-		// conversationID, err := database.GetConvoID(m.ParticipantIDs, conversations)
-		// if err != nil {
-		// 	return fmt.Errorf("Unable to get convoID for participants: %w", err)
-		// }
-		// chats, err := database.GetChats()
-		// // fmt.Println("chats in Content Socket: ", chats)
-		// if err != nil {
-		// 	return fmt.Errorf("Unable to get chats for chat template: %w", err)
-		// }
-		// c := database.FilterChatsForConvo(conversationID, chats)
-		// fmt.Printf("%+v", c)
 		if err := tpl.ExecuteTemplate(sb, "chat.template", nil); err != nil {
 			return fmt.Errorf("Chat ExecuteTemplate error: %+v\n", err)
 		}

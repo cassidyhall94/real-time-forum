@@ -2,12 +2,11 @@ package main
 
 import (
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 	"os"
-	"real-time-forum/pkg/authentication"
 	"real-time-forum/pkg/database"
+	"real-time-forum/pkg/handlers"
 	socket "real-time-forum/pkg/websockets"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -37,18 +36,20 @@ func init() {
 func main() {
 	defer database.DB.Close()
 	myhttp := http.NewServeMux()
-	myhttp.HandleFunc("/", serveHomePage)
+	myhttp.HandleFunc("/", handlers.ServeHomePage)
+	myhttp.HandleFunc("/me", handlers.Me)
 	// when adding a new websocket endpoint make sure to update the switch case in the websocket connection function to account for it
 	myhttp.HandleFunc("/chat", socket.SocketCreate)
 	myhttp.HandleFunc("/content", socket.SocketCreate)
 	myhttp.HandleFunc("/post", socket.SocketCreate)
 	myhttp.HandleFunc("/presence", socket.SocketCreate)
 	myhttp.HandleFunc("/comment", socket.SocketCreate)
-	myhttp.HandleFunc("/register", authentication.RegistrationHandler)
-	myhttp.HandleFunc("/login", authentication.LoginHandler)
-	fs := http.FileServer(http.Dir("./static"))
-	myhttp.Handle("/static", fs)
+	myhttp.HandleFunc("/register", handlers.RegistrationHandler)
+	myhttp.HandleFunc("/login", handlers.LoginHandler)
 	// myhttp.HandleFunc("/home", mainHandler)
+
+	fs := http.FileServer(http.Dir("static"))
+	myhttp.Handle("/static/", http.StripPrefix("/static", fs))
 
 	// daemonised functions
 	// go socket.BroadcastPresences()
@@ -66,34 +67,3 @@ func main() {
 // 		http.Error(w, "No such file or directory: Internal Server Error 500", http.StatusInternalServerError)
 // 	}
 // }
-
-func serveHomePage(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path == "/" || r.URL.Path == "index.html" {
-		tpl, err := template.ParseGlob("templates/*")
-		if err != nil {
-			fmt.Printf("unable to parse templates: %+v\n", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		if !authentication.RequestIsLoggedIn(r) {
-			if err := tpl.ExecuteTemplate(os.Stdout, "indexWithLogin.template", nil); err != nil {
-				fmt.Printf("unable to render indexWithLogin.template: %+v\n", err)
-				w.WriteHeader(http.StatusInternalServerError)
-				return
-			}
-			if err := tpl.ExecuteTemplate(w, "indexWithLogin.template", nil); err != nil {
-				fmt.Printf("unable to render indexWithLogin.template: %+v\n", err)
-				w.WriteHeader(http.StatusInternalServerError)
-				return
-			}
-		}
-
-		if err := tpl.ExecuteTemplate(w, "index.template", nil); err != nil {
-			fmt.Printf("unable to render index.template: %+v\n", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-	}
-	return
-}

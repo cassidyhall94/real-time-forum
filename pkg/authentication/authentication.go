@@ -3,6 +3,7 @@ package authentication
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"real-time-forum/pkg/database"
 	"time"
 
@@ -10,21 +11,31 @@ import (
 )
 
 // parseRegForm attempts to parse a form from the request and returns a database.User containing the form data
-func parseAuthForm(r *http.Request) (database.User, error) {
+func ParseAuthForm(r *http.Request) (database.User, error) {
 	// Parse the form data
 	err := r.ParseForm()
 	if err != nil {
 		return database.User{}, fmt.Errorf("unable to parse reg form: %w", err)
 	}
 
+	getFormVal := func(f url.Values, names ...string) string {
+		for _, name := range names {
+			c := f.Get(name)
+			if c != "" {
+				return c
+			}
+		}
+		return ""
+	}
+
 	return database.User{
-		Nickname:  r.Form.Get("nickname"),
+		Nickname:  getFormVal(r.Form, "nickname", "login-nickname"),
 		Age:       r.Form.Get("age"),
 		Gender:    r.Form.Get("gender"),
 		FirstName: r.Form.Get("fname"),
 		LastName:  r.Form.Get("lname"),
 		Email:     r.Form.Get("email"),
-		Password:  r.Form.Get("password"),
+		Password:  getFormVal(r.Form, "password", "login-password"),
 	}, nil
 }
 
@@ -39,7 +50,7 @@ func cookieIsLoggedIn(c *http.Cookie) bool {
 		return false
 	}
 
-	sess, err := database.GetSessionsFromDB()
+	sess, err := database.GetSessions()
 	if err != nil {
 		return false
 	}
@@ -73,7 +84,7 @@ func validateSessCookie(c *http.Cookie, sess []*database.Session) bool {
 }
 
 func isCookieExpired(sess *database.Session) bool {
-	expirationTime, err := time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", sess.ExpiryTime)
+	expirationTime, err := time.Parse("2006-01-02 15:04:05-07:00", sess.ExpiryTime)
 	if err != nil {
 		fmt.Printf("unable to validate expiry time on session cookie: %+v\n", sess)
 		return true
@@ -84,7 +95,7 @@ func isCookieExpired(sess *database.Session) bool {
 	return false
 }
 
-func passwordHash(str string) string {
+func PasswordHash(str string) string {
 	hashedPw, err := bcrypt.GenerateFromPassword([]byte(str), 8)
 	if err != nil {
 		fmt.Println("unable to hash password")
@@ -93,7 +104,18 @@ func passwordHash(str string) string {
 	return string(hashedPw)
 }
 
-func checkPwHash(password, hash string) bool {
+func CheckPwHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }
+
+func GetUserFromRequest(r *http.Request) (*database.User, error) {
+	cookie := extractSessionCookie(r)
+	if cookie == nil {
+		return nil, fmt.Errorf("no session cookie in request")
+	}
+	return database.GetUserFromSessionID(&database.Session{
+		SessionID: cookie.Value,
+	})
+}
+
